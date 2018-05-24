@@ -1,0 +1,95 @@
+<?
+	@require_once "../../include/config.php";
+	
+	if( $ArrThisMemberDefaultInfo[time_confirm_celno] >= 1000 )
+	{
+		echo "<script language='JavaScript'>alert('이미 휴대폰인증을 받으셨습니다.\\n\\n만약 휴대폰번호를 변경하시려면 고객센터로 문의 주시기 바랍니다.');window.close();</script>";
+	}
+	
+	if( $work == "celno_confirm_complete" AND strlen($join_celno) >= 5 )
+	{
+		$Qry = "UPDATE member_default SET fld_celno='".trim($join_celno)."', fld_confirm_celno=NOW() WHERE uid=".$_SESSION[ssUID];
+		$Rlt = @mysql_query($Qry,$Con);
+		echo "<script>opener.window.location.reload();window.close();</script>";
+		exit;
+	}
+	
+	@include_once HOME_DIR . "/include/popup_top.php";
+?>
+<script language="JavaScript">
+<!--
+
+	function fnc_celno_confirm_complete()
+	{
+		var form = document.member_form;
+		
+		if(form.join_celno.value == "")
+		{
+			alert('휴대폰번호가 반드시 필요합니다.');
+			form.join_celno.focus();
+			return false;
+		}
+		
+		form.work.value = "celno_confirm_complete";
+		form.submit();
+	}
+
+-->
+</script>
+<script language="JavaScript" src="function.js"></script>
+</head>
+<body>
+<form name="member_form" method="post" action="" onSubmit="return false">
+<input type="hidden" name="work"/>
+	<div class="popHead bgColor333">
+		<div class="popWidthWrap2">
+			회원서비스 > 휴대폰인증
+			<div class="popWinCloseBtn"><i class="fa fa-times fa-lg"></i></div>
+		</div>
+	</div>
+	<div class="popContents">
+		<div class="popWidthWrap2">
+			<div class="artTitle">휴대폰번호<span class="mrgL10 fs06 textNormal">본인의 휴대전화번호를 입력하세요</span></div>
+			<!--상품정보 s-->
+			<div class="articleBox bdAllCCC bd2Top666" style="margin-top:0;">
+				<div class="artCont">
+					<table class="writeTable">
+						<colgroup>
+							<col width="50%" /><col width="50%" />
+						</colgroup>
+						<tr>
+							<td style="border:0;">
+								<input type="hidden" name="join_celno_confirm" id="ID_join_celno_confirm"/>
+								<span><input type="text" name="join_celno" maxlength="12" id="ID_join_celno" class="textNumType form-control" style="width:160px;" placeholder="휴대폰번호 입력"/></span>
+								<span id="" class="decText" style="display:none;">전화번호를 다시 확인해 주세요</span>
+							</td>
+							<td style="vertical-align:top;text-align:right;border:0;">
+								<span><input type="button" value="인증번호발송" class="btn btnWhite mrgL10" onclick="JavaScript:fnc_celno_confirm1()" id="IDBT_join_celno"></span>
+								<span><input type="button" value="휴대폰 인증완료(저장하기)" class="btn btnWhite mrgL10" onclick="JavaScript:fnc_celno_confirm_complete()" style="display:none;" id="IDBT_celno_confirm_complete"></span>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2" style="border-bottom:0;">
+								<div id="IDB_celno_confirm" class="bdTop" style="float:left;display:none;padding-top:10px;margin-top:10px;">
+									<span class="fLeft"><input type="text" name="celno_confirm" maxlength="5" id="ID_celno_confirm" class="text80Type ttaCenter form-control"/></span>
+									<input type="button" value="인증확인" class="btn btnWhite mrgL10 fLeft" onclick="JavaScript:fnc_celno_confirm2()"> 
+									<span id="ID_join_celno_msg" class="decText"></span>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<!--상품정보 e-->
+		</div>
+	</div>
+	<div class="popFooter bdTop" style="position:fixed;bottom:0;">
+		<div class="pageBtnBox">
+			<div class="btn btnWhite" onclick="winClose();">닫기</div>
+		</div>
+	</div>
+<script language="JavaScript">window.resizeTo(500,450);opener.window.location.reload();</script>
+<? @include_once HOME_DIR . "/include/pop_infobox.php"; ?>
+</form>
+</body>
+</html>

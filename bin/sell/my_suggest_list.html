@@ -1,0 +1,183 @@
+<?
+	@require_once "../../include/config.php";
+	@include_once HOME_DIR . "/include/top.php";
+?>
+</head>
+<body>
+<div id="wrap">
+	<script type="text/javascript">currentPageKind="sell";currentMainN=1;currentSubN=0;</script><!-- 현재페이지 -->
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<!-- contents s -->
+
+					<!-- 전체공고리스트 s-->
+					<div class="cbTitle">
+						<h2>My제안서</h2>
+						<span>직접 등록하신 공고목록입니다</span>
+					</div>
+					<div class="cbTopBox">
+					</div>
+					<div class="cbMiddleBox">
+						
+						<!-- 리스트 s-->
+						<form class="pageFormBox" id="" name="" action="" method="post">
+							<div class="articleBox">
+								<div class="artTop">
+									<input type="button" value="새제안서등록" class="listBtnStyle btnMainC2" onclick="javascript:pageMove(sub_buyNavT_0[3][1],sub_buyNavT_0[3][2]);">
+									<div class="searchBoxWrap">
+										<input type="text" class="searchInputBox" placeholder="검색어" />
+										<input type="submit" id="searchBtn" name="searchBtn" value="&#xf002;" class="listBtnStyle btnMainC2"/>
+									</div>
+								</div>
+								<div class="artCont bdTop2MC2">
+									<table class="listTable">
+										<caption>공고전체리스트</caption>
+										<colgroup>
+											<col width="10%" /><col width="40%" /><col width="20%" /><col width="15%" /><col width="15%" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th>상태</th>
+												<th>제목</th>
+												<th>공고관리</th>
+												<th>제안서관리</th>
+												<th>일자</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td><div class="actOn2">게재중</div></td>
+												<th>
+													<a href="#">
+														<p><span class="rowTitle">한화생명 VIP 고객 사은품</span><p>
+														<p>VIP고객사은품 / 2,000 ~ 10,000</p>
+														<p>잡화 / 계절상품 / 남성</p>
+													</a>
+												</th>
+												<td>
+													<div class="tableBtnWrap">
+														<input type="button" value="수정" class="tableBtnStyle btnWMC1" onclick="">
+														<input type="button" value="마감" class="tableBtnStyle btnWMC1" onclick="">
+													</div>
+												</td>
+												<td>
+													<p>
+														<a href="#">
+															<span class="rowTitle">전체제안서 <span class="textCBlue">33</span></span>
+														</a>
+													<p>
+													<p>
+														<a href="#">
+															<span class="rowTitle">미열람 <span class="textCRed textBold">33</span></span>
+														</a>
+													</p>
+												</td>
+												<td>
+													<p>12/31~12/31<p>
+													<p>(99일 남음)<p>
+												</td>
+											</tr>
+											<tr>
+												<td><div class="actOn2">게재중</div></td>
+												<th>
+													<a href="#">
+														<p><span class="rowTitle">한화생명 VIP 고객 사은품</span><p>
+														<p>VIP고객사은품 / 2,000 ~ 10,000</p>
+														<p>잡화 / 계절상품 / 남성</p>
+													</a>
+												</th>
+												<td>
+													<div class="tableBtnWrap">
+														<input type="button" value="수정" class="tableBtnStyle btnWMC1" onclick="">
+														<input type="button" value="마감" class="tableBtnStyle btnWMC1" onclick="">
+													</div>
+												</td>
+												<td>
+													<p>
+														<a href="#">
+															<span class="rowTitle">전체제안서 <span class="textCBlue">33</span></span>
+														</a>
+													<p>
+													<p>
+														<a href="#">
+															<span class="rowTitle">미열람 <span class="textCRed textBold">33</span></span>
+														</a>
+													</p>
+												</td>
+												<td>
+													<p>12/31~12/31<p>
+													<p>(99일 남음)<p>
+												</td>
+											</tr>
+											<tr>
+												<td><div class="actOn2">게재중</div></td>
+												<th>
+													<a href="#">
+														<p><span class="rowTitle">한화생명 VIP 고객 사은품</span><p>
+														<p>VIP고객사은품 / 2,000 ~ 10,000</p>
+														<p>잡화 / 계절상품 / 남성</p>
+													</a>
+												</th>
+												<td>
+													<div class="tableBtnWrap">
+														<input type="button" value="수정" class="tableBtnStyle btnWMC1" onclick="">
+														<input type="button" value="마감" class="tableBtnStyle btnWMC1" onclick="">
+													</div>
+												</td>
+												<td>
+													<p>
+														<a href="#">
+															<span class="rowTitle">전체제안서 <span class="textCBlue">33</span></span>
+														</a>
+													<p>
+													<p>
+														<a href="#">
+															<span class="rowTitle">미열람 <span class="textCRed textBold">33</span></span>
+														</a>
+													</p>
+												</td>
+												<td>
+													<p>12/31~12/31<p>
+													<p>(99일 남음)<p>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div class="pagingBoxWrap">
+									<ul class="pagingBox2">
+										<a href="#"><li class="angleBtn"><i class="fa fa-angle-double-left"></i></li></a>
+										<a href="#"><li class="angleBtn"><i class="fa fa-angle-left"></i></li></a>
+										<a href="#"><li class="actOn">1</li></a>
+										<a href="#"><li>2</li></a>
+										<a href="#"><li>3</li></a>
+										<a href="#"><li>4</li></a>
+										<a href="#"><li>5</li></a>
+										<a href="#"><li class="angleBtn"><i class="fa fa-angle-right"></i></li></a>
+										<a href="#"><li class="angleBtn"><i class="fa fa-angle-double-right"></i></li></a>
+									</ul>
+								</div>
+							</div>
+						</form>
+						<!-- 리스트 e-->
+
+					</div>
+					<!-- 전체공고리스트 e-->
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+	<? @include_once HOME_DIR . "/include/bottom.php"; ?>

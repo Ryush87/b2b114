@@ -1,0 +1,214 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../../include/config.php";
+	@include_once HOME_DIR . "/bin/member/login_.html";
+	@include_once HOME_DIR . "/include/top.php";
+?>
+<script language="JavaScript" src="function.js"></script>
+<script language="JavaScript">
+<!--
+
+	function fchk_login()
+	{
+		if( $('ID_login_id').value.length < 3)
+		{
+			$('ID_login_id_msg').innerHTML = "아이디를 입력해주십시오. (영문+숫자, 3~20자 이내)";
+			$('ID_login_id').focus();
+			return false;
+		}
+		else
+		{
+			$('ID_login_id_msg').innerHTML = "";
+		}
+		
+		if( $('ID_login_password').value.length < 6)
+		{
+			$('ID_login_password_msg').innerHTML = "비밀번호를 입력해주십시오. (영문+숫자, 6~20자 이내)";
+			$('ID_login_password').focus();
+			return false;
+		}
+		else
+		{
+			$('ID_login_password_msg').innerHTML = "";
+		}
+		
+	}
+	
+	function fchk_join()
+	{
+		// 아이디 체크
+			if( $('ID_join_id_chk').value == false )
+			{
+				fnc_join_idchk();
+				return false;
+			}
+		
+		// 패스워드 체크
+			if( $('ID_join_password').value.length < 6 )
+			{
+				$('ID_join_password_msg').innerHTML = "영문+숫자, 6~20자 이내로 비밀번호를 입력 해주십시오.";
+				$('ID_join_password').focus();
+				return false;
+			} else { $('ID_join_password_msg').innerHTML = ""; }
+		
+		// 패스워드(확인) 체크
+			if( $('ID_join_password').value != $('ID_join_password2').value )
+			{
+				$('ID_join_password2_msg').innerHTML = "비밀번호와 비밀번호 확인의 입력값이 다릅니다.";
+				$('ID_join_password2').focus();
+				return false;
+			} else { $('ID_join_password2_msg').innerHTML = ""; }
+		
+		// 이메일 체크
+			if( $('ID_join_email_chk').value == false )
+			{
+				fnc_join_emailchk();
+				return false;
+			}
+		
+		// 약관동의 체크
+			if( $('ID_agreement_check').value == "0")
+			{
+				$('ID_agreement_check_msg').innerHTML = "약관에 동의해야 회원가입이 가능합니다.";
+				return false;
+			}
+		
+	}
+	
+-->
+</script>
+</head>
+<body>
+<div id="wrap">
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/oneNav.php"; ?>
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav_member.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<!-- contents s -->
+
+					<!-- 로그인 s -->
+					<div class="col2">
+						<form class="pageFormBox" id="" name="form_login" action="login.html" method="post" onSubmit="return fchk_login()">
+						<input type="hidden" name="work_type" value="login"/>
+							<div class="cbTitle">
+								<h2>로그인</h2>
+								<span>B2B114 사이트에 오신 것을 환영합니다</span>
+							</div>
+							<div class="cbTopBox">
+							</div>
+							<div class="cbMiddleBox">
+								<ul class="loginFormWrap">
+									<li class="memberInputBox">
+										<input type="text" name="login_id" placeholder="아이디" id="ID_login_id"/>
+										<span id="ID_login_id_msg" class="memberMsgBox"></span>
+									</li>
+									<li class="memberInputBox">
+										<input type="password" name="login_password" placeholder="비밀번호" id="ID_login_password"/>
+										<span id="ID_login_password_msg" class="memberMsgBox"></span>
+									</li>
+									<li>
+										<a href="find_loginInfo.html"><div class="textBtn" style="margin-top:170px;">아이디/비밀번호 찾기</div></a>
+									</li>
+									<li>
+										<input type="submit" value="로그인" class="btnStyle btnMainC" onclick="" />
+									</li>
+								</ul>
+							</div>
+						</form>
+					</div>
+					<!-- 로그인 e -->
+
+					<!-- 회원가입 s -->
+					<div class="col2" style="float:right;">
+						<form class="pageFormBox" id="" name="form_join" action="join_complete_.html" method="post" onSubmit="return fchk_join()">
+						<input type="hidden" name="work_type" value="simple_join"/>
+							<div class="cbTitle">
+								<h2>회원가입</h2>
+								<span>B2B114의 모든 서비스는 무료입니다</span>
+							</div>
+							<div class="cbTopBox">
+							</div>
+							<div class="cbMiddleBox">
+								<ul class="loginFormWrap">
+									<li class="memberInputBox">
+										<input type="text" name="join_id" placeholder="아이디" id="ID_join_id" onKeyUp="JavaScript:fnc_join_idchk()"/>
+										<input type="hidden" name="join_id_chk" value="0" id="ID_join_id_chk"/>
+										<span id="ID_join_id_msg" class="memberMsgBox"></span>
+									</li>
+									<li class="memberInputBox">
+										<input type="password" name="join_password" placeholder="비밀번호" id="ID_join_password"/>
+										<span id="ID_join_password_msg" class="memberMsgBox"></span>
+									</li>
+									<li class="memberInputBox">
+										<input type="password" name="join_password2" placeholder="비밀번호확인" id="ID_join_password2"/>
+										<span id="ID_join_password2_msg" class="memberMsgBox"></span>
+									</li>
+									<li class="memberInputBox">
+										<input type="text" name="join_email" placeholder="이메일주소" id="ID_join_email" onKeyUp="JavaScript:fnc_join_emailchk();"/>
+										<input type="hidden" name="join_email_chk" value="0" id="ID_join_email_chk"/>
+										<span id="ID_join_email_msg" class="memberMsgBox"></span>
+									</li>
+									<li>
+										<input type="hidden" name="agreement_check" value="0" id="ID_agreement_check"/>
+										<span id="ID_agreement_check_msg"></span>
+										<a href="javascript:popupAgreeCheck();"><div class="agreeBtn textBtn">보기</div></a>
+										<label class="chechkbox-inline textBtn"><input type="checkbox" id="joinAgreeBox" onclick="changeAgreement();"/>이용약관동의</label>
+										<input type="submit" value="회원가입" class="btnStyle btnC333" />
+									</li>
+								</ul>
+								<!-- 약관동의팝업 s -->
+								<div>
+									<div class="popDivBgBox"></div>
+									<div id="provisionPopBox" class="popDivBox">
+										<div class="popDivCloseBtn"><i class="fa fa-times fa-2x"></i></div>
+										<div class="popDivTitle"><span>이용약관</span></div>
+										<div class="popDivContents">
+											<table class="popDivTable">
+												<tbody>
+													<tr><th>이용약관</th></tr>
+													<tr>
+														<td>
+															<div class="popTextBox" style="overflow:auto;">
+																<pre><? @include_once HOME_DIR . "/bin/member/_include_policyTerms.html"; ?></pre>
+															</div>
+														</td>
+													</tr>
+													<tr><th>개인정보 수집 및 이용약관</th></tr>
+													<tr>
+														<td>
+															<div class="popTextBox" style="overflow:auto;">
+																<pre><? @include_once HOME_DIR . "/bin/member/_include_privacyInfo.html"; ?></pre>
+															</div>
+														</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+										<div class="popDivBtns">
+											<div class="btn btnMainC" onclick="hidePopDivBox(jQuery('#provisionPopBox'));">닫기</div>
+										</div>
+									</div>
+								</div>
+								<!-- 약관동의팝업 e -->
+							</div>
+						</form>
+					</div>
+					<!-- 회원가입 e -->
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">setCurrentPage('로그인');</script><!-- 현재페이지 -->
+	<? @include_once HOME_DIR . "/include/bottom.php"; ?>

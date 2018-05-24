@@ -1,0 +1,483 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../../include/config.php";
+	@include_once HOME_DIR . "/include/top.php";
+	@include_once LIBRARY . "/Modules/function_telAddDash.php";
+	
+	if($work == "modify")
+	{
+		// 회원정보변경 MODE
+			fnc_login_check();
+			$title_text = "회원정보변경";
+			$title_sub_text = "일부정보(아이디, 사업자 등록증의 정보 등)를 제외하고 회원정보를 수정하실 수 있습니다.";
+			$button_text = "정보수정";
+
+			$Qry = "SELECT * FROM member_default WHERE uid=".$_SESSION[ssUID];
+			$Rlt = @mysql_query($Qry,$Con);
+			$member = @mysql_fetch_array($Rlt);
+	}
+	else
+	{
+		// 회원가입 MODE
+			$title_text = "회원가입";
+			$title_sub_text = "B2B114 회원가입을 진심으로 환영합니다. 감사합니다!";
+			$button_text = "회원가입";
+	}
+?>
+<script language="JavaScript" src="/_LIB/css_js/number_format.js"></script>
+<script language="JavaScript" src="function.js"></script>
+<script language="JavaScript">
+<!--
+
+	function fchk_join()
+	{
+		// 아이디 체크
+			if( $('ID_join_id_chk').value == false )
+			{
+				fnc_join_idchk();
+				return false;
+			}
+		
+		<? if( strlen($work) <= 0 ) { ?>
+		// 패스워드 체크
+			if( $('ID_join_password').value.length < 6 )
+			{
+				$('ID_join_password_msg').innerHTML = "영문+숫자, 6~20자 이내로 비밀번호를 입력 해주십시오.";
+				$('ID_join_password').focus();
+				return false;
+			} else { $('ID_join_password_msg').innerHTML = ""; }
+		<? } ?>
+		
+		// 패스워드(확인) 체크
+			if( $('ID_join_password').value != $('ID_join_password2').value )
+			{
+				$('ID_join_password2_msg').innerHTML = "비밀번호와 비밀번호 확인의 입력값이 다릅니다.";
+				$('ID_join_password2').focus();
+				return false;
+			} else { $('ID_join_password2_msg').innerHTML = ""; }
+		
+		// 이메일 체크
+			if( $('ID_join_email').value != $('ID_join_email_old').value )
+			{
+				if( $('ID_join_email_chk').value == false )
+				{
+					fnc_join_emailchk();
+					return false;
+				}
+			}
+		
+		// 휴대폰 인증 체크
+			if( $('ID_join_celno').value.length >= 1)
+			{
+				if( $('ID_join_celno_confirm').value != "Y" )
+				{
+					$('ID_join_celno_msg').innerHTML = "휴대폰번호 등록시 휴대폰인증을 하셔야 합니다.";
+					$('ID_join_celno').focus();
+					return false;
+				}
+			}
+
+		// 진행여부 확인
+			if( confirm('입력하신 정보로 <?=($work=="modify")?"수정":"회원가입"?> 하시겠습니까?') )
+			{
+				document.form_join.submit();
+			}
+			else
+			{
+				return false;
+			}
+	}
+	
+-->
+</script>
+</head>
+<body>
+<form class="pageFormBox" name="form_join" action="join_complete_.html" enctype="multipart/form-data" method="post">
+<input type="hidden" name="mode" value="<?=($work=="modify")?"modify":"simple_join"?>"/>
+<div id="wrap">
+	<script type="text/javascript">currentPageKind="member";currentMainN=0;currentSubN=0;</script><!-- 현재페이지 -->
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/oneNav.php"; ?>
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav_member.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<!-- contents s -->
+					
+					<form class="pageFormBox" id="" name="" action="" method="post">
+						<!-- 정보입력 s-->
+						<div class="cbTitle">
+							<h2><?=$title_text?></h2>
+							<span><?=$title_sub_text?></span>
+						</div>
+						<? if( strlen($work) <= 0 ) { ?>
+						<div class="cbTopBox">
+							<ul class="stepBarBox">
+								<li><div>약관동의</div></li>
+								<li class="actOn"><div>정보입력</div></li>
+								<li><div>가입완료</div></li>
+							</ul>
+							<div class="cbExpBox bdAllCCC">
+								<p class="pTitle">실명 인증없이 <span class="textMC1">간단한 절차</span>로 회원가입을 하실 수 있습니다</p>
+								<p>실명 인증없이 간단한 정보만 입력하시면, B2B114 서비스를 바로 이용 하실 수 있습니다</p>
+							</div>
+						</div>
+						<? } ?>
+						<div class="cbMiddleBox">
+							<!-- 가입자정보 s-->
+							<div class="articleBox">
+								<div class="artTitle">회원정보<div class="plusText"><span><i class="fa fa-asterisk"></i></span> 필수정보</div></div>
+								<div class="artCont bdTop2MC1">
+									
+									<table class="writeTable">
+										<caption>회원정보입력</caption>
+										<colgroup>
+											<col width="20%" /><col width="80%" />
+										</colgroup>
+										<tbody>
+											<tr>
+												<th>아이디<sup>*</sup></th>
+												<td>
+													<? if($work == "modify") { ?>
+														<?=$member[fld_id]?>
+														<input type="hidden" name="join_id_chk" value="1" id="ID_join_id_chk"/>
+													<? } else {?>
+														<input type="text" name="join_id" id="ID_join_id" onKeyUp="JavaScript:fnc_join_idchk();" class="textType form-control" />
+														<input type="hidden" name="join_id_chk" value="0" id="ID_join_id_chk"/>
+														<span id="ID_join_id_msg" class="statusText"></span>
+													<? } ?>
+												</td>
+											</tr>
+											<tr>
+												<th>비밀번호<? if( strlen($work) <= 0 ) { ?><sup>*</sup><? } ?></th>
+												<td>
+													<input type="password" name="join_password" id="ID_join_password" class="textType form-control" />
+													<span id="ID_join_password_msg" class="statusText"><?=($work=="modify")?"비밀번호를 변경하는 경우에만 입력해주십시오.":null?></span>
+												</td>
+											</tr>
+											<tr>
+												<th>비밀번호 확인<? if( strlen($work) <= 0 ) { ?><sup>*</sup><? } ?></th>
+												<td>
+													<input type="password" name="join_password2" id="ID_join_password2" class="textType form-control"/>
+													<span id="ID_join_password2_msg" class="statusText"></span>
+												</td>
+											</tr>
+											<tr>
+												<th>이메일주소<sup>*</sup></th>
+												<td>
+													<input type="hidden" name="join_email_old" value="<?=$member[fld_email_address]?>" id="ID_join_email_old"/>
+													<input type="text" name="join_email" value="<?=$member[fld_email_address]?>" id="ID_join_email" class="textType form-control" onKeyUp="JavaScript:fnc_join_emailchk();"/>
+													<input type="hidden" name="join_email_chk" value="0" id="ID_join_email_chk"/>
+													<span id="ID_join_email_msg" class="statusText"></span>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>이름</th>
+												<td>
+													<input type="text" name="join_name" value="<?=$member[fld_name]?>" id="ID_join_name" class="textType form-control" />
+													<span id="ID_join_name_msg" class="statusText"></span>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>휴대폰번호</th>
+												<td>
+													<? if( strlen($member[fld_confirm_celno]) <= 0 OR $member[fld_confirm_celno] == "0000-00-00 00:00:00") { ?>
+														<input type="hidden" name="join_celno_confirm" id="ID_join_celno_confirm"/>
+														<span><input type="text" name="join_celno" maxlength="12" id="ID_join_celno" class="textType form-control"/></span>
+														<span><input type="button" value="인증번호발송" class="btn btnWhite mrgL10" onclick="JavaScript:fnc_celno_confirm1()" id="IDBT_join_celno"></span>
+														<span><input type="button" value="인증완료(저장)" class="btn btnWhite mrgL10" onclick="JavaScript:" id="IDBT_celno_confirm_complete" style="display:none"></span>
+														<span style="display:none;padding-top:5px;" id="IDB_celno_confirm">
+															<input type="text" name="celno_confirm" maxlength="5" id="ID_celno_confirm" class="text80Type form-control" style="text-align:center;width:80px;"/>
+															<input type="button" value="인증확인" class="btn btnWhite mrgL10" onclick="JavaScript:fnc_celno_confirm2(1)"> 
+														</span>
+														<span id="ID_join_celno_msg" class="statusText"></span>
+													<? } else { ?>
+														<?=fnc_telAddDash($member[fld_celno])?>
+														<input type="hidden" id="ID_join_celno"/>
+														<span class="statusBtn"><i class="fa fa-check"></i> 휴대폰인증완료</span>
+													<? } ?>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>소속부서</th>
+												<td>
+													<input type="text" name="join_division" value="<?=$member[fld_division]?>" id="ID_join_division" class="textType form-control"/>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>직위</th>
+												<td>
+													<input type="text" name="join_position" value="<?=$member[fld_position]?>" id="ID_join_position" class="textType form-control"/>
+												</td>
+											</tr>
+											<tr>
+												<td colspan="2">
+													<div class="hideBtnBox showArtCont">
+														<input type="button" value="+ 더보기" class="btn btnWhite" onclick="">
+													</div>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<!--가입자정보 e-->
+							<!--기업정보 s-->
+							<div class="articleBox">
+								<div class="artTitle">기업정보</div>
+								<div class="artCont bdTop2MC1">
+									<table class="writeTable">
+										<caption>기업정보입력</caption>
+										<colgroup>
+											<col width="20%" /><col width="80%" />
+										</colgroup>
+										<tbody>
+											<? if( strlen($member[fld_confirm_company]) <= 0 OR $member[fld_confirm_company] == "0000-00-00 00:00:00") { ?>
+											<tr class="hideBoxㄴ">
+												<th>사업자 등록증</th>
+												<td>
+													<input type="text" id="bizpaperImgFileRoute" class="fileInputType form-control" readonly="readonly" title="첨부된 파일경로" value="선택된 파일 없음">
+													<div class="uploadFile btn btnWhite mrgL10">
+														파일선택
+														<input type="file" name="attach1" id="ID_attach1" class="fileBtn" onchange="javascript:document.getElementById('bizpaperImgFileRoute').value=this.value"/>
+													</div>
+													<br/><br/>
+													<br/>사업자 등록증을 업로드하면 당사 운영팀에서 귀사의 사업자등록증 정보를 확인하고
+													<br/><b style="color:#FF8000">사업자인증 처리</b>를 하며 사업자 등록증 상의 정보로 입력하신 <b style="color:#FF8000">정보를 갱신(수정)</b> 합니다.
+													<br/>만약 사업자인증 처리가 급히 필요하신 경우 운영팀(<?=fnc_TelnoAddHyphen(CS_TELNO)?>)으로 연락 주시기 바랍니다.
+													<br/>※ 갱신 정보 : 회사명, 사업자번호, 소재지, 업태, 종목 등 사업자 등록증 상에 표시된 항목
+												</td>
+											</tr>
+											<? } ?>
+											<tr class="hideBox">
+												<th>회사명</th>
+												<td>
+													<input type="text" name="join_co_name" value="<?=$member[fld_co_name]?>" id="ID_join_co_name" class="textType form-control"<?=(strlen($member[fld_co_name])>=1)?" readonly":null?>/>
+													<? if( strlen($member[fld_confirm_company]) >= 1 AND $member[fld_confirm_company] != "0000-00-00 00:00:00") { ?>
+													<div class="statusBtn" style="float:left;width:130px;margin-top:7px;text-align:center"><i class="fa fa-check"></i> 사업자인증완료</div>
+													<? } ?>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>사업자번호</th>
+												<td>
+													<? $arr_tmp = explode('-',$member[fld_co_uno1]); ?>
+													<input type="number" name="join_co_uno1_1" value="<?=$arr_tmp[0]?>" maxlength="3" id="ID_join_co_uno1_1" class="text80Type form-control ttaCenter"<?=(strlen($member[fld_co_uno1])>=1)?" readonly":null?> /><div class="hyphen">-</div>
+													<input type="number" name="join_co_uno1_2" value="<?=$arr_tmp[1]?>" maxlength="2" id="ID_join_co_uno1_2" class="text80Type form-control ttaCenter"<?=(strlen($member[fld_co_uno1])>=1)?" readonly":null?> /><div class="hyphen">-</div>
+													<input type="number" name="join_co_uno1_3" value="<?=$arr_tmp[2]?>" maxlength="5" id="ID_join_co_uno1_3" class="text80Type form-control ttaCenter"<?=(strlen($member[fld_co_uno1])>=1)?" readonly":null?> />
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>법인등록번호</th>
+												<td>
+													<? $arr_tmp = explode('-',$member[fld_co_uno2]); ?>
+													<input type="number" name="join_co_uno2_1" value="<?=$arr_tmp[0]?>" maxlength="6" id="ID_join_co_uno2_1" class="textNumType form-control ttaCenter"<?=(strlen($member[fld_co_uno2])>=1)?" readonly":null?> /><div class="hyphen">-</div>
+													<input type="number" name="join_co_uno2_2" value="<?=$arr_tmp[1]?>" maxlength="7" id="ID_join_co_uno2_2" class="textNumType form-control ttaCenter"<?=(strlen($member[fld_co_uno2])>=1)?" readonly":null?> />
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>우편번호</th>
+												<td>
+													<? $arr_tmp = explode('-',$member[fld_co_zipcode]); ?>
+													<input type="text" name="join_co_zipcode1" value="<?=$arr_tmp[0]?>" id="dm_zipcode1" size="5" class="text80Type form-control ttaCenter" readonly onClick="fnc_execDaumPostcode()"/><div class="hyphen">-</div>
+													<input type="text" name="join_co_zipcode2" value="<?=$arr_tmp[1]?>" id="dm_zipcode2" size="5" class="text80Type form-control ttaCenter" readonly onClick="fnc_execDaumPostcode()"/>
+													<? if(strlen($member[fld_co_zipcode])<=0) { ?>
+													<input type="button" value="우편번호찾기" class="btn btnWhite mrgL10" onClick="fnc_execDaumPostcode()">
+													<? @include_once LIBRARY . "/Common/address_search_daumAPI.html"; ?>
+													<? } ?>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>주소</th>
+												<td>
+													<input type="text" name="join_co_address1" value="<?=$member[fld_co_address1]?>" id="dm_address1" class="text100Type form-control" readonly />
+													<input type="text" name="join_co_address2" value="<?=$member[fld_co_address2]?>" id="dm_address2" class="text100Type form-control" <?=(strlen($member[fld_co_address2])>=1)?" readonly":null?> style="margin-top:10px;"/>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>업태</th>
+												<td>
+													<input type="text" name="join_co_uptae" value="<?=$member[fld_co_uptae]?>" id="ID_join_co_uptae" class="textType form-control" <?=(strlen($member[fld_co_uptae])>=1)?" readonly":null?> />
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>종목</th>
+												<td>
+													<input type="text" name="join_co_jongmok" value="<?=$member[fld_co_jongmok]?>" id="ID_join_co_jongmok" class="textType form-control" <?=(strlen($member[fld_co_jongmok])>=1)?" readonly":null?> />
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>대표자명</th>
+												<td>
+													<input type="text" name="join_co_ownname" value="<?=$member[fld_co_ownname]?>" id="ID_join_co_ownname" class="text80Type form-control" <?=(strlen($member[fld_co_ownname])>=1)?" readonly":null?> />
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>개업일</th>
+												<td>
+													<div class="dateInputBox">
+														<input type="text" name="join_co_odate" value="<?=$member[fld_co_odate]?>" id="ID_join_co_odate" class="datePickInput form-control" style="margin-left:0;" readonly/>
+														<? if(strlen($member[fld_co_odate])<=0) { ?>
+														<i class="fa fa-calendar"></i>
+														<? } ?>
+													</div>
+													<script type="text/javascript">setDatePick("ID_join_co_odate");</script>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>전화번호</th>
+												<td>
+													<? $arr_tmp = explode('-',$member[fld_co_telno]); ?>
+													<select name="join_co_telno1" id="ID_join_co_telno1" class="selectType form-control">
+														<option value="" selected>선택</option>
+														<option value="02" <?=($arr_tmp[0]=="02")?" selected":null?>>02</option>
+														<option value="031"<?=($arr_tmp[0]=="031")?" selected":null?>>031</option>
+														<option value="032"<?=($arr_tmp[0]=="032")?" selected":null?>>032</option>
+														<option value="033"<?=($arr_tmp[0]=="033")?" selected":null?>>033</option>
+														<option value="041"<?=($arr_tmp[0]=="041")?" selected":null?>>041</option>
+														<option value="042"<?=($arr_tmp[0]=="042")?" selected":null?>>042</option>
+														<option value="043"<?=($arr_tmp[0]=="043")?" selected":null?>>043</option>
+														<option value="044"<?=($arr_tmp[0]=="044")?" selected":null?>>044</option>
+														<option value="051"<?=($arr_tmp[0]=="051")?" selected":null?>>051</option>
+														<option value="052"<?=($arr_tmp[0]=="052")?" selected":null?>>052</option>
+														<option value="053"<?=($arr_tmp[0]=="053")?" selected":null?>>053</option>
+														<option value="054"<?=($arr_tmp[0]=="054")?" selected":null?>>054</option>
+														<option value="055"<?=($arr_tmp[0]=="055")?" selected":null?>>055</option>
+														<option value="061"<?=($arr_tmp[0]=="061")?" selected":null?>>061</option>
+														<option value="062"<?=($arr_tmp[0]=="062")?" selected":null?>>062</option>
+														<option value="063"<?=($arr_tmp[0]=="063")?" selected":null?>>063</option>
+														<option value="064"<?=($arr_tmp[0]=="064")?" selected":null?>>064</option>
+														<option value="070"<?=($arr_tmp[0]=="070")?" selected":null?>>070</option>
+													</select>
+													<div class="hyphen">-</div>
+													<input type="number" name="join_co_telno2" value="<?=$arr_tmp[1]?>" id="ID_join_co_telno2" class="text80Type form-control ttaCenter" />
+													<div class="hyphen">-</div>
+													<input type="number" name="join_co_telno3" value="<?=$arr_tmp[2]?>" id="ID_join_co_telno3" class="text80Type form-control ttaCenter" />
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>팩스번호</th>
+												<td>
+													<? $arr_tmp = explode('-',$member[fld_co_faxno]); ?>
+													<select name="join_co_faxno1" id="ID_join_co_faxno1" class="selectType form-control">
+														<option value="" selected>선택</option>
+														<option value="02" <?=($arr_tmp[0]=="02")?" selected":null?>>02</option>
+														<option value="031"<?=($arr_tmp[0]=="031")?" selected":null?>>031</option>
+														<option value="032"<?=($arr_tmp[0]=="032")?" selected":null?>>032</option>
+														<option value="033"<?=($arr_tmp[0]=="033")?" selected":null?>>033</option>
+														<option value="041"<?=($arr_tmp[0]=="041")?" selected":null?>>041</option>
+														<option value="042"<?=($arr_tmp[0]=="042")?" selected":null?>>042</option>
+														<option value="043"<?=($arr_tmp[0]=="043")?" selected":null?>>043</option>
+														<option value="044"<?=($arr_tmp[0]=="044")?" selected":null?>>044</option>
+														<option value="051"<?=($arr_tmp[0]=="051")?" selected":null?>>051</option>
+														<option value="052"<?=($arr_tmp[0]=="052")?" selected":null?>>052</option>
+														<option value="053"<?=($arr_tmp[0]=="053")?" selected":null?>>053</option>
+														<option value="054"<?=($arr_tmp[0]=="054")?" selected":null?>>054</option>
+														<option value="055"<?=($arr_tmp[0]=="055")?" selected":null?>>055</option>
+														<option value="061"<?=($arr_tmp[0]=="061")?" selected":null?>>061</option>
+														<option value="062"<?=($arr_tmp[0]=="062")?" selected":null?>>062</option>
+														<option value="063"<?=($arr_tmp[0]=="063")?" selected":null?>>063</option>
+														<option value="064"<?=($arr_tmp[0]=="064")?" selected":null?>>064</option>
+														<option value="070"<?=($arr_tmp[0]=="070")?" selected":null?>>070</option>
+													</select>
+													<div class="hyphen">-</div>
+													<input type="number" name="join_co_faxno2" value="<?=$arr_tmp[1]?>" id="ID_join_co_faxno2" class="text80Type form-control ttaCenter" />
+													<div class="hyphen">-</div>
+													<input type="number" name="join_co_faxno3" value="<?=$arr_tmp[2]?>" id="ID_join_co_faxno3" class="text80Type form-control ttaCenter" />
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>홈페이지</th>
+												<td>
+													<div class="hyphen">http://</div><input type="text" name="join_co_url" value="<?=$member[fld_co_url]?>" id="ID_join_co_url" class="textType form-control" style="width:395px;"/>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>회사로고</th>
+												<td>
+													<input type="text" id="bizLogoImgFileRoute" class="fileInputType form-control" readonly="readonly" title="첨부된 파일경로" value="선택된 파일 없음">
+													<div class="uploadFile btn btnWhite mrgL10">
+														파일선택
+														<input type="file" name="attach2" id="ID_attach1" class="fileBtn" onchange="javascript:document.getElementById('bizLogoImgFileRoute').value=this.value"/>
+													</div>
+													<? if( strlen($member[fld_co_logo]) >= 1 ) { ?>
+														<div class="statusBtn" style="float:left;margin-top:7px;text-align:center;">
+															<i class="fa fa-check"></i>
+															<a href="javascript:wOpen('/_LIB/bin/image_view.html?imgsrc=/_GWD/B2B114/co_logo/<?=$member[fld_co_logo]?>','imgwin',50,50,1)" style="color:#fff;">
+																<?=$member[fld_co_logo]?>
+															</a>
+														</div>
+													<? } ?>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>기업History</th>
+												<td>
+													<textarea name="join_co_history" id="ID_join_co_history" cols="30" rows="8" class="form-control"><?=stripslashes($member[fld_co_history])?></textarea>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>주력상품군</th>
+												<td>
+													<input type="text" name="join_co_mproduct" value="<?=$member[fld_co_mproduct]?>" id="ID_join_co_mproduct" class="titleType form-control" />
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>사원수</th>
+												<td>
+													<input type="text" name="join_co_staff" value="<?=number_format($member[fld_co_staff])?>" id="ID_join_co_staff" class="text80Type form-control" onKeyUp="JavaScript:this.value=number_format(this.value);" style="text-align:right;"/><div class="hyphen"> 명</div>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>자본금</th>
+												<td>
+													<input type="text" name="join_co_cstock" value="<?=number_format($member[fld_co_cstock])?>" id="ID_join_co_cstock" class="textType form-control" onKeyUp="JavaScript:this.value=number_format(this.value);" style="text-align:right;"/><div class="hyphen"> 원</div>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>매출액</th>
+												<td>
+													<input type="text" name="join_co_sales_account" value="<?=number_format($member[fld_co_sales_account])?>" id="ID_join_co_sales_account" class="textType form-control"  onKeyUp="JavaScript:this.value=number_format(this.value);" style="text-align:right;"/><div class="hyphen"> 원</div>
+												</td>
+											</tr>
+											<tr>
+												<td colspan="2">
+													<div class="hideBtnBox showArtCont">
+														<input type="button" value="+ 더보기" class="btn btnWhite" onclick="">
+													</div>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<!--기업정보 e-->
+						</div>
+						<!-- 정보입력 e-->
+
+						<!-- 페이지버튼 s-->
+						<div class="cbBottomBox">
+							<div class="pageBtnBox">
+								<input type="button" value="<?=$button_text?>" class="btn btnMainC" onClick="JavaScript:fchk_join()"/>
+								<input type="button" value="취소" class="btn btnWhite" onclick="JavaScript:history.go(-1);"/>
+							</div>
+						</div>
+						<!-- 페이지버튼 e-->
+					</form>
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+<? if($work == "modify") { ?><script type="text/javascript">absoluteShow(".showArtCont");</script><? } ?>
+<? @include_once HOME_DIR . "/include/bottom.php"; ?>

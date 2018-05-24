@@ -1,0 +1,98 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../../include/config.php";
+	@include_once HOME_DIR . "/include/top.php";
+
+	if($mode == "modify")
+	{
+		// 회원정보변경 MODE
+			fnc_login_check();
+			$title_text = "회원정보변경";
+
+			$Qry = "SELECT * FROM member_default WHERE uid=".$_SESSION[ssUID];
+			$Rlt = @mysql_query($Qry,$Con);
+			$member = @mysql_fetch_array($Rlt);
+
+			$body_title = "<span class='textMC1'>";
+			$body_title .= ( strlen($_SESSION[ssNAME]) >= 1)?$_SESSION[ssNAME]:"익명";
+			$body_title .= "</span> 회원님의 회원정보가 정상적으로 수정 되었습니다.";
+			$body_text .= "변경된 정보를 다시 확인하시려면 아래 버튼을 클릭하십시오.";
+			
+			$button_text = "회원정보변경";
+			$button_url = "javascript:pageMove(sub_memberNavT_0[3][1],sub_memberNavT_0[3][2])";
+	}
+	else
+	{
+		// 회원가입 MODE
+			$title_text = "회원가입";
+			$body_title = "<span class='textMC1'>";
+			$body_title .= ( strlen($_SESSION[ssNAME]) >= 1)?$_SESSION[ssNAME]:"익명";
+			$body_title .= "</span> 회원님 가입해주셔서 감사 합니다!!";
+			$body_text .= "지금 바로 B2B114의 서비스를 이용해보십시오.<br/><br/>감사합니다!";
+
+			$button_text = "시작하기";
+			$button_url = "javascript:location.href='";
+			$button_url .= (strlen($_SESSION[ssBEFORE_URL])>=1)?$_SESSION[ssBEFORE_URL]:"/";
+			$button_url .= "';";
+	}
+?>
+</head>
+<body>
+<div id="wrap">
+	<script type="text/javascript">currentPageKind="member";currentMainN=0;currentSubN=0;</script><!-- 현재페이지 -->
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/oneNav.php"; ?>
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav_member.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<!-- contents s -->
+
+					<!-- 가입완료 s-->
+					<div class="cbTitle">
+						<h2><?=$title_text?></h2>
+					</div>
+					<div class="cbTopBox">
+						<? if( strlen($mode) <= 0 ) { ?>
+						<ul class="stepBarBox">
+							<li><div>약관동의</div></li>
+							<li><div>정보입력</div></li>
+							<li class="actOn"><div>가입완료</div></li>
+						</ul>
+						<? } ?>
+						<div class="cbExpBox bdAllCCC">
+							<p>&nbsp;</p>
+							<p class="pTitle"><?=$body_title?></p>
+							<p><?=$body_text?></p>
+							<p>&nbsp;</p>
+						</div>
+					</div>
+					<div class="cbMiddleBox">
+					</div>
+					<!-- 가입완료 e-->
+
+					<!-- 페이지버튼 s-->
+					<div class="cbBottomBox">
+						<div class="pageBtnBox">
+							<a href="<?=$button_url?>"><input type="button" value="  <?=$button_text?>  " class="btnStyle btnMainC"></a>
+						</div>
+					</div>
+					<!-- 페이지버튼 s-->
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+<? 
+	$_SESSION[ssBEFORE_URL] = null;
+	@include_once HOME_DIR . "/include/bottom.php"; 
+?>

@@ -1,0 +1,193 @@
+<?
+	@require_once "../../include/config.php";
+	
+	// 제안서 기본정보 가져오기
+		$Qry = "SELECT * FROM proposal_default WHERE uid=".$proposal_uid;
+		$Rlt = @mysql_query($Qry,$Con);
+		$proposal_default = @mysql_fetch_array($Rlt);
+		$eval_reject = ( @in_array($proposal_uid,$arr_eval_rejct) )?true:false;
+		$eval_review = ( @in_array($proposal_uid,$arr_eval_review) )?true:false;
+		$eval_important = ( @in_array($proposal_uid,$arr_eval_important) )?true:false;
+	
+	// 상품/브랜드/카테고리 정보 가져오기
+		$goods_default = @mysql_fetch_array(@mysql_query("SELECT * FROM goods_default WHERE uid=".$proposal_default[goods_uid],$Con));
+		$goods_brand = @mysql_fetch_array(@mysql_query("SELECT * FROM goods_brand WHERE uid=".$goods_default[brand_uid],$Con));
+		$goods_cat1 = ($goods_default[cat1_uid] >= 1)?@mysql_fetch_array(@mysql_query("SELECT * FROM goods_cat1 WHERE uid=".$goods_default[cat1_uid],$Con)):null;
+		$goods_cat2 = ($goods_default[cat2_uid] >= 1)?@mysql_fetch_array(@mysql_query("SELECT * FROM goods_cat2 WHERE uid=".$goods_default[cat2_uid],$Con)):null;
+		$goods_cat3 = ($goods_default[cat3_uid] >= 1)?@mysql_fetch_array(@mysql_query("SELECT * FROM goods_cat3 WHERE uid=".$goods_default[cat3_uid],$Con)):null;
+
+	// 제안사 정보 가져오기
+		$Qry = "SELECT * FROM member_default WHERE uid=".$proposal_default[regmem_uid];
+		$Rlt = @mysql_query($Qry,$Con);
+		$regmem_default = @mysql_fetch_array($Rlt);
+
+	@include_once HOME_DIR . "/include/popup_top.php";
+
+?>
+<script type="text/javascript">
+<!--
+
+	function fnc_evalEXEC(var_eval)
+	{
+		var urlurl = "proposal_view_popup.html?request_uid=<?=$request_uid?>&price_uid=<?=$price_uid?>&proposal_uid=<?=$proposal_uid?>&eval_execute="+var_eval;
+		window.location.href=urlurl;
+	}
+
+-->
+</script>
+</head>
+<body>
+	<div class="popHead bgColorMC1">
+		<div class="popWidthWrap">제안서보기</div>
+	</div>
+	<div class="popContents">
+		<div class="popWidthWrap">
+			<!-- 버튼 s -->
+			<div class="popWinBtnWrap">
+				<div class="popWinBtnBox fLeft ttaleft">
+					<div class="btn btnWhite listBtnStyle">제안 종료</div>
+				</div>
+				<div class="popWinBtnBox fRight ttaRight">
+					<div class="btn btnWhite listBtnStyle">제안서 정보수정</div>
+				</div>
+			</div>
+			<!-- 버튼 e -->
+			<!-- header s -->
+			<div class="apTitle apTitleAct fLeft"><div><?=$proposal_default[fld_title]?></div></div>
+			<!-- header e -->
+			<!-- 상품정보 s -->
+			<div class="articleBox" style="margin:0 0 0 0;">
+				<div class="artTitle">제안정보</div>
+				<div class="artCont">
+					<div class="pGoodsImgArea">
+						<img alt="" id="" src="/_GWD/B2B114/goods_image_m/<?=(strlen($goods_default[fld_image_m])>=1)?$goods_default[fld_image_m]:"noimage.gif"?>">
+					</div>
+					<div class="pGoodsSummary">
+						<table class="viewTable" style="border:1px solid #eee;">
+							<colgroup>
+								<col width="30%"/><col width="70%"/>
+							</colgroup>
+							<tbody>
+								<tr>
+									<th class="bdTop7MC1 bdLeft7MC1">상품명</th>
+									<td class="bdTop7MC1 bdRight7MC1 textBold"><?=$goods_default[fld_name]?></td>
+								</tr>
+								<tr>
+									<th class="bdLeft7MC1">소비자가</div></th>
+									<td class="bdRight7MC1 textBold"><?=number_format($goods_default[fld_price])?> 원</td>
+								</tr>
+								<tr>
+									<th class="bdBottom7MC1 bdLeft7MC1">제안가</th>
+									<td class="bdBottom7MC1 bdRight7MC1 textBold">
+										<?
+											$view_percent = ceil(100-($proposal_price[fld_price]/$goods_default[fld_price]*100));
+										?>
+										<span class="fs16 textMC1"><?=number_format($proposal_price[fld_price])?></span> 원
+										<span class="btn smallTrBtn"><?=$view_percent?>% 할인</span>
+									</td>
+								</tr>
+								<tr>
+									<th class="bdTop">최소 발주</th>
+									<td class="bdTop"><?=number_format($request_price[fld_ea])?>개</td>
+								</tr>
+								<tr>
+									<th class="bdTop">제안사</th>
+									<td class="bdTop"><?=$regmem_default[fld_co_name]?></td>
+								</tr>
+								<tr>
+									<th class="bdTop">연락처</th>
+									<td class="bdTop"><?=$regmem_default[fld_co_telno]?></td>
+								</tr>
+								<tr>
+									<th class="bdTop">납기가능일</th>
+									<td class="bdTop"><?=$proposal_default[fld_delivery]?></td>
+								</tr>
+								<tr>
+									<th class="bdTop">브랜드</th>
+									<td class="bdTop"><?=$goods_brand[fld_name]?></td>
+								</tr>
+								<tr>
+									<th class="bdTop">제조사</th>
+									<td class="bdTop"><?=$goods_default[fld_manufactuer]?></td>
+								</tr>
+								<tr>
+									<th class="bdTop">원산지</th>
+									<td class="bdTop"><?=($goods_default[fld_made_korea]=="Y")?"대한민국":$goods_default[fld_made_country]?></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="pGoodsinfo">
+						<table class="viewTable" style="border:1px solid #eee;">
+							<colgroup>
+								<col width="30%"/><col width="70%"/>
+							</colgroup>
+							<tbody>
+								<tr>
+									<th>상품분류</th>
+									<td>
+										<?=(strlen($goods_cat1[fld_name])>=1)?$goods_cat1[fld_name]:null?>
+										<?=(strlen($goods_cat2[fld_name])>=1)?" > ".$goods_cat2[fld_name]:null?>
+										<?=(strlen($goods_cat3[fld_name])>=1)?" > ".$goods_cat3[fld_name]:null?>
+									</td>
+								</tr>
+								<tr>
+									<th class="bdTop">모델명</th>
+									<td class="bdTop"><?=$goods_default[fld_model]?></td>
+								</tr>
+								<? if( strlen($goods_default[fld_introduction]) >= 1 ) { ?>
+								<tr>
+									<th class="bdTop">간략설명</th>
+									<td class="bdTop"><?=$goods_default[fld_introduction]?></td>
+								</tr>
+								<? } ?>
+								<? if( strlen($goods_default[fld_spec]) >= 1 ) { ?>
+								<tr>
+									<th class="bdTop">스펙</th>
+									<td class="bdTop lh16"><?=nl2br($goods_default[fld_spec])?></td>
+								</tr>
+								<? } ?>
+								<? if( strlen($proposal_default[fld_contents]) >= 1 ) { ?>
+								<tr>
+									<th class="bdTop">제안설명</th>
+									<td class="bdTop lh16"><?=nl2br($proposal_default[fld_contents])?></td>
+								</tr>
+								<? } ?>
+								<tr>
+									<td class="bdTop" colspan="2">
+										<div class="previewDetailInfoBox">
+											<?=stripslashes($goods_default[fld_contents])?>
+										</div>
+										<div class="viewDetailInfoBtn" style="text-align:center;">
+											<div class="btn btnWhite listTrBtn">상품상세보기</div>
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<!-- 상품정보 e -->
+			
+			<!-- 버튼 s -->
+			<div class="popWinBtnWrap">
+				<div class="popWinBtnBox fLeft ttaleft">
+					<div class="btn btnWhite listBtnStyle" onclick="JavaScript:fnc_scrap(<?=$proposal_default[uid]?>,'proposal','ID_btn_scrap_<?=$x2?>')" id="ID_btn_scrap_<?=$x2?>"><?=fnc_checkScrap($proposal_default[uid],'proposal')?></div>
+				</div>
+				<div class="popWinBtnBox fRight ttaRight">
+					<div class="btn <?=($request_eval[fld_eval] == "reject")?"btnMainC":"btnWhite"?> listBtnStyle" onclick="JavaScript:fnc_evalEXEC('reject')">거절</div>
+					<div class="btn <?=($request_eval[fld_eval] == "review")?"btnMainC":"btnWhite"?> listBtnStyle" onclick="JavaScript:fnc_evalEXEC('review')">검토</div>
+					<div class="btn <?=($request_eval[fld_eval] == "important")?"btnMainC":"btnWhite"?> listBtnStyle" onclick="JavaScript:fnc_evalEXEC('important')">유력</div>
+				</div>
+			</div>
+			<!-- 버튼 e -->
+		</div>
+	</div>
+	<div id="scrollTopBtn" class="bgColor999"><i class="fa fa-chevron-up"></i>TOP</div>
+	<div class="popFooter bdTop">
+		<div class="pageBtnBox"><div class="btn btnWhite" onclick="winClose();" >닫기</div></div>
+	</div>
+<script language="JavaScript">window.resizeTo(1000,850);opener.window.location.reload();</script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../../include/config.php";
+	@include_once HOME_DIR . "/include/top.php";
+	@include_once LIBRARY . "/Modules/function_telAddDash.php";
+
+	if( strlen($work) >= 1 )
+	{
+		switch($work)
+		{
+			case "find_id" : 
+				
+				// 회원정보 조회
+					$Qry = "SELECT * FROM member_default WHERE fld_email_address='".trim($fld_email_address)."'";
+					$Rlt = @mysql_query($Qry,$Con);
+					if( $member = @mysql_fetch_array($Rlt))
+					{
+						$mail_subject = iconv("UTF-8","EUC-KR","[B2B114] 아이디 찾기 결과 입니다.");
+						$mail_body = '
+												<!DOCTYPE HTML>
+												<html lang="en-US">
+												<head>
+													<meta charset="UTF-8">
+													<title></title>
+												</head>
+												<body style="margin:0;padding:0;font-family:">
+													<div style="width:100%;padding-top:20px;padding-bottom:20px;background:#eee;">
+														<div style="width:520px;margin:0 auto;padding-top:20px;padding-right:40px;padding-bottom:20px;padding-left:40px;border-right:2px solid #ddd;border-bottom:2px solid #ddd;background:#fff;">
+															<div style="width:100%;padding-top:20px;padding-bottom:20px;font-size:0.8em;">
+																<div style="float:left;width:100px;">
+																	<a href="http://b2b114.co.kr/" target="_blank" style="text-decoration:none;">
+																		<img src="http://b2b114.co.kr/skin/images/common/logo.png" alt="B2B114 LOGO" style="width:100%;" />
+																	</a>
+																</div>
+																<div style="float:left;margin-top:5px;margin-left:10px;font-weight:bold;color:#666;">회원정보</div>
+															</div>
+															<div style="width:100%;margin-top:20px;margin-bottom:20px;padding-bottom:20px;font-size:1.8em;border-bottom:1px solid #ddd;">
+																아이디찾기 <span style="color:#25aae1;">안내메일</span>입니다
+															</div>
+															<div style="width:100%">
+																<p>귀하의 아이디는 아래와 같습니다.</p>
+																<div style="margin-top:10px;margin-bottom:10px;padding-top:10px;padding-right:40px;padding-bottom:10px;padding-left:40px;border-top:1px solid #eee;border-bottom:1px solid #eee;background:#fafafa;">
+																	<p>아이디 : <span style="color:#25aae1;font-weight:bold;">'.$member[fld_id].'</span></p>
+																</div>
+																<p>B2B114를 이용해 주셔서 감사합니다.</p>
+																<p>더욱 편리한 서비스를 제공하기 위해 항상 최선을 다하겠습니다.</p>
+															</div>
+															<a href="http://b2b114.co.kr/bin/member/login.html" target="_blank" style="text-decoration:none;">
+																<div style="width:150px;margin:30px auto;padding-top:3px;padding-bottom:5px;font-size:1.2em;color:#fff;text-align:center;border-radius:4px;background:#25aae1;">로그인하러가기</div>
+															</a>
+															<div style="padding-top:20px;font-size:0.8em;color:#999;text-align:center;border-top:1px solid #ddd;">
+																본 메일은 발신전용입니다. 궁금하신 사항은 당사 <span style="color:#25aae1;">고객센터 '.fnc_telAddDash(CS_TELNO).'</span>로 연락 주시기 바랍니다.
+															</div>
+														</div>
+													</div>
+												</body>
+												</html>
+											';
+					}
+					else
+					{
+						echo "<script>alert('가입되어 있지 않은 이메일주소입니다.\\n\\n  확인하시고 다시 입력해주십시오.');history.go(-1);</script>";
+						exit;
+					}
+			break;
+			
+			case "find_password":
+
+				// 회원정보 조회
+					$Qry = "SELECT * FROM member_default WHERE fld_id='".trim($fld_id)."' AND fld_email_address='".trim($fld_email_address2)."'";
+					$Rlt = @mysql_query($Qry,$Con);
+					if( $member = @mysql_fetch_array($Rlt) )
+					{
+						// 비밀번호 초기화
+							$new_password = substr(rand(0,time()),0,8);
+							$Qry = "UPDATE member_default SET fld_password=password('".$new_password."') WHERE uid=".$member[uid];
+							$Rlt = @mysql_query($Qry,$Con);
+						
+						$mail_subject = iconv("UTF-8","EUC-KR","[B2B114] 비밀번호 초기화 결과 입니다.");
+						$mail_body = '
+												<!DOCTYPE HTML>
+												<html lang="en-US">
+												<head>
+													<meta charset="UTF-8">
+													<title></title>
+												</head>
+												<body style="margin:0;padding:0;font-family:">
+													<div style="width:100%;padding-top:20px;padding-bottom:20px;background:#eee;">
+														<div style="width:520px;margin:0 auto;padding-top:20px;padding-right:40px;padding-bottom:20px;padding-left:40px;border-right:2px solid #ddd;border-bottom:2px solid #ddd;background:#fff;">
+															<div style="width:100%;padding-top:20px;padding-bottom:20px;font-size:0.8em;">
+																<div style="float:left;width:100px;">
+																	<a href="http://b2b114.co.kr/" target="_blank" style="text-decoration:none;">
+																		<img src="http://b2b114.co.kr/skin/images/common/logo.png" alt="B2B114 LOGO" style="width:100%;" />
+																	</a>
+																</div>
+																<div style="float:left;margin-top:5px;margin-left:10px;font-weight:bold;color:#666;">회원정보</div>
+															</div>
+															<div style="width:100%;margin-top:20px;margin-bottom:20px;padding-bottom:20px;font-size:1.8em;border-bottom:1px solid #ddd;">
+																비밀번호 초기화 <span style="color:#25aae1;">안내메일</span>입니다
+															</div>
+															<div style="width:100%">
+																<p>귀하의 비밀번호를 아래 8자리 숫자로 변경(초기화) 하였습니다.</p>
+																<div style="margin-top:10px;margin-bottom:10px;padding-top:10px;padding-right:40px;padding-bottom:10px;padding-left:40px;border-top:1px solid #eee;border-bottom:1px solid #eee;background:#fafafa;">
+																	<p>비밀번호 : <span style="color:#25aae1;font-weight:bold;">'.$new_password.'</span></p>
+																</div>
+																<p>변경된 비밀번호를 이용하셔서 로그인하여 주십시오.</p>
+																<p>로그인 하시고 비밀번호를 꼭 변경하여 주시기 바랍니다.</p>
+															</div>
+															<a href="http://b2b114.co.kr/bin/member/login.html" target="_blank" style="text-decoration:none;">
+																<div style="width:150px;margin:30px auto;padding-top:3px;padding-bottom:5px;font-size:1.2em;color:#fff;text-align:center;border-radius:4px;background:#25aae1;">로그인하러가기</div>
+															</a>
+															<div style="padding-top:20px;font-size:0.8em;color:#999;text-align:center;border-top:1px solid #ddd;">
+																본 메일은 발신전용입니다. 궁금하신 사항은 당사 <span style="color:#25aae1;">고객센터 '.fnc_telAddDash(CS_TELNO).'</span>로 연락 주시기 바랍니다.
+															</div>
+														</div>
+													</div>
+												</body>
+												</html>
+											';
+					}
+					else
+					{
+						echo "<script>alert('가입되어 있지 않은 아이디, 이메일주소 입니다.\\n\\n  확인하시고 다시 입력해주십시오.');history.go(-1);</script>";
+						exit;
+					}
+			break;
+		}
+	
+		// Email 전송시 필요한 헤더값을 지정.
+			$from_name = "B2B114";
+			$from_email = "master@b2b114.co.kr";
+			$Mail_Headers = "From: ".$from_name." <".$from_email.">\r\n";
+			$Mail_Headers .= "Date: " . date("D, d M H:i:s Y ") . "\r\n";
+			$Mail_Headers .= "Reply-To: ".$from_name." <".$from_email_address.">\r\n";
+			$Mail_Headers .= "X-Mailer: ".$from_name." Mail Sender-0.6.12\r\n";
+			$Mail_Headers .= "MIME-Version: 1.0\r\n";
+			$Mail_Headers .= "Content-Type:text/html; charset=\"euc-kr\"\n";
+			$Mail_Headers .= "Content-Transfer-Encoding: 8bit\n\n";
+
+		// 메일전송 실행!
+			$to_email = $member[fld_email_address];
+			$mail_body = iconv("UTF-8","EUC-KR",$mail_body);
+			$Mail_Headers = iconv("UTF-8","EUC-KR",$Mail_Headers);
+			if( mail($to_email,$mail_subject,$mail_body,$Mail_Headers) )
+			{
+				if($work == "find_id")
+				{
+					$view_message = "가입시 등록하신 이메일주소로 아이디를 확인하실 수 있는 이메일을 발송 해드렸습니다.";
+				}
+				else
+				{
+					$view_message = "이메일(".$to_email.")로 초기화된 비밀번호를 보내드렸습니다. 메일을 확인 해주십시오.";
+				}
+			}
+			else
+			{
+				$view_message = "메일 발송 실패! 고객센터로 문의 해주십시오.";
+			}
+	}
+?>
+<script language="JavaScript">
+<!--
+
+	function fnc_find_id()
+	{
+		var form = document.member_form;
+		
+		if(fnc_email_check(form.fld_email_address.value) == false)
+		{
+			alert('올바른 형식의 이메일주소를 입력 해주십시오.');
+			form.fld_email_address.focus();
+			return false;
+		}
+		
+		form.work.value="find_id";
+		form.submit();
+	}
+	
+	function fnc_find_password()
+	{
+		var form = document.member_form;
+		
+		if(form.fld_id.value == "")
+		{
+			alert('아이디를 입력 해주십시오.');
+			form.fld_id.focus();
+			return false;
+		}
+		
+		if(fnc_email_check(form.fld_email_address2.value) == false)
+		{
+			alert('올바른 형식의 이메일주소를 입력 해주십시오.');
+			form.fld_email_address2.focus();
+			return false;
+		}
+		
+		form.work.value="find_password";
+		form.submit();
+	}
+
+-->
+</script>
+</head>
+<body>
+<form class="pageFormBox" name="member_form" action="" method="get">
+<input type="hidden" name="work"/>
+<div id="wrap">
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/oneNav.php"; ?>
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav_member.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<? if( strlen($view_message) >= 1 ) { ?>
+					<div align="center" style="padding:40px;font-size:large;color:#FF0000;font-weight:bold;"><h2><?=$view_message?></h2></div>
+					<? } ?>
+					<!-- contents s -->
+
+					<!-- 아이디찾기 s -->
+					<div class="col2">
+							<div class="cbTitle">
+								<h2>아이디찾기</h2>
+								<span>가입할 때 입력하신 이메일주소를 입력 해주십시오.</span>
+							</div>
+							<div class="cbTopBox">
+							</div>
+							<div class="cbMiddleBox">
+								<ul class="loginFormWrap">
+									<li class="memberInputBox"><input type="text" name="fld_email_address" placeholder="이메일주소" id="ID_join_email"/></li>
+									<li style="margin-top:155px;"><input type="button" value="아이디찾기" class="btnStyle btnMainC" onclick="fnc_find_id()"></li>
+								</ul>
+							</div>
+					</div>
+					<!-- 아이디찾기 e -->
+
+					<!-- 비밀번호찾기 s -->
+					<div class="col2" style="float:right;">
+							<div class="cbTitle">
+								<h2>비밀번호찾기</h2>
+								<span>가입할 때 입력하신 아이디와 이메일주소를 입력 해주십시오.</span>
+							</div>
+							<div class="cbTopBox">
+							</div>
+							<div class="cbMiddleBox">
+								<ul class="loginFormWrap">
+									<li class="memberInputBox"><input type="text" name="fld_id" placeholder="아이디"/></li>
+									<li class="memberInputBox"><input type="text" name="fld_email_address2" placeholder="이메일주소"/></li>
+									<li style="margin-top:100px;"><input type="button" value="비밀번호찾기" class="btnStyle btnC333"  onClick="fnc_find_password()"></li>
+								</ul>
+							</div>
+					</div>
+					<!-- 비밀번호찾기 e -->
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+<script type="text/javascript">setCurrentPage('아이디/비밀번호찾기');</script><!-- 현재페이지 -->
+<? @include_once HOME_DIR . "/include/bottom.php"; ?>

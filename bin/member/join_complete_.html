@@ -1,0 +1,187 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../../include/config.php";
+	@require_once LIBRARY . "/Modules/function_fileup.php";
+	
+	// 파라미터를 변수로 정의
+		$fld_id = trim($_POST[join_id]);
+		$fld_password = trim($_POST[join_password]);
+		$fld_name = addslashes(trim($_POST[join_name]));
+		$fld_celno = str_replace('-','',trim($_POST[join_celno]));
+		$fld_division = addslashes(trim($_POST[join_division]));
+		$fld_position = addslashes(trim($_POST[join_position]));
+		$fld_email_address = trim($_POST[join_email]);
+		$fld_co_name = addslashes(trim($_POST[join_co_name]));
+		$fld_co_uno1 = trim($_POST[join_co_uno1_1])."-".trim($_POST[join_co_uno1_2])."-".trim($_POST[join_co_uno1_3]);
+		$fld_co_uno1 = ( strlen($fld_co_uno1) <= 5 )?null:$fld_co_uno1;
+		$fld_co_uno2 = trim($_POST[join_co_uno2_1])."-".trim($_POST[join_co_uno2_2]);
+		$fld_co_uno2 = ( strlen($fld_co_uno2) <= 5 )?null:$fld_co_uno2;
+		$fld_co_ownname = addslashes(trim($_POST[join_co_ownname]));
+		$fld_co_zipcode = $_POST[join_co_zipcode1]."-".$_POST[join_co_zipcode2];
+		$fld_co_address1 = addslashes(trim($_POST[join_co_address1]));
+		$fld_co_address2 = addslashes(trim($_POST[join_co_address2]));
+		$fld_co_uptae= addslashes(trim($_POST[join_co_uptae]));
+		$fld_co_jongmok= addslashes(trim($_POST[join_co_jongmok]));
+		$fld_co_odate= $_POST[join_co_odate];
+		$fld_co_url= trim($_POST[join_co_url]);
+		$fld_co_staff= str_replace(',','',trim($_POST[join_co_staff]));
+		$fld_co_sales_account= str_replace(',','',trim($_POST[join_co_sales_account]));
+		$fld_co_cstock= str_replace(',','',trim($_POST[join_co_cstock]));
+		$fld_co_telno= $_POST[join_co_telno1]."-".trim($_POST[join_co_telno2])."-".trim($_POST[join_co_telno3]);
+		$fld_co_telno = ( strlen($fld_co_telno) <= 5 )?null:$fld_co_telno;
+		$fld_co_faxno= $_POST[join_co_faxno1]."-".trim($_POST[join_co_faxno2])."-".trim($_POST[join_co_faxno3]);
+		$fld_co_faxno = ( strlen($fld_co_faxno) <= 5 )?null:$fld_co_faxno;
+		$fld_co_history= addslashes(trim($_POST[join_co_history]));
+		$fld_co_mproduct= addslashes(trim($_POST[join_co_mproduct]));
+		
+	// 파일 업로드 처리
+		$updir = WEBDATA . "/B2B114/co_attach";
+		$fld_co_attach = ($_FILES[attach1][size]>=1)?fnc_fileup('attach1',$updir,$max_uid,0,0):$old_attach1;
+	
+	// 파일 업로드 처리
+		$updir = WEBDATA . "/B2B114/co_logo";
+		$fld_co_logo = ($_FILES[attach2][size]>=1)?fnc_fileup('attach2',$updir,$max_uid,0,0):$old_attach2;
+
+	// MODE 에 따라 다르게 실행
+		switch($mode)
+		{
+			case "modify" :
+				// 회원정보 가져오기
+					$Qry = "SELECT * FROM member_default WHERE uid=".$_SESSION[ssUID];
+					$Rlt = @mysql_query($Qry,$Con);
+					$member = @mysql_fetch_array($Rlt);
+
+				// 기본 쿼리문 작성
+					$Qry = "
+									UPDATE 
+										member_default 
+									SET 
+										fld_name='$fld_name' 
+										, fld_division='$fld_division'
+										, fld_position='$fld_position'
+										, fld_email_address='$fld_email_address'
+										, fld_co_name='$fld_co_name'
+										, fld_co_telno='$fld_co_telno'
+										, fld_co_faxno='$fld_co_faxno'
+										, fld_co_history='$fld_co_history' 
+										, fld_co_url='$fld_co_url'
+										, fld_co_staff='$fld_co_staff'
+										, fld_co_sales_account='$fld_co_sales_account'
+										, fld_co_cstock='$fld_co_cstock'
+										, fld_co_mproduct='$fld_co_mproduct'
+								";
+
+				// 휴대폰번호 쿼리문 작성
+					if( strlen($member[fld_confirm_celno]) <= 0 OR $member[fld_confirm_celno] == "0000-00-00 00:00:00")
+					{
+						$Qry .= ",fld_celno='$fld_celno', fld_confirm_celno=NOW()";
+					}
+					
+				// 사업자정보 쿼리문 작성
+					if( strlen($member[fld_confirm_company]) <= 0 OR $member[fld_confirm_company] == "0000-00-00 00:00:00")
+					{
+						$Qry .= "
+											, fld_co_uno1='$fld_co_uno1'
+											, fld_co_uno2='$fld_co_uno2'
+											, fld_co_ownname='$fld_co_ownname' 
+											, fld_co_zipcode='$fld_co_zipcode'
+											, fld_co_address1='$fld_co_address1'
+											,  fld_co_address2='$fld_co_address2'
+											, fld_co_uptae='$fld_co_uptae'
+											, fld_co_jongmok='$fld_co_jongmok'
+											, fld_co_odate='$fld_co_odate'
+											, fld_co_logo='$fld_co_logo'
+											, fld_co_attach='$fld_co_attach'
+										";
+					}
+
+				// 비밀번호 쿼리문 작성
+					$Qry .= ( strlen($fld_password) >= 1 )?" , fld_password=password('$fld_password')":null;
+					
+				// WHERE 쿼리문 작성
+					$Qry .= " WHERE uid=$_SESSION[ssUID] ";
+					$Rlt = @mysql_query($Qry,$Con);
+					
+					if($Rlt)
+					{
+						echo "<script>window.location.href='join_complete.html?mode=$mode';</script>";
+						exit;
+					}
+					else
+					{
+						// 에러발생
+							echo "<script language='JavaScript'>alert('오류발생 : 관리자에게 문의 바랍니다.');history.go(-1);</script>";
+							exit;
+					}
+			break;
+			
+			default :
+				if( strlen($fld_id) >= 3 AND strlen($fld_password) >= 6 AND strlen($fld_email_address) >= 5 )
+				{
+					// UID 가져오기
+						$Qry = "SELECT max(uid) FROM member_default";
+						$Rlt = @mysql_query($Qry,$Con);
+						$max_uid = @mysql_result($Rlt,0,0);
+						$max_uid = $max_uid + 1 ;
+					
+					// 기본값 설정
+						$fld_seller_reject=$fld_seller_review=$fld_seller_important=$fld_seller_important=$fld_count_wlogin=$fld_count_mlogin=0;
+						$fld_status=1;
+					
+					// 쿼리문 작성(INSERT) 및 실행
+						$Qry = "
+										INSERT INTO
+											member_default
+										SET
+											uid=".$max_uid.", 
+											fld_id='$fld_id', fld_admin='N', 
+											fld_password=password('$fld_password'),
+											fld_name='$fld_name', 
+											fld_division='$fld_division', 
+											fld_position='$fld_position', 
+											fld_email_address='$fld_email_address', 
+											
+											fld_co_name='$fld_co_name', 
+											fld_co_uno1='$fld_co_uno1', fld_co_uno2='$fld_co_uno2', 
+											fld_co_ownname='$fld_co_ownname', 
+											fld_co_zipcode='$fld_co_zipcode', 
+											fld_co_address1='$fld_co_address1',  fld_co_address2='$fld_co_address2', 
+											fld_co_uptae='$fld_co_uptae', fld_co_jongmok='$fld_co_jongmok', 
+											fld_co_odate='$fld_co_odate', fld_co_url='$fld_co_url', 
+											fld_co_staff='$fld_co_staff', fld_co_sales_account='$fld_co_sales_account',
+											fld_co_cstock='$fld_co_cstock', 
+											fld_co_telno='$fld_co_telno', fld_co_faxno='$fld_co_faxno', 
+											fld_co_logo='$fld_co_logo', fld_co_history='$fld_co_history', 
+											fld_co_mproduct='$fld_co_mproduct', fld_co_attach='$fld_co_attach', 
+											
+											fld_seller_reject='$fld_seller_reject',
+											fld_seller_review='$fld_seller_review',
+											fld_seller_important='$fld_seller_important',
+											fld_regdate=NOW(), 
+											fld_lastlogin=NULL, 
+											fld_count_wlogin='$fld_count_wlogin', 
+											fld_count_mlogin='$fld_count_mlogin',
+											fld_status='$fld_status'
+									";
+						$Qry .= (strlen($fld_celno) >= 1)?",fld_celno='$fld_celno', fld_confirm_celno=NOW() ":null;
+						$Rlt = @mysql_query($Qry,$Con);
+						
+						if($Rlt)
+						{
+							$_POST[work_type] = "login";
+							$_POST[login_id] = $fld_id;
+							$_POST[login_password] = $fld_password;
+							$go_url = "/bin/member/join_complete.html";
+							@include_once HOME_DIR . "/bin/member/login_.html";
+						}
+						else
+						{
+							// 에러발생
+								echo "<script language='JavaScript'>alert('오류발생 : 관리자에게 문의 바랍니다.');history.go(-1);</script>";
+								exit;
+						}
+				}
+			break;
+		}
+	
+?>

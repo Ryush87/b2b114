@@ -1,0 +1,59 @@
+<?
+	@require_once "../../include/config.php";
+	@include_once LIBRARY . "/Modules/function_telAddDash.php";
+	@include_once LIBRARY . "/Modules/function_price2won.php";
+
+	$Qry = "SELECT * FROM member_default WHERE uid=$uid";
+	$Rlt = @mysql_query($Qry,$Con);
+	if( $member = @mysql_fetch_array($Rlt) )
+	{
+		// 해당 바이어에게 등록된 총 제안서의 숫자를 가져오기
+			$Qry3 = "SELECT count(uid) FROM proposal_default WHERE regmem_uid=".$member[uid];
+			$Rlt3 = mysql_query($Qry3,$Con);
+			$proposal_totalrows = @mysql_result($Rlt3,0,0);
+?>
+		<div class="popDivBtnWrap">
+			<div class="popDivSubtitle">업체의 상세한 정보를 확인하실 수 있습니다</div>
+			<button type="button" class="popDivBtnStyle btnWhite" onclick="JavaScript:fnc_scrap(<?=$member[uid]?>,'seller','ID_btn_scrap_sellerInfoBox')" id="ID_btn_scrap_sellerInfoBox"><?=fnc_checkScrap($member[uid],'seller')?></button>
+		</div>
+		<table class="popDivTable">
+			<colgroup><col width="20%" /><col width="30%" /><col width="20%" /><col width="30%" /></colgroup>
+			<tbody>
+				<tr>
+					<td colspan="2" class="popImgLogo" style="text-align:center;"><img src="/_GWD/B2B114/co_logo/<?=(strlen($member[fld_co_logo])>=1)?$member[fld_co_logo]:"noimage.gif"?>" alt=""></td>
+					<td colspan="2" class="textBold" style="font-size:20px;"><?=(strlen($member[fld_co_name])>=1)?$member[fld_co_name]:"개인회원"?></td>
+				</tr>
+				<tr>
+					<th>담당자</th>
+					<td colspan="3"><?=(strlen($member[fld_name])>=1)?$member[fld_name]:"&nbsp;"?> <?=$member[fld_position]?></td>
+				</tr>
+				<tr>
+					<th>휴대폰번호</th>
+					<td colspan="3"><?=(strlen($member[fld_celno])>=1)?str_replace('-','.',fnc_telAddDash($member[fld_celno])):"&nbsp;"?></td>
+				</tr>
+				<tr>
+					<th>이메일주소</th>
+					<td colspan="3"><a href="mailto:<?=$member[fld_email_address]?>"><?=$member[fld_email_address]?></a>&nbsp;</td>
+				</tr>
+				<tr>
+					<th>전화번호</th>
+					<td><?=(strlen($member[fld_co_telno])>=1)?fnc_telAddDash($member[fld_co_telno]):"&nbsp;"?></td>
+					<th>팩스</th>
+					<td><?=(strlen($member[fld_co_faxno])>=1)?fnc_telAddDash($member[fld_co_faxno]):"&nbsp;"?></td>
+				</tr>
+				<tr>
+					<th>제안서 등록수</th>
+					<td><span class="textCRed textBold"><?=number_format($proposal_totalrows)?>개</span></td>
+					<th>업체평가총점</th>
+					<td><span class="textCRed textBold"><?=number_format(fnc_coScore($member[uid]))?>점</span></td>
+				</tr>
+				<? if(strlen($member[fld_co_history]) >= 1) { ?>
+				<tr>
+					<td colspan="4" style="line-height:150%;"><?=nl2br($member[fld_co_history])?></td>
+				</tr>
+				<? } ?>
+			</tbody>
+		</table>
+<?
+	} else { echo "<div align='center' style='padding:100px;'>오류발생 : 관리자에게 문의 바랍니다.</div>"; } 
+?>

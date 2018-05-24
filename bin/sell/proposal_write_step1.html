@@ -1,0 +1,122 @@
+<?
+	@require_once "../../include/config.php";
+	@include_once HOME_DIR . "/include/top.php";
+?>
+<script language="JavaScript">
+<!--
+	function fnc_keyword()
+	{
+
+		$('ID_goods_uid').value='';
+		
+		if( $('ID_qkeyword').value.length > 1 )
+		{
+			new Ajax.Request
+			(
+				'_search_goods.html', {
+					method: 'post',
+					parameters: {
+						'qkeyword':$('ID_qkeyword').value
+						, 'qsort':$('ID_qsort').value
+					}, 
+					onComplete: function(httpObj) { 
+						$('IDV_result').innerHTML = httpObj.responseText; 
+					}
+				}
+			);
+		}
+		else
+		{
+			$('IDV_result').innerHTML = '';
+		}
+	}
+	
+	function fnc_nextstep()
+	{
+		var form = document.sell_form;
+
+		if(form.goods_uid.value == "")
+		{
+			alert('상품을 선택하여 주십시요.');
+		}
+		else
+		{
+			form.action = "proposal_write_step2.html";
+			form.submit();
+		}
+	}
+
+	function select_goods(goods_uid,goods_name)
+	{
+		var form = document.sell_form;
+		var msg = "'"+goods_name + "' 상품의 제안서를 등록하시겠습니까?')";
+		var urlurl = "proposal_write_step2.html?goods_uid="+goods_uid+"&qkeyword="+form.qkeyword.value;
+		if( confirm(msg) )
+		{
+			window.location.href=urlurl;
+		}
+	}
+	
+	function fnc_goodscompanyVP2(viewtype,uid)
+	{
+		var urlurl = "/bin/common/goodscompany_view_popup.html?viewtype="+viewtype+"&uid="+uid+"&proposal_write=YES";
+		var goodscompany_view_popup = window.open(urlurl,'goodscompany_view_popup','left=0,top=0,width=950,height=800,scrollbars=1');
+	}
+	
+-->
+</script>
+</head>
+<body>
+
+<div id="wrap">
+	<script type="text/javascript">currentPageKind="sell";currentMainN=1;currentSubN=1;</script><!-- 현재페이지 -->
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<!-- contents s -->
+
+<form class="sell_form" name="sell_form" action="" method="get" onSubmit="return false">
+<input type="hidden" name="qsort" id="ID_qsort"/>
+<input type="hidden" name="goods_uid" id="ID_goods_uid"/>
+						<!-- 제안서 등록 s-->
+
+						<div class="cbTitle">
+							<h2>제안서등록</h2>
+							<span style="padding-left:5px;">제안하실 상품을 검색하세요</span>
+						</div>
+						<div class="cbTopBox">
+						</div>
+						<div class="cbMiddleBox" style="min-height:300px;">
+							
+							<!-- 상품검색 s-->
+							<div class="articleBox">
+								<div class="artTitle">상품검색</div>
+								<div class="strongTitle2"><input type="text" name="qkeyword" id="ID_qkeyword" value="<?=base64_decode(urldecode($_POST[qkeyword]))?>" onKeyUp="fnc_keyword()"/></div>
+							</div>
+							<!-- 상품검색 e-->
+
+							<!-- 상품검색결과 s-->
+							<div class="articleBox" style="margin-top:0;padding-top:0;" id="IDV_result"></div>
+							<!-- 상품검색결과 e-->
+
+						</div>
+						<!-- 제안서등록 e-->
+</form>
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+<script>fnc_keyword();</script>
+	<? @include_once HOME_DIR . "/include/bottom.php"; ?>

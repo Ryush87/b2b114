@@ -1,0 +1,22 @@
+<?php
+
+	@require_once "../../include/config.php";
+	
+	// 데이터 가져오기
+		$Qry = "SELECT * FROM goods_brand WHERE uid=$uid LIMIT 1";
+		$Rlt = @mysql_query($Qry,$Con);
+		$row = @mysql_fetch_array($Rlt);
+
+	// XML 정의
+		$xml = "<?xml version='1.0' encoding='UTF-8'?>\n";
+		$xml .= "<brand>\n";
+		$xml .= "	<fld_keyword><![CDATA[".stripslashes($row[fld_keyword])."]]></fld_keyword>\n";
+		$xml .= "	<fld_manufactuer><![CDATA[".stripslashes($row[fld_manufactuer])."]]></fld_manufactuer>\n";
+		$xml .= "	<fld_made_korea><![CDATA[".stripslashes($row[fld_made_korea])."]]></fld_made_korea>\n";
+		$xml .= "	<fld_made_country><![CDATA[".stripslashes($row[fld_made_country])."]]></fld_made_country>\n";
+		$xml .= "</brand>\n";
+
+	// XML 표시
+		header('Content-type: text/xml');
+		echo $xml;
+?>

@@ -1,0 +1,39 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../../include/config.php";
+
+	# 인증번호 확인
+		if( strlen($confirm_no) >= 5 )
+		{
+			if($confirm_no == $_SESSION[ssCELNO_CONFIRM_MSG])
+			{
+				echo "TRUE" ;
+			}
+			else
+			{
+				echo "FALSE";
+			}
+		}
+	
+	# 인증번호 발송
+		if( strlen($celno) >= 5 )
+		{
+			// 5자리 난수 생성 및 세션 등록
+				$confirm_msg = rand(10000,99999);
+				$_SESSION[ssCELNO_CONFIRM_MSG] = $confirm_msg;
+				session_register('ssCELNO_CONFIRM_MSG');
+				
+			// SMS 발송 처리(시작)
+				$strToCall = trim($celno);
+				$strCallBack = CS_TELNO;
+				$strMsg = "[B2B114] 휴대폰번호 인증을 위해 인증번호 입력란에 ".$confirm_msg." 를 입력해 주십시오. 감사합니다!";
+				$register_uid = 0;
+				$smsi_etc1 = 210;
+				$smsi_etc5 = "휴대폰인증";
+				$reqFlag = 0;
+				include_once LIBRARY . "/Modules/SMSi/send_execute.php";
+			// SMS 발송 처리(끝)
+		}
+	
+	exit;
+?>

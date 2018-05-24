@@ -1,0 +1,53 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../../include/config.php";
+	@include_once HOME_DIR . "/include/top.php";
+?>
+</head>
+<body>
+<div id="wrap">
+	<script type="text/javascript">currentPageKind="company";currentMainN=0;currentSubN=0;</script><!-- 현재페이지 -->
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/oneNav.php"; ?>
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<!-- contents s -->
+
+					<!-- 이용약관 s-->
+					<div class="cbTitle">
+						<h2><script>writeVar(sub_companyNavT_0[currentSubN][0]);</script></h2>
+						<span>B2B114 이용약관을 안내합니다</span>
+					</div>
+					<div class="cbTopBox">
+					</div>
+					<div class="cbMiddleBox">
+						
+						<!-- 내용 s-->
+							<div class="articleBox">
+								<div class="artTop">
+								</div>
+								<div class="artCont">
+									<pre><? @include_once HOME_DIR . "/bin/member/_include_policyTerms.html"; ?></pre>
+								</div>
+							</div>
+						<!-- 내용 e-->
+
+					</div>
+					<!-- 이용약관 e-->
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+	<? @include_once HOME_DIR . "/include/bottom.php"; ?>

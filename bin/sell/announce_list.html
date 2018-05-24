@@ -1,0 +1,266 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../../include/config.php";
+
+	if($page == "") { $page = 1 ; }
+	if($pageViewEa == "") { $pageViewEa = 8 ; }
+	
+	$WhereQ = " WHERE fld_status IN (1,2) ";
+	$WhereQ .= (strlen($qkeyword) >= 1)?" AND ( fld_title LIKE '%$qkeyword%' OR fld_contents LIKE '%$qkeyword%' )":null;
+	
+	$Qry = "SELECT count(uid) FROM request_default $WhereQ LIMIT 1" ;
+	$Rlt = @mysql_query($Qry,$Con) ;
+	$total_rows = @mysql_result($Rlt,0,0) ;
+
+	require LIBRARY . "/Modules/function_paging.php" ;
+	$pgn = fnc_paging($page,$total_rows,$pageViewEa,10,0) ;
+
+	$Qry = "SELECT *, UNIX_TIMESTAMP(fld_regdate) AS regtime, UNIX_TIMESTAMP(fld_end_date) AS endtime FROM request_default $WhereQ ORDER BY fld_regdate DESC LIMIT $pgn[DataStartNo], $pgn[ViewDataEa]" ;
+	$Rlt = @mysql_query($Qry,$Con) ;
+
+	$common_parameter = "&page=".$page."&qkeyword=".$qkeyword;
+
+	@include_once HOME_DIR . "/include/top.php";
+?>
+<script language="JavaScript">
+<!--
+
+	function fnc_keyword()
+	{
+		var form = document.sell_form;
+		form.page.value=1;
+		form.submit();
+	}
+
+-->
+</script>
+</head>
+<body>
+<div id="wrap">
+	<script type="text/javascript">currentPageKind="sell";currentMainN=0;currentSubN=0;</script><!-- 현재페이지 -->
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<!-- contents s -->
+
+					<!-- 전체공고리스트 s-->
+					<div class="cbTitle">
+						<h2>전체공고</h2>
+						<span>직접 등록하신 공고목록입니다</span>
+					</div>
+					<div class="cbTopBox">
+					</div>
+					<div class="cbMiddleBox">
+						
+						<!-- 리스트 s-->
+<form class="pageFormBox" name="sell_form" action="" method="get" onSubmit="return false">
+<input type="hidden" name="work"/>
+<input type="hidden" name="uid"/>
+<input type="hidden" name="page" value="<?=$page?>"/>
+<input type="hidden" name="qstatus" value="<?=$qstatus?>"/>
+							<div class="articleBox">
+								<div class="artTop">
+									<div class="searchBoxWrap">
+										<input type="text" class="searchInputBox" placeholder="검색어" />
+										<input type="submit" id="searchBtn" name="searchBtn" value="&#xf002;" class="listBtnStyle btnMainC2"/>
+									</div>
+								</div>
+								<div class="artCont bdTop2MC2">
+									<table class="listTable">
+										<caption>공고전체리스트</caption>
+										<colgroup>
+											<col width="12%" />
+											<col width="50%" />
+											<col width="16%" />
+											<? if($_SESSION[ssUID]>=1) { ?>
+											<col width="10%" />
+											<? } ?>
+											<col width="12%" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th>상태</th>
+												<th>제목</th>
+												<th>등록자</th>
+												<? if($_SESSION[ssUID]>=1) { ?>
+												<th>제안상태</th>
+												<? } ?>
+												<th>일자</th>
+											</tr>
+										</thead>
+										<tbody>
+<?
+	for($x = 0 ; $x < $pgn[ViewDataEa] ; $x++)
+	{
+		$IDXNO = ($pgn[DataStartNo] +1) + $x ;
+		$row = @mysql_fetch_array($Rlt) ;
+		$remain_day = ceil(( $row[endtime] - time() ) / 86400);
+		$view_condition = null;
+		if( strlen($row[fld_use]) >= 1) $view_condition .= $row[fld_use];
+		if( strlen($row[fld_season]) >= 1) $view_condition .= ( strlen($view_condition) >= 1 )?",":null;$view_condition .= $row[fld_season];
+		if( strlen($row[fld_theme_color]) >= 1) $view_condition .= ( strlen($view_condition) >= 1 )?",":null;$view_condition .= $row[fld_theme_color];
+		if( strlen($row[fld_age]) >= 1) $view_condition .= ( strlen($view_condition) >= 1 )?",":null;$view_condition .= $row[fld_age];
+		if( strlen($row[fld_sex]) >= 1) $view_condition .= ( strlen($view_condition) >= 1 )?",":null;$view_condition .= $row[fld_sex];
+		if( strlen($row[fld_character]) >= 1) $view_condition .= ( strlen($view_condition) >= 1 )?",":null;$view_condition .= $row[fld_character];
+		if( strlen($ArrPrint[fld_print]) >= 1) $view_condition .= ( strlen($view_condition) >= 1 )?",":null;$view_condition .= $ArrPrint[fld_print];
+		if( strlen($ArrSample[fld_sample]) >= 1) $view_condition .= ( strlen($view_condition) >= 1 )?",":null;$view_condition .= $ArrSample[fld_sample];
+
+		$arr_cat = (strlen(trim($row[fld_reject_category])) >= 2)?explode(',',$row[fld_reject_category]):null;
+		for($tx = 0 ; $tx < count($arr_cat) ; $tx++)
+		{
+			$arr_cat2 = explode('|',$arr_cat[$tx]);
+			
+			switch(count($arr_cat2))
+			{
+				case 3 :
+					$Qry2 = "SELECT A.fld_name AS cat1_name, B.fld_name AS cat2_name, C.fld_name AS cat3_name FROM goods_cat1 A, goods_cat2 B, goods_cat3 C WHERE A.uid=B.cat1_uid AND B.uid=C.cat2_uid AND C.uid=".$arr_cat2[2];
+					$Rlt2 = @mysql_query($Qry2,$Con);
+					$row2 = @mysql_fetch_array($Rlt2);
+					$view_condition .= ( strlen($view_condition) >= 1 )?",":null;$view_condition .= "<s>".$row2[cat1_name] . "&gt;" . $row2[cat2_name] . "&gt;" . $row2[cat3_name]."</s>";
+				break;
+		
+				case 2 :
+					$Qry2 = "SELECT A.fld_name AS cat1_name, B.fld_name AS cat2_name FROM goods_cat1 A, goods_cat2 B WHERE A.uid=B.cat1_uid AND B.uid=".$arr_cat2[1];
+					$Rlt2 = @mysql_query($Qry2,$Con);
+					$row2 = @mysql_fetch_array($Rlt2);
+					$view_condition .= ( strlen($view_condition) >= 1 )?",":null;$view_condition .= "<s>".$row2[cat1_name] . "&gt;" . $row2[cat2_name]."</s>";
+				break;
+				
+				default :
+					$Qry2 = "SELECT A.fld_name AS cat1_name FROM goods_cat1 A WHERE A.uid=".$arr_cat2[0];
+					$Rlt2 = @mysql_query($Qry2,$Con);
+					$row2 = @mysql_fetch_array($Rlt2);
+					$view_condition .= ( strlen($view_condition) >= 1 )?",":null;$view_condition .= "<s>".$row2[cat1_name]."</s>";
+				break;
+			}
+		}
+
+		$arr_cat = (strlen(trim($row[fld_request_category])) >= 2)?explode(',',$row[fld_request_category]):null;
+		for($tx = 0 ; $tx < count($arr_cat) ; $tx++)
+		{
+			$arr_cat2 = explode('|',$arr_cat[$tx]);
+			
+			switch(count($arr_cat2))
+			{
+				case 3 :
+					$Qry2 = "SELECT A.fld_name AS cat1_name, B.fld_name AS cat2_name, C.fld_name AS cat3_name FROM goods_cat1 A, goods_cat2 B, goods_cat3 C WHERE A.uid=B.cat1_uid AND B.uid=C.cat2_uid AND C.uid=".$arr_cat2[2];
+					$Rlt2 = @mysql_query($Qry2,$Con);
+					$row2 = @mysql_fetch_array($Rlt2);
+					$view_condition .= ( strlen($view_condition) >= 1 )?",":null;$view_condition .= $row2[cat1_name] . "&gt;" . $row2[cat2_name] . "&gt;" . $row2[cat3_name];
+				break;
+		
+				case 2 :
+					$Qry2 = "SELECT A.fld_name AS cat1_name, B.fld_name AS cat2_name FROM goods_cat1 A, goods_cat2 B WHERE A.uid=B.cat1_uid AND B.uid=".$arr_cat2[1];
+					$Rlt2 = @mysql_query($Qry2,$Con);
+					$row2 = @mysql_fetch_array($Rlt2);
+					$view_condition .= ( strlen($view_condition) >= 1 )?",":null;$view_condition .= $row2[cat1_name] . "&gt;" . $row2[cat2_name];
+				break;
+				
+				default :
+					$Qry2 = "SELECT A.fld_name AS cat1_name FROM goods_cat1 A WHERE A.uid=".$arr_cat2[0];
+					$Rlt2 = @mysql_query($Qry2,$Con);
+					$row2 = @mysql_fetch_array($Rlt2);
+					$view_condition .= ( strlen($view_condition) >= 1 )?",":null;$view_condition .= $row2[cat1_name];
+				break;
+			}
+		}
+		
+		// 바이어 정보 가져오기
+			$Qry2 = "SELECT * FROM member_default WHERE uid=".$row[regmem_uid];
+			$Rlt2 = @mysql_query($Qry2,$Con);
+			$buyerInfo = @mysql_fetch_array($Rlt2);
+			
+		// 가격 가져오기
+			$Qry2 = "SELECT count(uid) AS cnt, min(fld_price_s) AS min_price, max(fld_price_e) AS max_price, sum(fld_ea) AS sum_ea FROM request_price WHERE request_uid=".$row[uid];
+			$Rlt2 = @mysql_query($Qry2,$Con);
+			$price = @mysql_fetch_array($Rlt2);
+
+		$proposal_count = ($_SESSION[ssUID]>=1)?fnc_request2proposal($row[uid],null,$_SESSION[ssUID]):0;
+?>
+											<tr>
+												<td><div class="<?=($row[fld_status]==1)?"actOn2":null?>"><?=$ArrBuyRequestStatus[$row[fld_status]]?></div></td>
+												<th style="line-height:150%;">
+													<a href="announce_view.html?request_uid=<?=$row[uid]?><?=$common_parameter?>">
+													<p><span class="rowTitle"><?=(strlen($row[fld_buyer_name])>=1)?"<span class='fs12 textCBlue'>[".$row[fld_buyer_name]."]</span> - ":null?><?=$row[fld_title]?></span><p>
+													<p><?=number_format($price[min_price])?>원 ~ <?=number_format($price[max_price])?>원 (<?=number_format($price[cnt])?>가지 가격 조건으로 총 <?=number_format($price[sum_ea])?>개 구매 예정)</p>
+													<!-- <p><?=$view_condition?></p> -->
+													</a>
+												</th>
+												<td><?=fnc_secretId($buyerInfo[fld_id])?></td>
+												<? if($_SESSION[ssUID]>=1) { ?>
+												<td><? if($proposal_count[total]>=1) { ?><span class="rowTitle"><span class="textCRed textBold" style="font-size:16px;"><?=number_format($proposal_count[total])?></span> 건 제안중</span><? } else { echo "&nbsp;"; } ?></td>
+												<? } ?>
+												<td>
+													<p><?=str_replace('-','/',substr($row[fld_regdate],5,5))?>~<?=str_replace('-','/',substr($row[fld_end_date],5,5))?></p>
+													<? if($row[fld_status] == 1) { ?><p<?=($remain_day<=2)?" class='textBold textCRed'":null?>>(<?=abs($remain_day)?>일 남음)</p><? } ?>
+												</td>
+											</tr>
+<? } ?>
+										</tbody>
+									</table>
+								</div>
+								<div class="pagingBoxWrap">
+									<ul class="pagingBox2">
+<?
+
+	// 이전블록 버튼출력.
+	if($pgn[BeforeBlockNo] != "")
+	{
+		echo "<a href=\"JavaScript:document.sell_form.page.value='$pgn[BeforeBlockNo]';document.sell_form.submit();\"><li class=\"angleBtn\"><i class=\"fa fa-angle-left\"></i></li></a>";
+	}
+	
+	// 페이지번호 출력부분.
+	for($x = 0 ; $x < $pgn[ViewPageEa] ; $x++)
+	{
+		$PageNo = $pgn[PageStartNo]  + $x ;
+		if($page == $PageNo) 
+		{ 
+			echo "<li class=\"actOn\">$PageNo</li>";
+		}
+		else
+		{
+			echo " <a href=\"JavaScript:document.sell_form.page.value='$PageNo';document.sell_form.submit();\" onMouseOver=\"window.status='$PageNo 페이지로 이동';return true;\" onMouseOut=\"window.status='';\" onFocus='this.blur()' style='color:#797979'><li>$PageNo</li></a> " ;
+		}		
+	}
+	
+	// 다음블록 버튼출력.
+	if($pgn[NextBlockNo] != "")
+	{
+		echo "<a href=\"JavaScript:document.sell_form.page.value='$pgn[NextBlockNo]';document.sell_form.submit();\"><li class=\"angleBtn\"><i class=\"fa fa-angle-right\"></i></li></a>";
+	}
+?>	
+									</ul>
+								</div>
+							</div>
+						</form>
+						<!-- 리스트 e-->
+
+						<!-- 페이지버튼 s-->
+						<div class="cbBottomBox" style="margin-top:0;">
+							<!-- btns s -->
+								<div class="pageBtnBox">
+									<a href="<? echo $main_sellNavT[1][1] ?>" target="<? echo $main_sellNavT[1][2] ?>"><div class="btn btnMainC2">새로운 제안서 등록</div></a>
+								</div>
+							<!-- btns e -->
+						</div>
+						<!-- 페이지버튼 e-->
+
+					</div>
+					<!-- 전체공고리스트 e-->
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+	<? @include_once HOME_DIR . "/include/bottom.php"; ?>

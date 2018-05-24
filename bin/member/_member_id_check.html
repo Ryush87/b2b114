@@ -1,0 +1,21 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../../include/config.php";
+	
+	$Qry = "SELECT * FROM member_default WHERE fld_id = '".trim($_POST[id_val])."'";
+	$Rlt = @mysql_query($Qry,$Con);
+	$total_rows = @mysql_num_rows($Rlt);
+	
+	if( $total_rows >= 1 )
+	{
+		#echo "<font color='#FF0000'>이미 사용중인 아이디입니다. 다른 아이디를 입력 해주십시오.</font>";
+		echo "FALSE";
+	}
+	else
+	{
+		#echo "사용 가능한 아이디입니다.";
+		echo "TRUE";
+	}
+	
+	exit;
+?>

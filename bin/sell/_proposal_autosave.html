@@ -1,0 +1,70 @@
+<?
+	@require_once "../../include/config.php";
+
+	switch($_POST[work])
+	{
+		default :	// autosave execute
+
+				### proposal_DEFAULT ###
+					$fld_open_level=(strlen($fld_open_level)>=1)?$fld_open_level:0;
+					$fld_payment_type=(strlen($fld_payment_type)>=1)?$fld_payment_type:0;
+					$fld_print=(strlen($fld_print)>=1)?$fld_print:1;
+					$fld_sample=(strlen($fld_sample)>=1)?$fld_sample:1;
+					$SetQ = "
+										fld_title='$fld_title',
+										fld_contents='$fld_contents',
+										fld_open_level=$fld_open_level,
+										fld_payment_type='$fld_payment_type', 
+										fld_use='$fld_use', 
+										fld_season='$fld_season', 
+										fld_theme_color='$fld_theme_color', 
+										fld_age='$fld_age', 
+										fld_buyer_upjong='$fld_buyer_upjong', 
+										fld_print='$fld_print', 
+										fld_character='$fld_character', 
+										fld_sex='$fld_sex',
+										fld_update=NOW(), 
+										fld_print='$fld_print', 
+										fld_sample='$fld_sample', 
+										fld_delivery='$fld_delivery'
+									";
+					$Qry = "UPDATE proposal_default SET $SetQ WHERE uid=$proposal_uid ";
+					$Rlt = @mysql_query($Qry,$Con);
+
+				### proposal_PRICE ###
+					$arr_price = explode(',',$fld_price);
+					$arr_view_permit = explode(',',$fld_view_permit);
+					$arr_ea = explode(',',$fld_ea);
+					for($x = 0 ; $x < count($arr_price) ; $x++)
+					{
+						$Qry = "SELECT uid FROM proposal_price ";
+						$Qry .= " WHERE proposal_uid=".$proposal_uid." AND fld_price=".$arr_price[$x];
+						$Qry .= " AND fld_view_permit=".$arr_view_permit[$x]." AND fld_ea=".$arr_ea[$x];
+						$Rlt = @mysql_query($Qry,$Con);
+						$total_rows = @mysql_num_rows($Rlt);
+						
+						if($total_rows <= 0)
+						{
+							$Qry2 = "INSERT INTO proposal_price SET proposal_uid=".$proposal_uid.", fld_price=".$arr_price[$x];
+							$Qry2 .= ", fld_view_permit=".$arr_view_permit[$x].", fld_ea=".$arr_ea[$x].",fld_regdate=NOW()";
+							//echo $Qry2."<br/></br>";
+							$Rlt2 = @mysql_query($Qry2,$Con);
+						}
+					}	
+
+				### proposal_PRICE : DELETE! ###
+					if(strlen($del_price) >= 1 AND strlen($del_view_permit) >= 1 AND strlen($del_ea) >= 1)
+					{
+						$Qry = "DELETE FROM proposal_price WHERE proposal_uid=".$proposal_uid;
+						$Qry .= " AND fld_price=".$del_price." AND fld_view_permit=".$del_view_permit;
+						$Qry .= " AND fld_ea=".$del_ea;
+						#echo $Qry;
+						$Rlt = @mysql_query($Qry,$Con);
+					}
+				
+				echo "자동저장됨 (".date('Y-m-d H:i:s').")";
+				exit;
+		break;
+	}
+	
+?>

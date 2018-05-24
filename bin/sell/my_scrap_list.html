@@ -1,0 +1,218 @@
+<?
+	@require_once "../../include/config.php";
+	@include_once HOME_DIR . "/include/top.php";
+
+	$page = ( strlen($page) >= 1)?$page:1;
+	$pageViewEa = ( strlen($pageViewEa) >= 1)?$pageViewEa:8;
+	$view_tab = (strlen($view_tab) >= 1)?$view_tab:"announce";
+	switch($view_tab)
+	{
+		case "announce" : $currentSubN = 0; break;
+		case "buyer" : $currentSubN = 1; break;
+	}
+?>
+<script language="JavaScript">
+<!--
+
+	function fnc_changeTab(tabname)
+	{
+		var form = document.buy_form;
+		form.view_tab.value=tabname;
+		form.page.value=1;
+		form.submit();
+	}
+
+-->
+</script>
+</head>
+<body>
+<div id="wrap">
+	<script type="text/javascript">currentPageKind="sell";currentMainN=3;currentSubN=<?=$currentSubN?>;</script><!-- 현재페이지 -->
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<!-- contents s -->
+
+					<!-- 스크랩리스트 s-->
+					<div class="cbTitle">
+						<h2><script>writeVar(main_sellNavT[currentMainN][0]);</script></h2>
+						<span>판매활동 중에 스크랩 해놓은 공고/바이어 목록입니다</span>
+					</div>
+					<div class="cbTopBox">
+					</div>
+					<div class="cbMiddleBox">
+						
+						<!-- 리스트 s-->
+<form class="pageFormBox" name="buy_form" action="" method="get" onSubmit="return false">
+<input type="hidden" name="page" value="<?=$page?>"/>
+<input type="hidden" name="view_tab" value="<?=$view_tab?>"/>
+							<div class="articleBox" style="margin-bottom:0;">
+								<div class="artTop">
+									<a href="JavaScript:fnc_changeTab('announce')"><div class="listTab<?=($view_tab=="announce")?" listActTab":null?>">공고</div></a>
+									<a href="JavaScript:fnc_changeTab('buyer')"><div class="listTab<?=($view_tab=="buyer")?" listActTab":null?>">바이어</div></a>
+									<div class="listTabEtc" style="width:64%;padding:0;">
+										<div class="searchBoxWrap">
+											<input type="text" name="qkeyword" value="<?=$qkeyword?>" class="searchInputBox" placeholder="검색어" />
+											<input type="button" id="searchBtn" name="searchBtn" value="&#xf002;" class="listBtnStyle btnMainC" onClick="fnc_keyword()"/>
+										</div>
+									</div>
+								</div>
+								<div class="artCont">
+<?
+	switch($view_tab)
+	{
+		case "announce" :	// 제안서 스크랩 보기START
+?>
+									<table class="listTable">
+										<caption>공고전체리스트</caption>
+										<colgroup>
+											<col width="10%" />
+											<col width="70%" />
+											<col width="10%" />
+											<col width="10%" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th>상태</th>
+												<th>제목</th>
+												<th>제안서</th>
+												<th>공고기간</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td><div class="<?=($row[fld_status]==1)?"actOn":null?>"><?=$ArrBuyRequestStatus[$row[fld_status]]?></div></td>
+												<th class="lh16">
+													<a href="my_announce_view.html?request_uid=<?=$row[uid]?>&qstatus=<?=$qstatus?>&page=<?=$page?>">
+													<p><span class="rowTitle"><?=(strlen($row[fld_buyer_name])>=1)?"<span class='fs12 textCBlue'>[".$row[fld_buyer_name]."]</span> - ":null?><?=$row[fld_title]?></span><p>
+													<p><?=number_format($price[min_price])?>원 ~ <?=number_format($price[max_price])?>원 (<?=number_format($price[cnt])?>가지 가격 조건으로 총 <?=number_format($price[sum_ea])?>개 구매 예정)</p>
+													<!-- <p><?=$view_condition?></p> -->
+													</a>
+												</th>
+												<td>
+													<p><span class="rowTitle">전체제안서 <span class="textCBlue"><?=number_format($proposal_count[total])?></span></span></p>
+													<p><span class="rowTitle">미열람 <span class="textCRed textBold"><?=number_format($proposal_count[notview])?></span></span></p>
+												</td>
+												<td>
+													<p><?=str_replace('-','/',substr($row[fld_regdate],5,5))?>~<?=str_replace('-','/',substr($row[fld_end_date],5,5))?></p>
+													<? if($qstatus == 1) { ?><p<?=($remain_day<=2)?" class='textBold textCRed'":null?>>(<?=abs($remain_day)?>일 남음)</p><? } ?>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+<?
+		break; // 제안서 스크랩 보기END
+
+		case "buyer" :	// 셀러별 스크랩 보기 START 
+?>
+									<ul class="imgListUl">
+										<li class="liStyle2">
+											<div class="liWrap">
+												<table>
+													<tr>
+														<td class="liImgFixBox">
+															<a href="javascript:fnc_myannounce_popup('company',<?=$row[regmem_uid]?>);">
+																<img src="/_GWD/B2B114/co_logo/<?=(strlen($row[member_co_logo])>=1)?$row[member_co_logo]:"noimage.gif"?>" alt="">
+															</a>
+														</td>
+														<td class="liTxtFixBox">
+															<table>
+																<colgroup><col width="11%"/><col width="20%"/><col width="8%"/><col width="20%"/><col width="11%"/><col width="30%"/></colgroup>
+																<tr>
+																	<td colspan="4" class="fs18 textBold">
+																		<a href="javascript:fnc_myannounce_popup('company',<?=$row[regmem_uid]?>);">
+																			<?=(strlen($row[member_co_name])>=1)?$row[member_co_name]:"개인회원"?>
+																		</a>
+																	</td>
+																	<td colspan="2">
+																		<div class="fRight btn btnWhite listTrBtn scrapBtn" onclick="JavaScript:fnc_scrap(<?=$row[member_uid]?>,'seller','ID_btn_scrap_<?=$x2?>')" id="ID_btn_scrap_<?=$x2?>"><?=fnc_checkScrap($row[member_uid],'seller')?></div>
+																	</td>
+																</tr>
+																<tr>
+																	<td colspan="6" class="fs10 lh14" style="color:#999999;font-size:12px;padding-bottom:8px;"><?=nl2br(strip_tags($row[member_co_history]))?></td>
+																</tr>
+																<tr>
+																	<th>매출액</th>
+																	<td><script>document.write(num2won(<?=$row[member_co_sales_account]?>));</script>원</td>
+																	<th>개업일</th>
+																	<td><?=($row[member_co_odate] != "0000-00-00")?substr($row[member_co_odate],0,4)."년 ".substr($row[member_co_odate],5,2)."월 ".substr($row[member_co_odate],8,2)."일":"&nbsp;"?></td>
+																	<th>사원수</th>
+																	<td><?=number_format($row[member_co_staff])?> 명</td>
+																</tr>
+																<tr>
+																	<th>소재지</th>
+																	<? $arr_tmp = explode(' ',$row[member_co_address1]); ?>
+																	<td><?=$arr_tmp[0]?> <?=$arr_tmp[1]?></td>
+																	<th>대표자명</th>
+																	<td><?=$row[member_co_ownname]?></td>
+																	<th>담당자</th>
+																	<td><?=$row[member_name]?> <?=$row[member_position]?></td>
+																</tr>
+																<tr>
+																	<th>주력상품군</th>
+																	<td colspan="3"><?=$row[member_co_mproduct]?></td>
+																	<th>전화번호</th>
+																	<td><?=$row[member_co_telno]?></td>
+																</tr>
+																<tr>
+																	<th>대표사이트</th>
+																	<td colspan="3"><? if( strlen($row[member_co_url]) >= 1) { ?><a href="<?=$row[member_co_url]?>" target="_blank"><?=$row[member_co_url]?></a><? } else { echo "&nbsp;"; } ?></td>
+																	<th>이메일주소</th>
+																	<td><?=$row[member_email_address]?></td>
+																</tr>
+																<tr>
+																	<td colspan="4" style="text-align:right;padding-top:12px;">
+																		<div class="fLeft"><div class="btn evalBtn evalDiv_important" onclick="" id="">업체평가총점</div><span class="evalTxt_important"><?=number_format(fnc_coScore($row[member_uid]))?>점</span></div>
+																		<div class="fLeft"><div class="btn evalBtn evalDiv_basic mrgL10" onclick="" id="">제안서 등록수</div><span class="evalTxt_basic"><?=number_format($proposal_totalrows)?>개</span></div>
+																	</td>
+																	<td colspan="2">&nbsp;</td>
+																</tr>
+															</table>
+														</td>
+													</tr>
+												</table>
+											</div>
+										</li>
+									</ul>
+<?
+		break;
+	} 
+?>
+								</div>
+								<div class="pagingBoxWrap">
+									<ul class="pagingBox2">
+										<a href="#"><li class="angleBtn"><i class="fa fa-angle-double-left"></i></li></a>
+										<a href="#"><li class="angleBtn"><i class="fa fa-angle-left"></i></li></a>
+										<a href="#"><li class="actOn">1</li></a>
+										<a href="#"><li>2</li></a>
+										<a href="#"><li>3</li></a>
+										<a href="#"><li>4</li></a>
+										<a href="#"><li>5</li></a>
+										<a href="#"><li class="angleBtn"><i class="fa fa-angle-right"></i></li></a>
+										<a href="#"><li class="angleBtn"><i class="fa fa-angle-double-right"></i></li></a>
+									</ul>
+								</div>
+							</div>
+</form>
+						<!-- 리스트 e-->
+
+					</div>
+					<!-- 스크랩리스트 e-->
+
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+	<? @include_once HOME_DIR . "/include/bottom.php"; ?>

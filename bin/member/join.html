@@ -1,0 +1,101 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../../include/config.php";
+	@include_once HOME_DIR . "/include/top.php";
+?>
+<script language="JavaScript">
+<!--
+
+	function form_check()
+	{
+		var form = document.join_form;
+		
+		if(form.agreement_check1.value == "N")
+		{
+			alert('"이용약관"에 동의하셔야 회원가입이 가능합니다.');
+			return false;
+		}
+
+		if(form.agreement_check2.value == "N")
+		{
+			alert('"개인정보 수집 및 이용에 대한 안내"에\n\n  동의하셔야 회원가입이 가능합니다.');
+			return false;
+		}
+	}
+
+-->
+</script>
+</head>
+<body>
+<form name="join_form" method="get" action="join_input.html" onSubmit="return form_check()">
+<div id="wrap">
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/oneNav.php"; ?>
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav_member.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<!-- contents s -->
+
+					<!-- 약관동의 s -->
+					<div class="cbTitle">
+						<h2>회원가입</h2>
+						<span>B2B114 사이트에 오신 것을 환영합니다</span>
+					</div>
+					<div class="cbTopBox">
+						<ul class="stepBarBox">
+							<li class="actOn"><div>약관동의</div></li>
+							<li><div>정보입력</div></li>
+							<li><div>가입완료</div></li>
+						</ul>
+						<div class="cbExpBox bdAllCCC">
+							<p class="pTitle">회원가입을 위해 <span class="textMC1">이용약관</span>과 <span class="textMC1">개인정보 수집 및 이용</span>에 동의해주세요.</p>
+							<p>회원이되시면 B2B114에서 제공하는 다양한 서비스를 이용하실 수 있습니다</p>
+							<p>아래의 서비스 약관 및 개인정보 수집 이용에 대한 안내를 반드시 읽고 동의해주세요</p>
+						</div>
+					</div>
+					<div class="cbMiddleBox">
+						<div id="provision" class="stipulBox">
+							<h3>이용약관</h3>
+							<div class="textBoxWrap" style="padding:10px;"><pre><? @include_once HOME_DIR . "/bin/member/_include_policyTerms.html"; ?></pre></div>
+							<p class="agreeBox">
+								<label><input type="radio" name="agreement_check1" value="Y"/>동의합니다.</label>
+								<label><input type="radio" name="agreement_check1" value="N" checked/>동의하지 않습니다.</label>
+							</p>
+						</div>
+						<div id="privacy" class="stipulBox" style="float:right;">
+							<h3>개인정보 수집 및 이용에 대한 안내</h3>
+							<div class="textBoxWrap" style="padding:10px;"><pre><? @include_once HOME_DIR . "/bin/member/_include_privacyInfo.html"; ?></pre></div>
+							<p class="agreeBox">
+								<label><input type="radio" name="agreement_check2" value="Y"/>동의합니다.</label>
+								<label><input type="radio" name="agreement_check2" value="N" checked/>동의하지 않습니다.</label>
+							</p>
+						</div>
+					</div>
+					<!-- 약관동의 e -->
+
+					<!-- 페이지버튼 s-->
+					<div class="cbBottomBox">
+						<div class="pageBtnBox">
+							<input type="submit" value="다음단계" class="btnStyle btnMainC"/>
+							<input type="button" value="취소" class="btnStyle btnWhite" onclick="JavaScript:history.go(-1);"/>
+						</div>
+					</div>
+					<!-- 페이지버튼 e-->
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+	<script type="text/javascript">setCurrentPage('회원가입');</script><!-- 현재페이지 -->
+	<? @include_once HOME_DIR . "/include/bottom.php"; ?>

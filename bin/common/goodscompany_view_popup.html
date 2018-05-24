@@ -1,0 +1,413 @@
+<?
+	$open_window = "YES";
+	@require_once "../../include/config.php";
+	@include_once HOME_DIR . "/include/popup_top.php";
+	
+	// 기본값 설정
+		$view_sort = ( strlen($view_sort) >= 1)?$view_sort:"regdate_d";
+
+	// 보기 방식에 따른 데이터 처리
+		switch($viewtype)
+		{
+			case "goods" :
+				$goods_default = @mysql_fetch_array(@mysql_query("SELECT * FROM goods_default WHERE uid=".$uid,$Con));
+				$brand_default = ($goods_default[brand_uid] >= 2)?@mysql_fetch_array(@mysql_query("SELECT * FROM goods_brand WHERE uid=$goods_default[brand_uid]",$Con)):null;
+				$cat1_name = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat1 WHERE uid=$goods_default[cat1_uid]",$Con),0,0);
+				$cat2_name = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat2 WHERE uid=$goods_default[cat2_uid]",$Con),0,0);
+				$cat3_name = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat3 WHERE uid=$goods_default[cat3_uid]",$Con),0,0);
+				$WhereQ2 = $returnVar[whereQ]." AND A.goods_uid=".$uid;
+			break;
+			
+			case "company" :
+				$member_default = @mysql_fetch_array(@mysql_query("SELECT * FROM member_default WHERE uid=".$uid,$Con));
+				$WhereQ2 = $returnVar[whereQ]." AND A.regmem_uid=".$uid;
+			break;
+		}
+
+?>
+<script language="JavaScript">
+<!--
+
+	function fnc_changeSort(condition)
+	{
+		var form = document.common_form;
+		form.view_sort.value=condition;
+		form.page.value=1;
+		form.submit();
+	}
+
+-->
+</script>
+<script language="JavaScript" src="/_LIB/css_js/number_format.js"></script>
+
+</head>
+<body>
+<?
+	switch($viewtype)
+	{
+		case "goods" :
+?>
+	<div class="popHead bgColorMC1">
+		<div class="popWidthWrap">
+			<span class="fLeft">상품별 제안서 보기</span>
+			<div class="popWinCloseBtn"><i class="fa fa-times fa-lg"></i> 닫기</div>
+		</div>
+	</div>
+	<div class="popContents">
+		<div class="popWidthWrap">
+			<div class="artTitle" style="padding-bottom:0;">
+				<div class="popTab actOnTab" popInfoName="popupListGoods"><div class="inTab"><div>상품정보</div></div></div>
+				<div class="popTab" popInfoName="popupListBrand"><div class="inTab"><div>브랜드정보</div></div></div>
+				<div class="popTabEtc">
+					<div class="btn btnWhite listBtnStyle scrapBtn" onclick="JavaScript:fnc_scrap(<?=$uid?>,'goods','ID_btn_scrap_gd')" id="ID_btn_scrap_gd"><?=fnc_checkScrap($uid,'goods')?></div>
+				</div>
+			</div>
+			<!--상품정보 s-->
+			<div class="articleBox bdAllCCC" style="margin-top:0;border-top:0;">
+				<div class="artCont">
+					<table class="popupListInfo popupListGoods">
+						<tr>
+							<td class="liImgFixBox">
+								<img src="/_GWD/B2B114/goods_image_s/<?=(strlen($goods_default[fld_image_s])>=1)?$goods_default[fld_image_s]:"noimage.gif"?>" alt="">
+							</td>
+							<td class="liTxtFixBox">
+								<table>
+									<colgroup><col width="13%"/><col width="20%"/><col width="13%"/><col width="20%"/><col width="13%"/><col width="21%"/></colgroup>
+									<tr>
+										<td colspan="6" class="fs16 textBold"><?=$goods_default[fld_name]?></td>
+									</tr>
+									<tr>
+										<td colspan="6"><?=$goods_default[fld_introduction]?></td>
+									</tr>
+									<tr>
+										<td colspan="6"><?=(strlen($cat1_name)>=1)?$cat1_name:null?><?=(strlen($cat2_name)>=1)?" > ".$cat2_name:null?><?=(strlen($cat3_name)>=1)?" > ".$cat3_name:null?></td>
+									</tr>
+									<tr>
+										<th>브랜드</th>
+										<td><?=$brand_default[fld_name]?></td>
+										<th>모델명</th>
+										<td><?=$goods_default[fld_model]?></td>
+										<th>생산국가</th>
+										<td><?=$goods_default[fld_made_country]?></td>
+									</tr>
+									<tr>
+										<th>스펙</th>
+										<td colspan="5" class="lh14"><?=$goods_default[fld_spec]?></td>
+									</tr>
+									<tr>
+										<td colspan="4">
+											<div class="btn evalBtn evalDiv_reject" onclick="" id=""><?=$ArrEval[reject]?></div><span class="evalTxt_reject"><?=number_format($goods_default[fld_count_reject])?>건</span>
+											<div class="btn evalBtn evalDiv_review mrgL10" onclick="" id=""><?=$ArrEval[review]?></div><span class="evalTxt_review"><?=number_format($goods_default[fld_count_review])?>건</span>
+											<div class="btn evalBtn evalDiv_important mrgL10" onclick="" id=""><?=$ArrEval[important]?></div><span class="evalTxt_important"><?=number_format($goods_default[fld_count_important])?>건</span>
+										</td>
+										<td colspan="2">
+											<div class="sgPrice">
+												<span class="fRight fs08 textC333">소비자가</span><br/>
+												<span class="fRight"><span class="textCBlue"><?=number_format($goods_default[fld_price])?></span>원</span>
+											</div>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+					</table>
+
+					<table class="popupListInfo popupListBrand">
+						<tr>
+							<td class="liImgFixBox">
+								<img src="/_GWD/B2B114/goods_brand/<?=(strlen($brand_default[fld_logo])>=1)?$brand_default[fld_logo]:"noimage.gif"?>" alt="">
+							</td>
+							<td class="liTxtFixBox">
+								<table>
+									<colgroup><col width="13%"/><col width="20%"/><col width="13%"/><col width="20%"/><col width="13%"/><col width="21%"/></colgroup>
+									<tr>
+										<td colspan="6" class="fs16 textBold"><?=$brand_default[fld_name]?></td>
+									</tr>
+									<tr>
+										<td colspan="6" class="lh14"><?=$brand_default[fld_contents]?></td>
+									</tr>
+									<? if(strlen($brand_default[fld_like_brand]) >= 1) { ?>
+									<tr>
+										<th>유사브랜드</th>
+										<td colspan="5"><?=$brand_default[fld_like_brand]?></td>
+									</tr>
+									<? } ?>
+									<tr>
+										<th>제조회사</th>
+										<td colspan="5"><?=$brand_default[fld_manufactuer]?></td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<!--상품정보 e-->
+<?
+		break;
+		case "company" :
+			// 해당 제안사의 등록된 총 제안서의 숫자를 가져오기
+			$Qry3 = "SELECT count(uid) FROM proposal_default WHERE regmem_uid=".$uid;
+			$Rlt3 = mysql_query($Qry3,$Con);
+			$proposal_totalrows = @mysql_result($Rlt3,0,0);
+?>
+	<div class="popHead bgColorMC1">
+		<div class="popWidthWrap">
+			MY공고 > 업체별 제안서 보기
+			<div class="popWinCloseBtn"><i class="fa fa-times fa-lg"></i> 닫기</div>
+		</div>
+	</div>
+	<div class="popContents">
+		<div class="popWidthWrap">
+			<div class="artTitle" style="padding-bottom:0;">
+				<div class="popTab actOnTab"><div class="inTab"><div>업체정보</div></div></div>
+				<div class="popTabEtc2">
+					<div class="btn btnWhite listBtnStyle scrapBtn" onclick="JavaScript:fnc_scrap(<?=$uid?>,'seller','ID_btn_scrap_co')" id="ID_btn_scrap_co"><?=fnc_checkScrap($uid,'seller')?></div>
+				</div>
+			</div>
+			<!--업체정보 s-->
+			<div class="articleBox bdAllCCC pdd20" style="margin-top:0;border-top:0;">
+				<div class="artCont">
+					<table>
+						<tr>
+							<td class="liImgFixBox">
+								<img src="/_GWD/B2B114/co_logo/<?=(strlen($member_default[fld_co_logo])>=1)?$member_default[fld_co_logo]:"noimage.gif"?>" alt="">
+							</td>
+							<td class="liTxtFixBox">
+								<table>
+									<colgroup><col width="13%"/><col width="20%"/><col width="13%"/><col width="20%"/><col width="13%"/><col width="21%"/></colgroup>
+									<tr>
+										<td colspan="6" class="fs18 textBold">
+											<?=(strlen($member_default[fld_co_name])>=1)?$member_default[fld_co_name]:"개인회원"?>
+										</td>
+									</tr>
+									<tr>
+										<td colspan="6" class="fs10 lh14"><?=nl2br(strip_tags($member_default[fld_co_history]))?></td>
+									</tr>
+									<tr>
+										<th>매출액</th>
+										<td><script>document.write(num2won(<?=$member_default[fld_co_sales_account]?>));</script>원</td>
+										<th>개업일</th>
+										<td><?=($member_default[fld_co_odate] != "0000-00-00")?substr($member_default[fld_co_odate],0,4)."년 ".substr($member_default[fld_co_odate],5,2)."월 ".substr($member_default[fld_co_odate],8,2)."일":"&nbsp;"?></td>
+										<th>사원수</th>
+										<td><?=number_format($member_default[fld_co_staff])?> 명</td>
+									</tr>
+									<tr>
+										<th>소재지</th>
+										<? $arr_tmp = explode(' ',$member_default[fld_co_address1]); ?>
+										<td><?=$arr_tmp[0]?> <?=$arr_tmp[1]?></td>
+										<th>대표자명</th>
+										<td><?=$member_default[fld_co_ownname]?></td>
+										<th>담당자</th>
+										<td><?=$member_default[fld_name]?> <?=$member_default[fld_position]?></td>
+									</tr>
+									<tr>
+										<th>주력상품군</th>
+										<td colspan="3"><?=$member_default[fld_co_mproduct]?></td>
+										<th>전화번호</th>
+										<td><?=$member_default[fld_co_telno]?></td>
+									</tr>
+									<tr>
+										<th>대표사이트</th>
+										<td colspan="3"><? if( strlen($member_default[fld_co_url]) >= 1) { ?><a href="<?=$member_default[fld_co_url]?>" target="_blank"><?=$member_default[fld_co_url]?></a><? } else { echo "&nbsp;"; } ?></td>
+										<th>이메일주소</th>
+										<td><?=$member_default[fld_email_address]?></td>
+									</tr>
+									<tr>
+										<td colspan="5" style="padding-top:20px;">
+											<div class="fLeft"><div class="btn evalBtn evalDiv_important" onclick="" id="">업체평가총점</div><span class="evalTxt_important"><?=number_format(fnc_coScore($uid))?>점</span></div>
+											<div class="fLeft"><div class="btn evalBtn evalDiv_basic mrgL10" onclick="" id="">제안서 등록수</div><span class="evalTxt_basic"><?=number_format($proposal_totalrows)?>개</span></div>
+										</td>
+										<td style="padding-top:20px;">
+											<div class="btn btnWhite listTrBtn popupInfoBox" popDivId="companyNameInfo" onClick=""><i class="fa fa-building"></i> 업체상세보기</div>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<!--업체정보 e-->
+<?
+		break;
+	}
+?>
+			<form name="common_form" method="get" action="">
+			<input type="hidden" name="viewtype" value="<?=$viewtype?>"/>
+			<input type="hidden" name="uid" value="<?=$uid?>"/>
+			<input type="hidden" name="page" value="<?=$page?>"/>
+			<input type="hidden" name="view_sort" value="<?=$view_sort?>"/>
+			<!-- 제안서리스트 s-->
+			<div class="articleBox" style="padding:0;">
+				<div class="artTop" style="margin-bottom:0;">
+						<div class="artTitle fLeft" style="width:50%;">제안서 목록</div>
+						<div class="sortOpBox" style="font-size:1.4em;">
+						<ul>
+						</ul>
+					</div>
+					
+				</div>
+				<div class="artCont" style="border-top:2px solid #666;">
+					<table class="listTable">
+						<colgroup>
+							<? if($viewtype=="company") { ?>
+							<col width="10%" />
+							<col width="50%" />
+							<? } else { ?>
+							<col width="60%" />
+							<? } ?>
+							<col width="20%" />
+							<col width="10%" />
+							<col width="10%" />
+						</colgroup>
+						<thead>
+							<tr>
+								<? if($viewtype=="company") { ?>
+								<th>이미지</th>
+								<? } ?>
+								<th>제목</th>
+								<th>최저 제안가</th>
+								<th>업체명</th>
+								<th>스크랩</th>
+							</tr>
+						</thead>
+						<tbody>
+
+<?
+	// 기본값 설정
+		$page = ( strlen($page) >= 1)?$page:1;
+		$pageViewEa = ( strlen($pageViewEa) >= 1)?$pageViewEa:8;
+
+	// 조건문 설정
+		$FromQ = " proposal_default A, goods_default B ";
+		$WhereQ = " A.goods_uid = B.uid ";
+		$WhereQ .= ($viewtype=="company")?" AND A.regmem_uid=$uid ":" AND A.goods_uid=$uid";
+		$FieldQ = "
+							A.uid AS proposal_uid, A.regmem_uid AS proposal_regmem_uid, A.fld_title AS proposal_title, 
+							A.fld_contents AS proposal_contents, B.fld_introduction AS goods_introduction, B.fld_spec AS goods_spec, 
+							B.fld_image_s AS goods_image_s, B.fld_name AS goods_name, 
+							B.cat1_uid AS goods_cat1_uid, B.cat2_uid AS goods_cat2_uid, B.cat3_uid AS goods_cat3_uid
+						";
+
+	// 총갯수 확인
+		$Qry = "SELECT count(B.uid) FROM $FromQ WHERE ".$WhereQ;
+		$Rlt = @mysql_query($Qry,$Con);
+		$total_rows = @mysql_result($Rlt,0,0);
+
+	// 페이징
+		require LIBRARY . "/Modules/function_paging.php" ;
+		$pgn = fnc_paging($page,$total_rows,$pageViewEa,5,0) ;
+
+	// 실제 쿼리
+		$Qry = "SELECT $FieldQ FROM $FromQ WHERE $WhereQ ORDER BY A.fld_regdate LIMIT $pgn[DataStartNo], $pgn[ViewDataEa]";
+		$Rlt = @mysql_query($Qry,$Con);
+
+	// 제안서 목록 START
+		if($pgn[TotalDataRows] <= 0)
+		{
+?>
+			<tr><td>없음!</td></tr>
+<?
+		}
+		else
+		{
+			for($x2 = 0 ; $x2 < $pgn[ViewDataEa] ; $x2++)
+			{
+				$row = @mysql_fetch_array($Rlt);
+				
+				$view_introduction = null;
+				$view_introduction = (strlen($row[proposal_contents])>=1)?$row[proposal_contents]:null;
+				$view_introduction = (strlen($view_introduction)>=1)?$view_introduction:$row[goods_introduction];
+				$view_introduction = (strlen($view_introduction)>=1)?$view_introduction:$row[goods_spec];
+		
+				$cat1_name = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat1 WHERE uid=$row[goods_cat1_uid]",$Con),0,0);
+				$cat2_name = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat2 WHERE uid=$row[goods_cat2_uid]",$Con),0,0);
+				$cat3_name = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat3 WHERE uid=$row[goods_cat3_uid]",$Con),0,0);
+				#$company_name = @mysql_result(@mysql_query("SELECT fld_co_name FROM member_default WHERE uid=$row[proposal_regmem_uid]",$Con),0,0);
+				$company_name = @mysql_result(@mysql_query("SELECT fld_id FROM member_default WHERE uid=$row[proposal_regmem_uid]",$Con),0,0);
+				$proposal_price = @mysql_fetch_array(@mysql_query("SELECT fld_price, fld_view_permit FROM proposal_price WHERE proposal_uid=$row[proposal_uid] ORDER BY fld_price LIMIT 1",$Con));
+				$view_price = fnc_viewProposalPrice($proposal_price[fld_price],$proposal_price[fld_view_permit],$row[proposal_uid]);
+?>
+							<tr>
+								<? if($viewtype=="company") { ?>
+								<td style="padding-right:10px;">
+									<div class="listTrImg"><img src="/_GWD/B2B114/goods_image_s/<?=(strlen($row[goods_image_s])>=1)?$row[goods_image_s]:"noimage.gif"?>" alt=""></div>
+								</td>
+								<? } ?>
+								<td>
+									<a href="JavaScript:fnc_proposalVP(<?=$row[proposal_uid]?>);">
+										<div class="listTrTitle">
+											<span class="listTrSubtitle"><?=$row[proposal_title]?></span>
+											<? if( trim($row[proposal_title]) != trim($row[goods_name]) ){?><span class="listTrGoodname"><?=(strlen($row[brand_name])>=1)?"[".$row[brand_name]."] ":null?><?=$row[goods_name]?></span><? } ?>
+											<span><?=$view_introduction?></span>
+											<span><?=(strlen($cat1_name)>=1)?$cat1_name:null?><?=(strlen($cat2_name)>=1)?" > ".$cat2_name:null?><?=(strlen($cat3_name)>=1)?" > ".$cat3_name:null?></span>
+										</div>
+									</a>
+								</td>
+								<td class="listTrPrice">
+									<?=$view_price[price]?><br/>
+									<? if(!$view_price[open]) { ?>
+									<span style="font-weight:normal;font-size:11px;"><br/><?=$view_price[text]?></span>
+									<? } else { ?>
+									<span style="font-weight:normal;font-size:11px;">(최소 <?=number_format($proposal_price[fld_ea])?>개 이상)</span>
+									<? } ?>
+								</td>
+								<td><span class="popupInfoBox" popDivId="companyNameInfo"><?=fnc_secretId($company_name)?></span></td>
+								<td style="line-height:150%;">
+									<div class="btn btnWhite listTrBtn scrapBtn" onclick="JavaScript:fnc_scrap(<?=$row[proposal_uid]?>,'proposal','ID_btn_scrap_<?=$x2?>')" id="ID_btn_scrap_<?=$x2?>"><?=fnc_checkScrap($row[proposal_uid],'proposal')?></div>
+								</td>
+							</tr>
+<?	} }	?>
+						</tbody>
+					</table>
+					<div class="pagingBoxWrap">
+						<ul class="pagingBox">
+						<?
+							// 이전블록 버튼출력.
+							if($pgn[BeforeBlockNo] != "")
+							{
+								echo "<a href=\"JavaScript:document.common_form.page.value='$pgn[BeforeBlockNo]';document.common_form.submit();\"><li class=\"angleBtn\"><i class=\"fa fa-angle-left\"></i></li></a>";
+							}
+							
+							// 페이지번호 출력부분.
+							for($x2 = 0 ; $x2 < $pgn[ViewPageEa] ; $x2++)
+							{
+								$PageNo = $pgn[PageStartNo]  + $x2 ;
+								if($page == $PageNo) 
+								{ 
+									echo "<li class=\"actOn\">$PageNo</li>";
+								}
+								else
+								{
+									echo " <a href=\"JavaScript:document.common_form.page.value='$PageNo';document.common_form.submit();\" onMouseOver=\"window.status='$PageNo 페이지로 이동';return true;\" onMouseOut=\"window.status='';\" onFocus='this.blur()' style='color:#797979'><li>$PageNo</li></a> " ;
+								}		
+							}
+							
+							// 다음블록 버튼출력.
+							if($pgn[NextBlockNo] != "")
+							{
+								echo "<a href=\"JavaScript:document.common_form.page.value='$pgn[NextBlockNo]';document.common_form.submit();\"><li class=\"angleBtn\"><i class=\"fa fa-angle-right\"></i></li></a>";
+							}
+						?>	
+						</ul>
+					</div>
+				</div>
+			</div>
+			<!-- 제안서리스트 e-->
+			</form>
+		</div>
+	</div>
+	<div class="popFooter bdTop">
+		<div class="pageBtnBox">
+			<div class="btn btnWhite" onclick="winClose();">닫기</div>
+		</div>
+	</div>
+
+<script>
+	window.resizeTo(1000,850);<?=($proposal_write != "YES")?"opener.window.location.reload();":null?>
+	//windowResize();
+</script>
+<? @include_once HOME_DIR . "/include/pop_infobox.php"; ?>
+</body>
+</html>

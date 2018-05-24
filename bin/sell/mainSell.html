@@ -1,0 +1,35 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../../include/config.php";
+	@include_once HOME_DIR . "/include/top.php";
+?>
+</head>
+<body>
+<div id="wrap">
+	<script type="text/javascript">currentPageKind="sell";</script><!-- 현재페이지 -->
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<!-- contents s -->
+					
+					<p>판매메인</p>
+					<div class="squareBtnWrap">
+						<input type="button" value="제안서등록" class="squareBtnStyle btnMainC" onclick="javascript:pageMove(sub_sellNavT_1[1][1],sub_sellNavT_1[1][2]);">
+					</div>
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+	<? @include_once HOME_DIR . "/include/bottom.php"; ?>

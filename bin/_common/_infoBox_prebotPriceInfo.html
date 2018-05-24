@@ -1,0 +1,42 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../../include/config.php";
+	
+	$Qry = "SELECT * FROM goods_default WHERE uid=".$goods_uid;
+	$Rlt = @mysql_query($Qry,$Con);
+	$goods_default = @mysql_fetch_array($Rlt);
+	
+	$random_num = rand(7,18);
+	$prebot_price = $goods_default[fld_price] * ( (100-$random_num) / 100) ;
+	$sale_percent = 100 - ( $prebot_price / $goods_default[fld_price] * 100);
+?>
+		<table class="popAlertTable">
+			<colgroup><col width="100%" /></colgroup>
+			<tbody>
+				<tr>
+					<td class="lh14">
+						<div class="popScrollbox" style="text-align:center;">
+						<div class="textBold textPrebotC" style="margin:10px 0 30px 0;font-size:3em;"><?=number_format($prebot_price)?> 원</div>
+						<div class="textBold textCRed" style="margin:10px 0 30px 0;font-size:2em;">(<?=$sale_percent?>%할인)</div>
+						<div>
+							본 상품의 현재 인터넷 최저가는 위와 같습니다.<br/>
+							<span class="fs08 textC999">(<?=date('m월 d일 H시 i분',time()-2800)?> 업데이트! By PREBOT)</span>
+						</div>
+						
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<div class="" style="width:370px;margin:10px auto;">
+			<div class="fLeft" style="width:25%;">
+				<img src="/skin/images/common/logo_prebot.jpg" alt="" style="width:100%;"/>
+			</div>
+			<div class="fLeft fs08" style="width:75%;line-height:1.2em;padding-top:8px;">
+			위 인터넷 최저 가격은 실시간 가격조사 인공지능 로봇인<br/>
+			PREBOT(PRICE RESEARCH ROBOT)에서 제공 합니다.<br/>
+			</div>
+		</div>
+		<div class="popDivBtns">
+			<a href="http://prebot.co.kr" target="_blank"><div class="btn btnPrebotC">프리봇 바로가기</div></a>
+			<div class="btn btnWhite" onClick="javascript:allHidePopInfoBox();">닫기</div>
+		</div>

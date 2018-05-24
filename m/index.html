@@ -1,0 +1,77 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../include/config.php";
+	@include_once HOME_DIR . "/include/popup_top.php";
+	
+	$Qry = "SELECT * FROM proposal_msend WHERE uid=".base64_decode($c);
+	$Rlt = @mysql_query($Qry,$Con);
+?>
+<script language="JavaScript">
+<!--
+
+	function fnc_inschk()
+	{
+		var form = document.msend_form;
+		
+		if(form.fld_confirm_celno.value == "")
+		{
+			alert('휴대폰 뒷번호 4자리를 입력해주십시오.');
+			form.fld_confirm_celno.focus();
+			return false;
+		}
+	}
+
+-->
+</script>
+</head>
+<body>
+	<div class="popHead bgColorMC1">
+		<div class="popWidthWrap">
+			<img src="/skin/images/common/logo_w.png" alt="B2B114 LOGO" style="float:left;width:80px;"/>
+			<div style="float:left;margin-left:10px;">제안서보기</div>
+		</div>
+	</div>
+	<div class="popContents">
+		<div class="popWidthWrap">
+			<div class="articleBox" style="margin:30px 0 0 0;">
+				<div class="artCont">
+
+					<? if($proposal_msend = @mysql_fetch_array($Rlt)) { ?>
+					<form class="pageFormBox" id="" name="msend_form" action="proposal_view.html" method="post" onSubmit="return fnc_inschk()">
+					<input type="hidden" name="c" value="<?=$c?>"/>
+						<div class="cbTitle">
+							<h2>비밀번호</h2>
+							<span style="margin:10px 0 0 0;line-height:140%;">
+								휴대폰 뒷번호 4자리를 입력해주십시오.<br/>
+								(예 : 010-9022-7227 인 경우 "7227")
+							</span>
+						</div>
+						<div class="cbMiddleBox">
+							<ul class="loginFormWrap">
+								<li class="memberInputBox">
+									<input type="password" name="fld_confirm_celno" maxlength="4" placeholder="휴대폰 뒷번호 4자리" style="text-align:center;"/>
+									<span id="" class="memberMsgBox"></span>
+								</li>
+								<li style="margin:50px 0;border-top:0;">
+									<input type="submit" value="제안서보기" class="btnStyle btnMainC" />
+								</li>
+							</ul>
+						</div>
+					</form>
+					<? } else { ?>
+						<div class="cbTitle">
+							<h2>오류발생</h2>
+							<span style="margin:10px 0 0 0;">유효하지 않은 접속 링크 입니다.</span>
+						</div>
+						<div class="cbMiddleBox" style="padding-bottom:100px;"></div>
+					<? } ?>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="popFooter bdTop">
+		<div class="pageBtnBox"><a href="tel:<?=(strlen($proposal_msend[fld_to_celno])>=1)?$proposal_msend[fld_to_celno]:CS_TELNO?>"><div class="btn btnWhite"><i class="fa fa-phone"></i> 전화문의</div></a></div>
+	</div>
+<? @include_once HOME_DIR . "/include/pop_infobox.php"; ?>
+</body>
+</html>

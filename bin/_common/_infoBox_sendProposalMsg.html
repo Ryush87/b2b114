@@ -1,0 +1,127 @@
+<?
+	@require_once "../../include/config.php";
+	@include_once LIBRARY . "/Modules/function_telAddDash.php";
+
+	$to_celno = str_replace('.','',str_replace('-','',$to_celno));
+	
+	$Qry = "SELECT * FROM proposal_default WHERE uid=".$proposal_uid;
+	$Rlt = @mysql_query($Qry,$Con);
+	$proposal_default = @mysql_fetch_array($Rlt);
+	
+	if($proposal_default[regmem_uid] != $_SESSION[ssUID])
+	{
+?>
+		본인의 제안서만 전송할 수 있습니다.<br/>
+		권한이 없습니다.
+<?
+		exit;
+	}
+	else
+	{
+		if($work == "send_execute")
+		{
+			$max_uid = @mysql_result(@mysql_query("SELECT max(uid) FROM proposal_msend",$Con),0,0);
+			$max_uid = $max_uid + 1 ;
+			$Qry = "INSERT INTO proposal_msend SET uid=".$max_uid.", proposal_uid=".$proposal_uid.", price_uid=".$price_uid.", sender_uid=".$_SESSION[ssUID].",fld_to_celno='$to_celno', fld_regdate=NOW()";
+			$Rlt = @mysql_query($Qry,$Con);
+			if($Rlt)
+			{
+				// 회원정보 가져오기
+					$member_default = @mysql_fetch_array(@mysql_query("SELECT * FROM member_default WHERE uid=".$_SESSION[ssUID],$Con));
+					$view_member_name = (strlen($member_default[fld_co_name])>=1)?$member_default[fld_co_name]." ":null;
+					$view_member_name .= (strlen($member_default[fld_name])>=1)?$member_default[fld_name]." ".$member_default[fld_position]:$member_default[fld_id];
+				
+				// SMS 발송 처리(시작)
+					$strToCall = trim($to_celno);
+					$strCallBack = $member_default[fld_celno];
+					$strMsg = "[B2B114] ".$view_member_name."님께서 보내신 모바일 제안서 [ ".$proposal_default[fld_title]." ]가 도착 되었습니다.
+
+지금 바로 확인하시려면 아래 링크 주소(URL)를 눌러주십시오.
+http://b2b114.co.kr/m/?c=".base64_encode($max_uid);
+					$register_uid = 0;
+					$smsi_etc1 = 220;
+					$smsi_etc5 = "모바일제안서";
+					$reqFlag = 0;
+					include_once LIBRARY . "/Modules/SMSi/send_execute.php";
+				// SMS 발송 처리(끝)
+?>
+		<div class="popDivBtnWrap">
+			<div class="popDivSubtitle">문자 전송 결과확인</div>
+		</div>
+		<table class="popAlertTable">
+			<tr>
+				<td>
+					문자 전송이 완료 되었습니다.
+				</td>
+			</tr>
+		</table>
+		<div class="popDivBtns">
+			<div class="btn btnWhite" onClick="javascript:allHidePopInfoBox();">확인</div>
+		</div>
+<?
+			}
+			else
+			{
+				echo "전송실패!";
+			}
+			exit;
+		}
+		else
+		{
+?>
+<form name="msend_form" method="get" action="">
+<input type="hidden" name="proposal_uid" value="<?=$proposal_uid?>"/>
+<input type="hidden" name="work"/>
+		<div class="popDivBtnWrap">
+			<div class="popDivSubtitle">모바일 제안서를 문자로 전송 할 수 있습니다.</div>
+		</div>
+		<table class="popDivTable">
+			<colgroup><col width="35%" /><col width="65%" /></colgroup>
+			<tbody>
+				<tr>
+					<td class="textBold" style="border:0;padding:10px;padding-left:20px;padding-top:20px;">보내는사람</td>
+					<td style="border:0;padding:10px;padding-top:20px;"><?=fnc_telAddDash($_SESSION[ssCELNO])?></td>
+				</tr>
+				<tr>
+					<td class="textBold" style="border:0;padding:5px;padding-left:20px;">받으시는 분</td>
+					<td style="border:0;padding:5px;padding-right:30px;"><input type="text" name="to_celno" id="ID_join_division" class="textType form-control"/></td>
+				</tr>
+				<tr>
+					<td colspan="2" style="padding:0px;padding-top:10px;padding-left:20px;padding-right:20px;padding-bottom:20px;">
+						<table width="100%" border="0" cellspacing="0" cellpadding="0">
+								<td width="15" style="padding:10px;"><label><input type="radio" name="price_uid" value="0" checked/> 비공개(소비자가)</label></td>
+							<?
+								$Qry2 = "SELECT * FROM proposal_price WHERE proposal_uid=".$proposal_uid." ORDER BY fld_price ASC";
+								$Rlt2 = @mysql_query($Qry2,$Con);
+								$total_rows2 = @mysql_num_rows($Rlt2);
+								for($x = 1 ; $x <= $total_rows2 ; $x++)
+								{
+									$row2 = @mysql_fetch_array($Rlt2);
+									if($x%2 == 0) echo "<tr>";
+							?>
+								<td width="15" style="padding:10px;"><label><input type="radio" name="price_uid" value="<?=$row2[uid]?>"<?=($x==0)?" checked":null?>/> <?=number_format($row2[fld_price])?>원(<?=number_format($row2[fld_ea])?>개)</label></td>
+							<? 
+									if($x%2 == 1) echo "</tr>";
+								} 
+							?>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2" class="bgColoreee" style="padding:10px 14px;">
+						<ul class="helpLI">
+							<li><i class="fa fa-caret-right"></i> 모바일제안서 확인시 수신자가 이용하는 휴대폰요금제에<br/> &nbsp;&nbsp;따라 데이터 통화료가 발생 할 수 있습니다.</li>
+						</ul>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<div class="popDivBtns">
+			<div class="btn btnMainC" onClick="fnc_proposal_msend();">문자발송</div>
+			<div class="btn btnWhite" onClick="javascript:allHidePopInfoBox();">닫기</div>
+		</div>
+</form>
+<?
+		}
+	}
+?>

@@ -1,0 +1,96 @@
+<?
+	@require_once "../../include/config.php";
+
+	if( $ArrThisMemberDefaultInfo[time_confirm_company] >= 1000 )
+	{
+		echo "<script language='JavaScript'>alert('이미 사업자인증을 받으셨습니다.\\n\\n만약 사업자정보를 변경하시려면 고객센터로 문의 주시기 바랍니다.');window.close();</script>";
+	}
+
+	if($_FILES[attach1][size]>=1)
+	{
+		@require_once LIBRARY . "/Modules/function_fileup.php";
+		$updir = WEBDATA . "/B2B114/co_attach";
+		$fld_co_attach = ($_FILES[attach1][size]>=1)?fnc_fileup('attach1',$updir,$_SESSION[ssUID],0,0):$ArrThisMemberDefaultInfo[fld_co_attach];
+		$Qry = "UPDATE member_default SET fld_co_attach='$fld_co_attach' WHERE uid=".$_SESSION[ssUID];
+		$Rlt = @mysql_query($Qry,$Con);
+		#echo "<script>opener.window.location.href='/';window.close();</script>";
+		echo "<script>opener.window.location.reload();window.close();</script>";
+		exit;
+	}
+
+	@include_once HOME_DIR . "/include/popup_top.php";
+?>
+<script language="JavaScript">
+<!--
+
+	function form_check()
+	{
+		var form = document.member_form;
+		
+		if(form.attach1.value == "")
+		{
+			alert('사업자등록증 스캔파일을 첨부해주십시오.');
+			form.attach1.focus();
+			return false;
+		}
+		
+		form.submit();
+	}
+
+-->
+</script>
+</head>
+<body>
+<form name="member_form" enctype="multipart/form-data" method="post" action="" onSubmit="return false">
+	<div class="popHead bgColor333">
+		<div class="popWidthWrap3">
+			회원서비스 > 사업자인증
+			<div class="popWinCloseBtn"><i class="fa fa-times fa-lg"></i></div>
+		</div>
+	</div>
+	<div class="popContents">
+		<div class="popWidthWrap3">
+			<div class="artTitle">사업자등록증<span class="mrgL10 fs06 textNormal">문서를 스캔한 후 이미지파일을 업로드해주세요</span></div>
+			<!--상품정보 s-->
+			<div class="articleBox bdAllCCC bd2Top666" style="margin-top:0;">
+				<div class="artCont">
+					<table class="writeTable">
+						<colgroup>
+							<col width="80%" /><col width="20%" />
+						</colgroup>
+						<tr>
+							<td style="border:0;">
+								<input type="text" id="bizpaperImgFileRoute" class="bgColorfff form-control" readonly="readonly" title="첨부된 파일경로" value="선택된 파일 없음">
+							</td>
+							<td style="vertical-align:top;text-align:right;border:0;">
+								<div class="uploadFile btn btnWhite mrgL10" style="float:right;">
+									파일선택
+									<input type="file" name="attach1" id="ID_attach1" class="" onchange="javascript:document.getElementById('bizpaperImgFileRoute').value=this.value"/>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2" class="bdTop lh12" style="border-bottom:0;">
+								사업자 등록증을 업로드하면 당사 운영팀에서 귀사의 사업자등록증 정보를 확인하고<br/>
+								<b style="color:#FF8000">사업자인증 처리</b>를 하며 사업자 등록증 상의 정보로 입력하신 <b style="color:#FF8000">정보를 갱신(수정)</b> 합니다.<br/>
+								만약 사업자인증 처리가 급히 필요하신 경우 운영팀(<?=fnc_TelnoAddHyphen(CS_TELNO)?>)으로 연락 주시기 바랍니다.<br/>
+								※ 갱신 정보 : 회사명, 사업자번호, 소재지, 업태, 종목 등 사업자 등록증 상에 표시된 항목<br/>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<!--상품정보 e-->
+		</div>
+	</div>
+	<div class="popFooter bdTop" style="position:fixed;bottom:0;">
+		<div class="pageBtnBox">
+			<div class="btn btnC333" onclick="JavaScript:form_check();">업로드</div>
+			<div class="btn btnWhite" onclick="winClose();">닫기</div>
+		</div>
+	</div>
+<script language="JavaScript">window.resizeTo(750,450);</script>
+<? @include_once HOME_DIR . "/include/pop_infobox.php"; ?>
+</form>
+</body>
+</html>

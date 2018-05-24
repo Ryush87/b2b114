@@ -1,0 +1,60 @@
+<?
+	if( strlen($_POST[login_id]) >= 3 AND strlen($_POST[login_password]) >= 6 )
+	{
+		$Qry = "SELECT * FROM member_default WHERE fld_id='".trim($_POST[login_id])."' AND fld_password=password('".trim($_POST[login_password])."')";
+		$Rlt = @mysql_query($Qry,$Con);
+		$total_rows = @mysql_num_rows($Rlt);
+	
+		if($total_rows >= 1)
+		{
+			$row = @mysql_fetch_array($Rlt);
+			
+			if( $row[fld_status] != 1 )
+			{
+				echo "<script>alert('서비스 이용이 불가한 상태입니다. 관리자에게 문의 바랍니다.');window.location.href='/';</script>";
+				exit;
+			}
+			
+			$_SESSION[ssUID] = $row[uid];
+			session_register(ssUID);
+			$_SESSION[ssADMIN] = $row[fld_admin];
+			session_register(ssADMIN);
+			$_SESSION[ssID] = $row[fld_id];
+			session_register(ssID);
+			$_SESSION[ssNAME] = $row[fld_name];
+			session_register(ssNAME);
+			$_SESSION[ssCELNO] = $row[fld_celno];
+			session_register(ssCELNO);
+			$_SESSION[ssEMAILADDRESS] = $row[fld_email_address];
+			session_register(ssEMAILADDRESS);
+			$_SESSION[ssLASTLOGIN] = date('Y-m-d H:i:s');
+			session_register(ssLASTLOGIN);
+	
+			$Qry = "UPDATE member_default SET fld_count_wlogin = fld_count_wlogin +1, fld_lastlogin = '".$_SESSION[ssLASTLOGIN]."' WHERE uid = '$row[uid]'" ;
+			$Rlt = @mysql_query($Qry,$Con) ;
+	
+			if( strlen($go_url) <= 0 )
+			{
+				if( strlen($_SESSION[ssBEFORE_URL]) >= 1 )
+				{
+					$go_url = $_SESSION[ssBEFORE_URL];
+					$_SESSION[ssBEFORE_URL] = null;
+				}
+				else
+				{
+					$go_url = "/";
+				}
+			}
+			
+			echo "<script>window.location.href='".$go_url."';</script>";
+			exit;
+			
+		}
+		else
+		{
+			echo "<script>alert('로그인실패 : 아이디, 비밀번호 확인 후 로그인해주십시오.');history.go(-1);</script>";
+			exit;
+		}
+		
+	}
+?>

@@ -1,0 +1,73 @@
+<?
+	@require_once "../../include/config.php";
+	
+	$ssUID = $_SESSION[ssUID];
+	$section = $_GET[section];
+	$scrap_uid = $_GET[scrap_uid];
+	
+	$Qry = "SELECT uid FROM member_scrap WHERE member_uid=".$ssUID." AND fld_section='".$section."' AND scrap_uid=".$scrap_uid;
+	$Rlt = @mysql_query($Qry,$Con);
+	$total_rows = @mysql_num_rows($Rlt);
+	
+	if( $total_rows >= 1 )
+	{
+		// 기존에 있는 데이터이므로 삭제
+			$uid = @mysql_result($Rlt,0,0);
+			$Qry = "DELETE FROM member_scrap WHERE uid=".$uid;
+			$Rlt = @mysql_query($Qry,$Con);
+			
+		// 스크랩 횟수 증감부등호 ;
+			$scrap_inequality = "-";
+			
+		// 메시지 표시
+			echo "delete";
+	}
+	else
+	{
+		// 기존에 없는 데이터이므로 스크랩
+			$uid = @mysql_result($Rlt,0,0);
+			$Qry = "INSERT INTO member_scrap SET member_uid=".$_SESSION[ssUID].", fld_section='".$_GET[section]."', scrap_uid=".$_GET[scrap_uid].", fld_regdate=NOW()";
+			$Rlt = @mysql_query($Qry,$Con);
+			
+		// 제안서 스크랩인 경우 스크랩 사실을 셀러 메시지함에 알려줌.
+			if($section == "proposal")
+			{
+				$receiver_uid = @mysql_result(@mysql_query("SELECT regmem_uid FROM proposal_default WHERE uid=".$_GET[scrap_uid],$Con),0,0);
+				$arr_var[proposal_uid] = $_GET[scrap_uid];
+				$arr_var[request_uid] = $_GET[request_uid];
+				$arr_var[request_price_uid] = $_GET[request_price_uid];
+				@fnc_messageSend(30,$receiver_uid,$arr_var);
+			}
+			
+		// 스크랩 횟수 증감부등호 ;
+			$scrap_inequality = "+";
+
+		// 메시지 표시
+			echo "scrap";
+	}
+	
+	// 스크랩 횟수 증가/감소
+		switch($section)
+		{
+			case "proposal" : // 제안서
+				$proposal = @mysql_fetch_array(@mysql_query("SELECT * FROM proposal_default WHERE uid=".$scrap_uid,$Con));
+				@mysql_query("UPDATE proposal_default SET fld_count_scrap = fld_count_scrap ".$scrap_inequality." 1 WHERE uid=".$scrap_uid,$Con);	// 제안서 스크랩 횟수 감소
+				@mysql_query("UPDATE member_default SET fld_scrap_proposal = fld_scrap_proposal ".$scrap_inequality." 1 WHERE uid=".$proposal[regmem_uid],$Con);	// 회원>제안서 스크랩 횟수 감소
+			break;
+	
+			case "goods" : // 상품
+				@mysql_query("UPDATE goods_default SET fld_count_scrap = fld_count_scrap ".$scrap_inequality." 1 WHERE uid=".$scrap_uid,$Con);	// 상품 스크랩 횟수 감소
+			break;
+	
+			case "seller" : // 셀러
+				@mysql_query("UPDATE member_default SET fld_scrap_seller = fld_scrap_seller ".$scrap_inequality." 1 WHERE uid=".$scrap_uid,$Con);	// 셀러 스크랩 횟수 감소
+			break;
+	
+			case "buyer" : // 바이어
+				@mysql_query("UPDATE member_default SET fld_scrap_buyer = fld_scrap_buyer ".$scrap_inequality." 1 WHERE uid=".$scrap_uid,$Con);	// 바이어 스크랩 횟수 감소
+			break;
+
+		}	
+			
+	exit;
+?>

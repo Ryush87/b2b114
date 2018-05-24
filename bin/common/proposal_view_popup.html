@@ -1,0 +1,482 @@
+<?
+	$open_window = "YES";
+	@require_once "../../include/config.php";
+	
+	# 평가처리 START -------------------------------
+		if( strlen($eval_execute) >= 1 AND $request_uid >= 1)
+		{
+			// 제안서 정보 가져오기
+				$proposal_default = @mysql_fetch_array(@mysql_query("SELECT * FROM proposal_default WHERE uid=".$proposal_uid,$Con));
+				
+			// 기존에 평가된 정보가 있는지 체크
+				$Rlt = @mysql_query("SELECT * FROM request_eval WHERE request_uid=$request_uid AND proposal_uid=$proposal_uid",$Con);
+				if($old_eval = @mysql_fetch_array($Rlt))
+				{	
+					// 제안서 평가횟수 감소
+						$Qry = "UPDATE proposal_default SET fld_count_".$old_eval[fld_eval]."=fld_count_".$old_eval[fld_eval]." - 1 WHERE uid=".$proposal_default[uid];
+						#echo $Qry."<br/>";
+						$Rlt = @mysql_query($Qry,$Con);
+					// 회원 평가횟수 감소
+						$Qry = "UPDATE member_default SET fld_seller_".$old_eval[fld_eval]."=fld_seller_".$old_eval[fld_eval]." - 1 WHERE uid=".$proposal_default[regmem_uid];
+						#echo $Qry."<br/>";
+						$Rlt = @mysql_query($Qry,$Con);
+					// 상품 평가횟수 감소
+						$Qry = "UPDATE goods_default SET fld_count_".$old_eval[fld_eval]."=fld_count_".$old_eval[fld_eval]." - 1 WHERE uid=".$proposal_default[goods_uid];
+						#echo $Qry."<br/>";
+						$Rlt = @mysql_query($Qry,$Con);
+					// 평가정보 UPDATE 쿼리문 작성
+						$Qry = "UPDATE request_eval SET fld_eval='$eval_execute' WHERE uid=".$old_eval[uid];
+				}
+				else
+				{
+					// 평가정보 INSERT 쿼리문 작성
+						$Qry = "INSERT INTO request_eval SET request_uid=$request_uid, proposal_uid=$proposal_uid, fld_eval='$eval_execute', fld_regdate=NOW()";
+				}
+
+			// 평가정보 쿼리문 실행
+				#echo $Qry."<br/>";
+				$Rlt = @mysql_query($Qry,$Con);
+
+			// 평가처리 실행한 내용을 메시지로 전송
+				$arr_var[request_uid] = $request_uid;
+				$arr_var[request_price_uid] = $price_uid;
+				$arr_var[proposal_uid] = $proposal_uid;
+				$arr_var[proposal_price_uid] = $proposal_price_uid;
+				$arr_var[fld_eval] = $eval_execute;
+				@fnc_messageSend(20,$proposal_default[regmem_uid],$arr_var);
+
+			// 제안서 평가횟수 증가
+				$Qry = "UPDATE proposal_default SET fld_count_".$eval_execute."=fld_count_".$eval_execute." + 1 WHERE uid=".$proposal_default[uid];
+				#echo $Qry."<br/>";
+				$Rlt = @mysql_query($Qry,$Con);
+			// 회원 평가횟수 증가
+				$Qry = "UPDATE member_default SET fld_seller_".$eval_execute."=fld_seller_".$eval_execute." + 1 WHERE uid=".$proposal_default[regmem_uid];
+				#echo $Qry."<br/>";
+				$Rlt = @mysql_query($Qry,$Con);
+			// 상품 평가횟수 감소
+				$Qry = "UPDATE goods_default SET fld_count_".$eval_execute."=fld_count_".$eval_execute." + 1 WHERE uid=".$proposal_default[goods_uid];
+				#echo $Qry."<br/>";
+				$Rlt = @mysql_query($Qry,$Con);
+				
+			echo "<script>window.location.href='proposal_view_popup.html?request_uid=".$request_uid."&price_uid=".$price_uid."&proposal_uid=".$proposal_uid."';</script>";
+			exit;
+				
+		}
+	# 평가처리 END ----------------------------------
+
+	// 제안서 기본정보 가져오기
+		$Qry = "SELECT * FROM proposal_default WHERE uid=".$proposal_uid;
+		$Rlt = @mysql_query($Qry,$Con);
+		$proposal_default = @mysql_fetch_array($Rlt);
+		$eval_reject = ( @in_array($proposal_uid,$arr_eval_rejct) )?true:false;
+		$eval_review = ( @in_array($proposal_uid,$arr_eval_review) )?true:false;
+		$eval_important = ( @in_array($proposal_uid,$arr_eval_important) )?true:false;
+		$arr_use = explode(",",$proposal_default[fld_use]);
+		$arr_season = explode(',',$proposal_default[fld_season]);
+		$arr_theme_color = explode(',',$proposal_default[fld_theme_color]);
+		$arr_age = explode(',',$proposal_default[fld_age]);
+		$arr_buyer_upjong = explode(',',$proposal_default[fld_buyer_upjong]);
+		$arr_character = explode(',',$proposal_default[fld_character]);
+		$arr_sex = explode(',',$proposal_default[fld_sex]);
+	
+	// 공고를 통해서 조회하는 경우
+		if($request_uid >= 1)
+		{
+			// 공고 기본정보 가져오기
+				$Qry = "SELECT * FROM request_default WHERE uid=".$request_uid;
+				$Rlt = @mysql_query($Qry,$Con);
+				$request_default = @mysql_fetch_array($Rlt);
+				if($request_default[regmem_uid] != $_SESSION[ssUID] AND $proposal_default[regmem_uid] != $_SESSION[ssUID])
+				{
+					echo "<script>alert('본인 공고에 제안된 제안서만 조회 가능합니다.');window.close();</script>";
+					exit;
+				}
+				$arr_view_uid = explode(',',$request_default[view_uid]);
+				if( !in_array($proposal_uid,$arr_view_uid) AND $proposal_default[regmem_uid] != $_SESSION[ssUID] )
+				{
+					$view_uid .= ( strlen($request_default[view_uid]) >= 1 )?$request_default[view_uid].",".$proposal_uid:$proposal_uid;
+					$Qry = "UPDATE request_default SET view_uid='$view_uid' WHERE uid=".$request_uid;
+					#echo $Qry;
+					$Rlt = @mysql_query($Qry,$Con);
+				}
+
+			// 공고 평가정보 가져오기
+				$Qry = "SELECT * FROM request_eval WHERE request_uid=$request_uid AND proposal_uid=$proposal_uid";
+				$Rlt = @mysql_query($Qry,$Con);
+				$request_eval = @mysql_fetch_array($Rlt);
+		
+			// 공고 가격정보 가져오기
+				$Qry = "SELECT * FROM request_price WHERE uid=".$price_uid;
+				$Rlt = @mysql_query($Qry,$Con);
+				$request_price = @mysql_fetch_array($Rlt);
+		}
+
+	// 제안서 조회횟수 증가
+		if( preg_match("|$proposal_uid|",$_COOKIE[B2b114ProposalViewNum]) == false AND $proposal_default[regmem_uid] != $_SESSION[ssUID] )
+		{
+			@mysql_query("UPDATE proposal_default SET fld_count_view = fld_count_view + 1 WHERE uid=".$proposal_uid,$Con);
+			$var_B2b114ProposalViewNum = $_COOKIE[B2b114ProposalViewNum].",|".$proposal_uid."|";
+			setcookie("B2b114ProposalViewNum",$var_B2b114ProposalViewNum,0,"/");
+		}
+
+	// 상품/브랜드/카테고리 정보 가져오기
+		$goods_default = @mysql_fetch_array(@mysql_query("SELECT * FROM goods_default WHERE uid=".$proposal_default[goods_uid],$Con));
+		$goods_brand = @mysql_fetch_array(@mysql_query("SELECT * FROM goods_brand WHERE uid=".$goods_default[brand_uid],$Con));
+		$goods_cat1 = ($goods_default[cat1_uid] >= 1)?@mysql_fetch_array(@mysql_query("SELECT * FROM goods_cat1 WHERE uid=".$goods_default[cat1_uid],$Con)):null;
+		$goods_cat2 = ($goods_default[cat2_uid] >= 1)?@mysql_fetch_array(@mysql_query("SELECT * FROM goods_cat2 WHERE uid=".$goods_default[cat2_uid],$Con)):null;
+		$goods_cat3 = ($goods_default[cat3_uid] >= 1)?@mysql_fetch_array(@mysql_query("SELECT * FROM goods_cat3 WHERE uid=".$goods_default[cat3_uid],$Con)):null;
+
+	// 제안사 정보 가져오기
+		$Qry = "SELECT * FROM member_default WHERE uid=".$proposal_default[regmem_uid];
+		$Rlt = @mysql_query($Qry,$Con);
+		$regmem_default = @mysql_fetch_array($Rlt);
+
+	// 제안서 가격정보 가져오기
+		$Qry = "SELECT * FROM proposal_price WHERE proposal_uid=".$proposal_uid;
+		$Qry .= ($request_uid >= 1)?" AND fld_price >= $request_price[fld_price_s] AND fld_price <= $request_price[fld_price_e] AND fld_ea <= $request_price[fld_ea] ":null;
+		$Qry .= " ORDER BY fld_price ASC LIMIT 1 ";
+		#echo $Qry;
+		$Rlt = @mysql_query($Qry,$Con);
+		$proposal_price = @mysql_fetch_array($Rlt);
+
+	@include_once HOME_DIR . "/include/popup_top.php";
+
+?>
+<script type="text/javascript">
+<!--
+	function fnc_evalEXEC(var_eval)
+	{
+		var urlurl = "proposal_view_popup.html?request_uid=<?=$request_uid?>&price_uid=<?=$price_uid?>&proposal_uid=<?=$proposal_uid?>&proposal_price_uid=<?=$proposal_price[uid]?>&eval_execute="+var_eval;
+		window.location.href=urlurl;
+	}
+	function evalWrapBox(obj){
+		switch(obj){
+			case 'before':{
+				jQuery('.evalBefore').css('display','block');
+				jQuery('.evalAfter').css('display','none');
+				break;
+			}
+			case 'after':{
+				jQuery('.evalBefore').css('display','none');
+				jQuery('.evalAfter').css('display','block');
+				break;
+			}
+		}
+	}
+	function fnc_proposal_msend()
+	{
+		var form = document.msend_form;
+		
+		if(form.to_celno.value == "")
+		{
+			alert('받으시는분 휴대폰번호를 입력해주십시오.');
+			form.to_celno.focus();
+		}
+		else
+		{
+			if( confirm('전송하시겠습니까?'))
+			{
+				new Ajax.Request
+				(
+					'/bin/_common/_infoBox_sendProposalMsg.html', {
+						method: 'post',
+						parameters: {
+							'proposal_uid':form.proposal_uid.value, 
+							'price_uid':form.price_uid.value,
+							'to_celno':form.to_celno.value, 
+							'work':'send_execute'
+						}, 
+						onComplete: function(httpObj) { 
+								$('ID_sendProposalMsg').innerHTML = httpObj.responseText; 
+							}
+					}
+				);
+			}
+		}
+	}
+-->
+</script>
+</head>
+<body>
+	<div class="popHead bgColorMC1">
+		<div class="popWidthWrap">
+			<span class="fLeft">제안서보기</span>
+			<div class="popWinCloseBtn"><i class="fa fa-times fa-lg"></i> 닫기</div>
+			<div class="popHeadBtn">평가하기</div>
+		</div>
+	</div>
+	<div class="popContents">
+		<div class="popWidthWrap">
+
+			<? if($request_uid >= 1 AND $proposal_default[regmem_uid] != $_SESSION[ssUID]) { ?>
+			<div class="evalWrapBox bdTop7MC1 bdRight7MC1 bdBottom7MC1 bdLeft7MC1">
+				<div class="evalBefore">
+					<div class="fs12 textBold">지금 보고 계신 제안이 마음에 드시는지 평가를 해주십시오.</div>
+					<p class="mrgB20">평가를 해 놓으면 원하는 제안서를 찾는데 크게 도움이 됩니다.</p>
+					<div class="mrgB20">
+						<div class='btn evalBtn evalBtn_<?=($request_eval[fld_eval]=="reject")?$request_eval[fld_eval]:"basic"?> balloonAct' onClick="JavaScript:fnc_evalEXEC('reject')" id="" title="전혀 원하지 않는 상품의 제안일 경우 선택하세요"><?=$ArrEval[reject]?></div>
+						<div class='btn evalBtn evalBtn_<?=($request_eval[fld_eval]=="review")?$request_eval[fld_eval]:"basic"?> mrgL20 balloonAct' onClick="JavaScript:fnc_evalEXEC('review')" id="" title="확신은 없지만, 그래도 다시한번 검토해볼 제안서일 경우 선택하세요"><?=$ArrEval[review]?></div>
+						<div class='btn evalBtn evalBtn_<?=($request_eval[fld_eval]=="important")?$request_eval[fld_eval]:"basic"?> mrgL20 balloonAct' onClick="JavaScript:fnc_evalEXEC('important')" id="" title="제안사와 협의할 마음이 있다면 선택하세요"><?=$ArrEval[important]?></div>
+					</div>
+				</div>
+				<div class="evalAfter">
+					<div class="fs12 textBold">
+						회원님께서는 <div class="btn evalBtn evalDiv_<?=$request_eval[fld_eval]?>" style="font-size:0.8em;"><?=$ArrEval[$request_eval[fld_eval]]?></div> 로 평가 하셨습니다.
+					</div>
+					<p class="mrgB20">지금 보고 계신 제안에 대한 다른 회원님들의 평가입니다.</p>
+					<div class="mrgB20">
+						<div class="btn evalBtn evalDiv_reject" onclick="" id=""><?=$ArrEval[reject]?></div><span class="evalTxt_reject" style="width:70px;"><?=number_format($proposal_default[fld_count_reject])?>건</span>
+						<div class="btn evalBtn evalDiv_review mrgL10" onclick="" id=""><?=$ArrEval[review]?></div><span class="evalTxt_review" style="width:70px;"><?=number_format($proposal_default[fld_count_review])?>건</span>
+						<div class="btn evalBtn evalDiv_important mrgL10" onclick="" id=""><?=$ArrEval[important]?></div><span class="evalTxt_important" style="width:70px;"><?=number_format($proposal_default[fld_count_important])?>건</span>
+						<div class="btn evalBtn evalBtn_basic mrgL20 balloonAct" onclick="evalWrapBox('before');" id="" title="평가를 수정하시려면 재평가 버튼을 클릭하세요">재평가</div>
+					</div>
+				</div>
+			</div>
+			<? } ?>
+
+			<!-- 버튼 s -->
+			<div class="popWinBtnWrap">
+				<? if($proposal_default[regmem_uid]==$_SESSION[ssUID]) { ?>
+				<div class="popWinBtnBox fLeft ttaleft">
+					<div class="btn btnWhite listTrBtn popupInfoBox" popDivId="sendProposalMsg" onclick="JavaScript:fnc_infoBox_sendProposalMsg(<?=$proposal_uid?>)" id=""><i class="fa fa-envelope-o"></i> 모바일 제안서 문자전송</div>
+				</div>
+				<? } ?>
+				<div class="popWinBtnBox fRight ttaRight">
+					<div class="btn btnWhite listTrBtn scrapBtn" onclick="JavaScript:fnc_scrap(<?=$proposal_uid?>,'proposal','ID_btn_scrap_one')" id="ID_btn_scrap_one"><?=fnc_checkScrap($proposal_uid,'proposal')?></div>
+				</div>
+			</div>
+			<!-- 버튼 e -->
+			<!-- header s -->
+			
+			<div class="apTitle apTitleAct fLeft"><div class="apTitleText"><?=$proposal_default[fld_title]?></div></div>
+			<!-- header e -->
+			<!-- 상품정보 s -->
+			<div class="articleBox">
+				<div class="artCont">
+					<div class="pGoodsImgArea">
+						<img alt="" id="" src="/_GWD/B2B114/goods_image_m/<?=(strlen($goods_default[fld_image_m])>=1)?$goods_default[fld_image_m]:"noimage.gif"?>">
+					</div>
+					<div class="pGoodsSummary">
+						<table class="viewTable">
+							<colgroup>
+								<col width="30%"/><col width="70%"/>
+							</colgroup>
+							<tbody>
+								<tr>
+									<th class="bdTop7MC1 bdLeft7MC1">상품명</th>
+									<td class="bdTop7MC1 bdRight7MC1 textBold"><?=$goods_default[fld_name]?></td>
+								</tr>
+								<tr>
+									<th class="bdLeft7MC1">소비자가</th>
+									<td class="bdRight7MC1 textBold">
+										<?=number_format($goods_default[fld_price])?> 원
+										<div class="btn prebotBtn popupInfoBox" popDivId="prebotPriceInfo" onClick="JavaScript:fnc_infoBox_prebotPriceInfo(<?=$goods_default[uid]?>)">온라인 최저가 확인 <i class='fa fa-caret-right'></i></div>
+									</td>
+								</tr>
+								<?
+									$uidInfo = $proposal_uid.",".$request_uid.",".$price_uid;
+									$view_price = fnc_viewProposalPrice($proposal_price[fld_price],$proposal_price[fld_view_permit],$uidInfo);
+									$view_percent = ceil(100-($proposal_price[fld_price]/$goods_default[fld_price]*100));
+								?>
+								<? if($view_price[open] AND strlen($request_uid) <= 0) { ?>
+								<tr>
+									<th class="bdLeft7MC1">발주 수량</th>
+									<td class="bdRight7MC1 textBold">최소 <?=number_format($proposal_price[fld_ea])?>개 이상</td>
+								</tr>
+								<? } ?>
+								<tr>
+									<th class="bdBottom7MC1 bdLeft7MC1">제안가</th>
+									<td class="bdBottom7MC1 bdRight7MC1 textBold">
+											<span class="fs16 textMC1"><?=$view_price[price]?></span>
+											<? if($view_price[open]) { ?>
+											<span class="btn smallTrBtn"><?=$view_percent?>% 할인</span>
+											<? } else { ?>
+											<span><?=$view_price[text]?></span>
+											<? } ?>
+									</td>
+								</tr>
+								<tr>
+									<th class="bdTop bdLeft">납기가능일</th>
+									<td class="bdTop bdRight"><?=$proposal_default[fld_delivery]?></td>
+								</tr>
+								<tr>
+									<th class="bdTop bdLeft">제안사</th>
+									<td class="bdTop bdRight">
+									<? if($request_uid >= 1) { // 다른 셀러는 제안기업의 이름을 알 수 없도록 처리 (2015.08.11) ?>
+										<?=(strlen($regmem_default[fld_co_name])>=1)?$regmem_default[fld_co_name]:"개인회원"?>
+										<div class="btn btnWhite listTrSmallBtn popupInfoBox fRight" popDivId="companyNameInfo" onClick="JavaScript:fnc_infoBox_sellerInfo(<?=$regmem_default[uid]?>)"><i class="fa fa-building-o"></i> 상세정보</div>
+									<? } else { ?>
+										<?=fnc_secretId($regmem_default[fld_id])?>
+									<? } ?>
+									</td>
+								</tr>
+								
+								<tr>
+									<th class="bdTop bdLeft">브랜드</th>
+									<td class="bdTop bdRight">
+										<?=$goods_brand[fld_name]?>
+										<div class="btn btnWhite listTrSmallBtn popupInfoBox fRight" popDivId="brandNameInfo" onClick="JavaScript:fnc_infoBox_brandInfo(<?=$goods_brand[uid]?>)"><i class="fa fa-tag"></i> 상세정보</div>
+									</td>
+								</tr>
+								<tr>
+									<th class="bdTop bdLeft">원산지</th>
+									<td class="bdTop bdRight"><?=($goods_default[fld_made_korea]=="Y")?"대한민국":$goods_default[fld_made_country]?></td>
+								</tr>
+								<tr>
+									<th class="bdTop bdLeft">인쇄/샘플</th>
+									<td class="bdTop bdRight">
+										인쇄 <?=($proposal_default[fld_print]==2)?"가능":"불가"?> / 샘플제출 <?=($proposal_default[fld_sample]==2)?"가능":"불가"?>
+									</td>
+								</tr>
+								<tr>
+									<th class="bdTop bdBottom bdLeft">상품평가</th>
+									<td class="bdTop bdBottom bdRight" style="font-size:1em;">
+										<div class="btn evalBtn evalDiv_reject">거절</div><span class="evalTxt_reject"><?=number_format($goods_default[fld_count_reject])?>건</span>
+										<div class="btn evalBtn evalDiv_review mrgL10">검토</div><span class="evalTxt_review"><?=number_format($goods_default[fld_count_review])?>건</span>
+										<div class="btn evalBtn evalDiv_important mrgL10">유력</div><span class="evalTxt_important"><?=number_format($goods_default[fld_count_important])?>건</span>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="pGoodsinfo">
+						<table class="viewTable" style="border:1px solid #eee;">
+							<colgroup>
+								<col width="30%"/><col width="70%"/>
+							</colgroup>
+							<tbody>
+								<tr>
+									<th>상품분류</th>
+									<td>
+										<?=(strlen($goods_cat1[fld_name])>=1)?$goods_cat1[fld_name]:null?>
+										<?=(strlen($goods_cat2[fld_name])>=1)?" > ".$goods_cat2[fld_name]:null?>
+										<?=(strlen($goods_cat3[fld_name])>=1)?" > ".$goods_cat3[fld_name]:null?>
+									</td>
+								</tr>
+								<tr>
+									<th class="bdTop">모델명</th>
+									<td class="bdTop"><?=$goods_default[fld_model]?></td>
+								</tr>
+								<? if( strlen($goods_default[fld_introduction]) >= 1 ) { ?>
+								<tr>
+									<th class="bdTop">간략설명</th>
+									<td class="bdTop"><?=$goods_default[fld_introduction]?></td>
+								</tr>
+								<? } ?>
+								<? if( strlen($goods_default[fld_spec]) >= 1 ) { ?>
+								<tr>
+									<th class="bdTop">스펙</th>
+									<td class="bdTop lh16"><?=nl2br($goods_default[fld_spec])?></td>
+								</tr>
+								<? } ?>
+								<? if( strlen($proposal_default[fld_contents]) >= 1 ) { ?>
+								<tr>
+									<th class="bdTop">제안설명</th>
+									<td class="bdTop lh16"><?=nl2br($proposal_default[fld_contents])?></td>
+								</tr>
+								<? } ?>
+								<? if( strlen($arr_use[0]) >=1 ) { ?>
+								<tr>
+									<th class="bdTop">용도</th>
+									<td class="bdTop lh16">
+										<? foreach($arr_use AS $fld => $val) { ?>
+										<div class="pGoodsSelectedItem"><?=$val?></div>
+										<? } ?>
+									</td>
+								</tr>
+								<? } ?>
+								<? if( strlen($arr_season[0]) >=1 ) { ?>
+								<tr>
+									<th class="bdTop">계절</th>
+									<td class="bdTop lh16">
+										<? foreach($arr_season AS $fld => $val) { ?>
+										<div class="pGoodsSelectedItem"><?=$val?></div>
+										<? } ?>
+									</td>
+								</tr>
+								<? } ?>
+								<? if( strlen($arr_theme_color[0]) >=1 ) { ?>
+								<tr>
+									<th class="bdTop">테마컬러</th>
+									<td class="bdTop lh16">
+										<? foreach($arr_theme_color AS $fld => $val) { ?>
+										<div class="pGoodsSelectedItem"><?=$val?></div>
+										<? } ?>
+									</td>
+								</tr>
+								<? } ?>
+								<? if( strlen($arr_age[0]) >=1 ) { ?>
+								<tr>
+									<th class="bdTop">연령</th>
+									<td class="bdTop lh16">
+										<? foreach($arr_age AS $fld => $val) { ?>
+										<div class="pGoodsSelectedItem"><?=$val?></div>
+										<? } ?>
+									</td>
+								</tr>
+								<? } ?>
+								<? if( strlen($arr_character[0]) >=1 ) { ?>
+								<tr>
+									<th class="bdTop">특징</th>
+									<td class="bdTop lh16">
+										<? foreach($arr_character AS $fld => $val) { ?>
+										<div class="pGoodsSelectedItem"><?=$val?></div>
+										<? } ?>
+									</td>
+								</tr>
+								<? } ?>
+								<? if( strlen($arr_sex[0]) >=1 ) { ?>
+								<tr>
+									<th class="bdTop">성별</th>
+									<td class="bdTop lh16">
+										<? foreach($arr_sex AS $fld => $val) { ?>
+										<div class="pGoodsSelectedItem"><?=$val?></div>
+										<? } ?>
+									</td>
+								</tr>
+								<? } ?>
+								<tr>
+									<td class="bdTop" colspan="2">
+										<div class="previewDetailInfoBox">
+											<?=stripslashes($goods_default[fld_contents])?>
+										</div>
+										<div class="viewDetailInfoBtn" style="text-align:center;">
+											<div class="btn btnWhite listTrBtn">상품상세보기</div>
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<!-- 상품정보 e -->
+			
+		</div>
+	</div>
+	<div id="scrollTopBtn" class="bgColor999"><i class="fa fa-chevron-up"></i>TOP</div>
+	<div class="popFooter bdTop">
+		<div class="pageBtnBox"><div class="btn btnWhite" onclick="winClose();" >닫기</div></div>
+	</div>
+<script>
+	windowResize();
+<? if($request_uid >= 1 AND $proposal_default[regmem_uid] != $_SESSION[ssUID]) { ?>
+	var popHeadBtn=jQuery('.popHead .popHeadBtn');
+	var apTitleTop=jQuery('.evalWrapBox').offset().top-35;
+	jQuery(window).scroll(function(){
+		jQuery('.popHead').css('position','fixed');
+		var winTop=jQuery(this).scrollTop();
+		if(winTop>=apTitleTop){
+			popHeadBtn.css('display','block');
+		}else if(winTop<=apTitleTop){
+			popHeadBtn.css('display','none');
+		}
+	});
+	<? if($request_eval[uid] >= 1) { ?>
+		evalWrapBox('after');
+	<? } ?>
+<? } ?>
+</script>
+<? @include_once HOME_DIR . "/include/pop_infobox.php"; ?>
+</body>
+</html>

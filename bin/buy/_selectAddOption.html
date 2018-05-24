@@ -1,0 +1,34 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../../include/config.php";
+	
+	switch($work)
+	{
+		case "cat1TOcat2" :
+			$Qry = "SELECT uid AS opt_uid, fld_name AS opt_name FROM goods_cat2 WHERE cat1_uid = '$q_uid' AND fld_status = 'Y' ORDER BY fld_name";
+			$Rlt = @mysql_query($Qry,$Con);
+		break;
+
+		case "cat2TOcat3" :
+			$Qry = "SELECT uid AS opt_uid, fld_name AS opt_name FROM goods_cat3 WHERE cat2_uid = '$q_uid' AND fld_status = 'Y' ORDER BY fld_name";
+			$Rlt = @mysql_query($Qry,$Con);
+		break;
+
+	} // end switch
+	
+	if( strlen($label0) >= 1)
+	{
+?>
+		<option value=""><?=$label0?></option>
+<?
+	}	// end id
+	
+	while($row = @mysql_fetch_array($Rlt))
+	{
+?>
+		<option value="<?=$row[opt_uid]?>"><?=$row[opt_name]?></option>
+<?
+	} // end while
+	
+	exit;
+?>

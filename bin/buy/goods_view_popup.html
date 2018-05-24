@@ -1,0 +1,135 @@
+<?
+	@require_once "../../include/config.php";
+	@include_once HOME_DIR . "/include/popup_top.php";
+?>
+<script type="text/javascript">
+</script>
+</head>
+<body>
+	<div class="popHead bgColorMC1">
+		<div class="popWidthWrap">
+			상품검색 > 상품정보 보기
+			<div class="popWinCloseBtn"><i class="fa fa-times fa-lg"></i></div>
+		</div>
+	</div>
+	<div class="popContents">
+		<div class="popWidthWrap">
+			
+			<!-- 버튼 s -->
+			<div class="popWinBtnWrap">
+				<div class="popWinBtnBox fLeft ttaleft">
+				</div>
+				<div class="popWinBtnBox fRight ttaRight">
+					<div class="btn btnWhite listTrBtn scrapBtn" onclick="#" id=""><i class="fa fa-square-o"></i>스크랩</div>
+				</div>
+			</div>
+			<!-- 버튼 e -->
+			<!-- header s -->
+			<div class="apTitle apTitleAct fLeft"><div>올가죽 서류가방(LTD-3000BL)</div></div>
+			<!-- header e -->
+			<!-- 상품정보 s -->
+			<div class="articleBox" style="margin:0 0 0 0;">
+				<div class="artTitle"></div>
+				<div class="artCont">
+					<div class="pGoodsImgArea">
+						<img alt="" id="" src="http://b2b114.co.kr/_GWD/B2B114/goods_image_m/37.jpg">
+					</div>
+					<div class="pGoodsSummary">
+						<table class="viewTable" style="border:1px solid #eee;">
+							<colgroup>
+								<col width="30%"/><col width="70%"/>
+							</colgroup>
+							<tbody>
+								<tr>
+									<th class="bdTop">상품분류</th>
+									<td class="bdTop">패션>가방</td>
+								</tr>
+								<tr>
+									<th class="bdTop">브랜드</th>
+									<td class="bdTop">
+										란체티
+										<div class="btn btnWhite listTrSmallBtn popupInfoBox" popDivId="brandNameInfo">상세정보</div>
+									</td>
+								</tr>
+								<tr>
+									<th class="bdTop">소비자가</th>
+									<td class="bdTop textBold">
+										<span class="fs16 textMC1">999,999</span> 원
+									</td>
+								</tr>
+								<tr>
+									<th class="bdTop">납기가능일</th>
+									<td class="bdTop">2015/12/31</td>
+								</tr>
+								<tr>
+									<th class="bdTop">모델명</div></th>
+									<td class="bdTop">TK-330</td>
+								</tr>
+								<tr>
+									<th class="bdTop">원산지</th>
+									<td class="bdTop">대한민국</td>
+								</tr>
+								<tr>
+									<th class="bdTop">등록업체</th>
+									<td class="bdTop">
+										지앤티글로벌
+										<div class="btn btnWhite listTrSmallBtn popupInfoBox" popDivId="companyNameInfo">상세정보</div>
+									</td>
+								</tr>
+								<tr>
+									<th class="bdTop">상품평가</th>
+									<td class="bdTop" style="font-size:1em;">
+										<div class="btn evalBtn evalDiv_reject">거절</div><span class="evalTxt_reject"><?=number_format($goods_default[fld_count_reject])?>건</span>
+										<div class="btn evalBtn evalDiv_review mrgL10">검토</div><span class="evalTxt_review"><?=number_format($goods_default[fld_count_review])?>건</span>
+										<div class="btn evalBtn evalDiv_important mrgL10">유력</div><span class="evalTxt_important"><?=number_format($goods_default[fld_count_important])?>건</span>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="pGoodsinfo">
+						<table class="viewTable" style="border:1px solid #eee;border-top:0;">
+							<colgroup>
+								<col width="30%"/><col width="70%"/>
+							</colgroup>
+							<tbody>
+								<? if( strlen($goods_default[fld_introduction]) >= 1 ) { ?>
+								<tr>
+									<th class="bdTop">간략설명</th>
+									<td class="bdTop"><?=$goods_default[fld_introduction]?></td>
+								</tr>
+								<? } ?>
+								<? if( strlen($goods_default[fld_spec]) >= 1 ) { ?>
+								<tr>
+									<th class="bdTop">스펙</th>
+									<td class="bdTop lh16"><?=nl2br($goods_default[fld_spec])?></td>
+								</tr>
+								<? } ?>
+								<tr>
+									<td class="bdTop" colspan="2">
+										<div class="previewDetailInfoBox" style="display:block;">
+											<img src="http://b2b114.co.kr/_GWD/SmartEditor/LTK-900_info.jpg" alt="" />
+										</div>
+										<div class="viewDetailInfoBtn" style="text-align:center;">
+											<div class="btn btnWhite listTrBtn">접기</div>
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<!-- 상품정보 e -->
+			
+		</div>
+	</div>
+	<div id="scrollTopBtn" class="bgColor999"><i class="fa fa-chevron-up"></i>TOP</div>
+	<div class="popFooter bdTop">
+		<div class="pageBtnBox"><div class="btn btnWhite" onclick="winClose();" >닫기</div></div>
+	</div>
+<script>window.resizeTo(1000,850);opener.window.location.reload();</script>
+<? @include_once HOME_DIR . "/include/pop_infobox.php"; ?>
+</body>
+</html>
+	

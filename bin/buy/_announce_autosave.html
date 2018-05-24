@@ -1,0 +1,75 @@
+<?
+	@require_once "../../include/config.php";
+
+	switch($_POST[work])
+	{
+		default :	// autosave execute
+
+				### request_DEFAULT ###
+					$fld_print=(strlen($fld_print)>=1)?$fld_print:1;
+					$fld_sample=(strlen($fld_sample)>=1)?$fld_sample:1;
+					$fld_payment_type=(strlen($fld_payment_type)>=1)?$fld_payment_type:1;
+					$fld_delivery_type=(strlen($fld_delivery_type)>=1)?$fld_delivery_type:1;
+					$SetQ = "
+										fld_title='$fld_title',
+										fld_contents='$fld_contents',
+										fld_end_date='$fld_end_date',
+										fld_order_date='$fld_order_date', 
+										fld_delivery_date='$fld_delivery_date', 
+										fld_payment_type='$fld_payment_type', 
+										fld_payment_memo='$fld_payment_memo', 
+										fld_use='$fld_use', 
+										fld_season='$fld_season', 
+										fld_theme_color='$fld_theme_color', 
+										fld_age='$fld_age', 
+										fld_request_category='$fld_request_category', 
+										fld_reject_category='$fld_reject_category', 
+										fld_buyer_name='$fld_buyer_name', 
+										fld_print='$fld_print', 
+										fld_sample='$fld_sample', 
+										fld_brand_keyword='$fld_brand_keyword', 
+										fld_buyer_upjong='$fld_buyer_upjong', 
+										fld_character='$fld_character', 
+										fld_sex='$fld_sex',
+										fld_delivery_type='$fld_delivery_type', 
+										fld_update=NOW() 
+									";
+					$Qry = "UPDATE request_default SET $SetQ WHERE uid=$request_uid ";
+					$Rlt = @mysql_query($Qry,$Con);
+
+				### request_PRICE ###
+					$arr_price_s = explode(',',$fld_price_s);
+					$arr_price_e = explode(',',$fld_price_e);
+					$arr_ea = explode(',',$fld_ea);
+					for($x = 0 ; $x < count($arr_price_s) ; $x++)
+					{
+						$Qry = "SELECT uid FROM request_price ";
+						$Qry .= " WHERE request_uid=".$request_uid." AND fld_price_s=".$arr_price_s[$x];
+						$Qry .= " AND fld_price_e=".$arr_price_e[$x]." AND fld_ea=".$arr_ea[$x];
+						$Rlt = @mysql_query($Qry,$Con);
+						$total_rows = @mysql_num_rows($Rlt);
+						
+						if($total_rows <= 0)
+						{
+							$Qry2 = "INSERT INTO request_price SET request_uid=".$request_uid.", fld_price_s=".$arr_price_s[$x];
+							$Qry2 .= ", fld_price_e=".$arr_price_e[$x].", fld_ea=".$arr_ea[$x].",fld_regdate=NOW()";
+							$Rlt2 = @mysql_query($Qry2,$Con);
+						}
+					}	
+
+				### request_PRICE : DELETE! ###
+					if($del_price_s >= 1 AND $del_price_e >= 1 AND $del_ea >= 1)
+					{
+						$Qry = "DELETE FROM request_price WHERE request_uid=".$request_uid;
+						$Qry .= " AND fld_price_s=".$del_price_s." AND fld_price_e=".$del_price_e;
+						$Qry .= " AND fld_ea=".$del_ea;
+						//echo $Qry;
+						$Rlt = @mysql_query($Qry,$Con);
+					}
+				
+				echo "자동저장됨 (".date('Y-m-d H:i:s').")";
+				exit;
+		break;
+	}
+	
+?>

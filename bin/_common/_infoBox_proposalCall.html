@@ -1,0 +1,80 @@
+<?
+	@require_once "../../include/config.php";
+	
+	if($_POST[proposal_uid] >= 1)
+	{
+		$receiver_uid = @mysql_result(@mysql_query("SELECT regmem_uid FROM proposal_default WHERE uid=".$_POST[proposal_uid],$Con),0,0);
+		$arr_var[proposal_uid] = $_POST[proposal_uid];
+		$arr_var[request_uid] = $_POST[request_uid];
+		$arr_var[request_price_uid] = $_POST[request_price_uid];
+		@fnc_messageSend(10,$receiver_uid,$arr_var);
+		exit;
+	}
+
+	$arr_uid = explode(',',$uid); // 제안서,공고,공고가격
+
+	$Qry = "SELECT * FROM proposal_default WHERE uid=$arr_uid[0]";
+	$Rlt = @mysql_query($Qry,$Con);
+	if( $proposal = @mysql_fetch_array($Rlt) )
+	{
+		
+		if($proposal[regmem_uid] == $_SESSION[ssUID])
+		{
+			// 본인이 등록한 제안서를 통한 제안요청 차단!
+?>
+		<div class="popDivBtnWrap">
+			<div class="popDivSubtitle">제안요청을 할 수 없습니다</div>
+		</div>
+		<table class="popAlertTable">
+			<tr>
+				<td>
+					다른 셀러에게만 제안요청 가능!<br/>
+					(본인에게는 제안요청 할 수 없습니다.)
+				</td>
+			</tr>
+		</table>
+		<div class="popDivBtns">
+			<div class="btn btnWhite" onClick="javascript:allHidePopInfoBox();">확인</div>
+		</div>
+<?
+			exit;
+		}
+		
+		$Qry2 = "SELECT * FROM member_default WHERE uid=".$proposal[regmem_uid];
+		$Rlt2 = @mysql_query($Qry2,$Con);
+		$member = @mysql_fetch_array($Rlt2);
+?>
+		<div class="popDivBtnWrap">
+			<div class="popDivSubtitle">제안 요청(제안가 확인 요청)을 합니다. </div>
+		</div>
+		<table class="popDivTable">
+			<colgroup><col width="50%" /><col width="50%" /></colgroup>
+			<tbody>
+				<tr>
+					<td><img src="/_GWD/B2B114/co_logo/<?=(strlen($member[fld_co_logo])>=1)?$member[fld_co_logo]:"noimage.gif"?>" alt="" style="width:100%;"></td>
+					<td class="textBold" style="font-size:1.4em;"><?=(strlen($member[fld_co_name])>=1)?$member[fld_co_name]:"개인회원"?></td>
+				</tr>
+				<tr>
+					<td colspan="2" class="lh12"  style="border:0;">
+						<div class="popScrollbox">
+						정확한 가격, 조건 등을 확인하기 위해 셀러에게 제안 요청을 합니다.<br/>
+						제안 요청을 하시면 최고의 제안 조건을 곧 받아 볼 수 있습니다.
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<label class="chechkbox-inline" style="width:100%;">
+							<input type="checkbox" name="chkchk" value="1" id="ID_checkbox_proposalCall"/> 연락에 필요한 최소한의 정보(이메일, 전화번호 등) 공개 동의
+						</label>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<div class="popDivBtns">
+			<div class="btn btnMainC" onClick="fnc_proposalCall_execute(<?=$arr_uid[0]?>,<?=($arr_uid[1]>=1)?$arr_uid[1]:0?>,<?=($arr_uid[2]>=1)?$arr_uid[2]:0?>);">제안 요청(제안가 확인 요청)</div>
+			<div class="btn btnWhite" onClick="javascript:allHidePopInfoBox();">닫기</div>
+		</div>
+<?
+	} else { echo "<div align='center' style='padding:100px;'>오류발생 : 관리자에게 문의 바랍니다.</div>"; } 
+?>

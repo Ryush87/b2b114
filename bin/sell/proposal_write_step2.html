@@ -1,0 +1,400 @@
+<?
+	@require_once "../../include/config.php";
+	
+	// 등록버튼 클릭시 저장
+		if($work == "proposal_execute")
+		{
+			if($page >= 1)
+			{
+				echo "<script language='JavaScript'>window.location.href='my_proposal_list.html?page=".$page."&qkeyword=".$qkeyword."';</script>";
+				exit;
+			}
+			else
+			{
+				// 저장
+					$Qry = "UPDATE proposal_default SET fld_status=1, fld_regdate=NOW() WHERE uid=$proposal_uid";
+					$Rlt = @mysql_query($Qry,$Con);
+					echo "<script language='JavaScript'>window.location.href='my_proposal_list.html?qstatus=1';</script>";
+					exit;
+			}
+		}
+
+	if($proposal_uid >= 1)
+	{
+		$Qry = "SELECT * FROM proposal_default WHERE uid=".$proposal_uid;
+		$Rlt = @mysql_query($Qry,$Con);
+		$proposal = @mysql_fetch_array($Rlt);
+
+		// 수정권한체크(본인등록건인지)
+			if($_SESSION[ssADMIN] == "N" AND $proposal[regmem_uid] != $_SESSION[ssUID])
+			{
+				echo "<script>alert('본인이 등록한 제안서만 수정 가능합니다.');history.go(-1);</script>";
+				exit;
+			}
+		
+		$Qry = "SELECT * FROM goods_default WHERE uid=".$proposal[goods_uid];
+		$Rlt = @mysql_query($Qry,$Con);
+		$goods = @mysql_fetch_array($Rlt);
+	}
+	else
+	{
+		if($goods_uid >= 1)
+		{
+			$Qry = "SELECT * FROM goods_default WHERE uid=".$goods_uid;
+			$Rlt = @mysql_query($Qry,$Con);
+			$goods = @mysql_fetch_array($Rlt);
+	
+			// 데이터 가져오기(자동저장)
+				$Qry = "SELECT * FROM proposal_default WHERE regmem_uid=$_SESSION[ssUID] AND fld_status=0 ORDER BY uid DESC LIMIT 1";
+				$Rlt = @mysql_query($Qry,$Con);
+				$total_rows = @mysql_num_rows($Rlt);
+				
+				if($total_rows >= 1)
+				{
+					// 있는 경우
+						$proposal = @mysql_fetch_array($Rlt);
+				}
+				else
+				{
+					// 없는 경우
+						$Qry = "INSERT INTO proposal_default SET regmem_uid=".$_SESSION[ssUID].", goods_uid=".$goods_uid.", fld_update=NOW()";
+						$Rlt = @mysql_query($Qry,$Con);
+						
+					// 데이터 가져오기
+						$Qry = "SELECT * FROM proposal_default WHERE regmem_uid=$_SESSION[ssUID] AND fld_status=0 ORDER BY uid DESC LIMIT 1";
+						$Rlt = @mysql_query($Qry,$Con);
+						$proposal = @mysql_fetch_array($Rlt);
+				}
+		}
+		else
+		{
+			echo "<script>alert('상품을 선택해주십시오.');history.go(-1);</script>";
+			exit;
+		}
+	}
+
+	// 가져온 데이터를 사용할 수 있는 상태로 가공하기
+		$arr_use = explode(',',trim($proposal[fld_use]));
+		$arr_age = explode(',',trim($proposal[fld_age]));
+		$arr_sex = explode(',',trim($proposal[fld_sex]));
+		$arr_season = explode(',',trim($proposal[fld_season]));
+		$arr_buyer_upjong = explode(',',trim($proposal[fld_buyer_upjong]));
+		$arr_theme_color = explode(',',trim($proposal[fld_theme_color]));
+		$arr_character = explode(',',trim($proposal[fld_character]));
+				
+	// 기본값 설정
+		$proposal[fld_delivery] = (strlen($proposal[fld_delivery]) >= 1)?$proposal[fld_delivery]:"2개월 이내";
+	
+	@include_once HOME_DIR . "/include/top.php";
+?>
+<script language="JavaScript">
+<!--
+	function fnc_goodscompanyVP2(viewtype,uid)
+	{
+		var urlurl = "/bin/common/goodscompany_view_popup.html?viewtype="+viewtype+"&uid="+uid+"&proposal_write=YES";
+		var goodscompany_view_popup = window.open(urlurl,'goodscompany_view_popup','left=0,top=0,width=950,height=800,scrollbars=1');
+	}
+-->
+</script>
+</head>
+<body>
+<div id="wrap">
+	<script type="text/javascript">currentPageKind="sell";currentMainN=1;currentSubN=1;</script><!-- 현재페이지 -->
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<!-- contents s -->
+					<form class="sell_form" name="sell_form" action="" method="post">
+					<!--input type="hidden" name="execute_uid"/-->
+					<input type="hidden" name="work"/>
+					<input type="hidden" name="page" value="<?=$page?>"/>
+					<input type="hidden" name="qkeyword" value="<?=$qkeyword?>"/>
+					<input type="hidden" name="goods_uid" value="<?=$goods_uid?>"/>
+					<input type="hidden" name="proposal_uid" value="<?=$proposal[uid]?>"/>
+					<input type="hidden" name="fld_price"/>
+					<input type="hidden" name="fld_ea"/>
+					<input type="hidden" name="fld_view_permit"/>
+					<input type="hidden" name="del_price"/>
+					<input type="hidden" name="del_ea"/>
+					<input type="hidden" name="del_view_permit"/>
+					<input type="hidden" name="fld_use"/>
+					<input type="hidden" name="fld_age"/>
+					<input type="hidden" name="fld_sex"/>
+					<input type="hidden" name="fld_season"/>
+					<input type="hidden" name="fld_buyer_upjong"/>
+					<input type="hidden" name="fld_theme_color"/>
+					<input type="hidden" name="fld_character"/>
+						<!-- 제안서 등록 s-->
+						<div class="cbTitle">
+							<h2>제안서등록</h2>
+							<span style="padding-left:5px;">제안서 내용을 입력/선택 해주십시오.</span>
+						</div>
+						<div class="cbTopBox">
+						</div>
+						<div class="cbMiddleBox">
+							
+							<!--상품정보 s-->
+							<div class="articleBox bdAllCCC pdd20 mrgB10">
+								<div class="artTitle">선택 상품(제안 상품)</div>
+								<div class="artCont">
+									<ul class="suggestGoods" style="border:0;border-top:2px solid #eee;padding:10px 0 0 0">
+										<li class="sGoodsList" style="border-bottom:0;">
+											<div class="sGoodsImgArea fLeft">
+												<a href="#" target="_blank" class="img">
+													<img src="/_GWD/B2B114/goods_image_m/<?=( strlen($goods[fld_image_m]) >= 1 )?$goods[fld_image_m]:"noimage.gif"?>"/>
+												</a>
+											</div>
+											<div class="sGoodsinfo fLeft">
+												<div class="sgTitle"><?=$goods[fld_name]?></div>
+												<div class="sgSubTitle"><?=$goods[fld_introduction]?></div>
+												<div class="sgPrice">
+													<span class=""><?=number_format($goods[fld_price])?>원</span>
+												</div>
+												<div class="sgDepth">
+													<a href="#" class=" " title="" target="_blank">생활/주방</a>
+													&gt; <a href="#" class=" " title="" target="_blank">주방</a>
+													&gt; <a href="#" class=" " title="" target="_blank">텀블러</a>
+												</div>
+												<div class="sgDesc"><?=$goods[fld_spec]?></div>
+												<div class="sgDate">등록일 <?=str_replace('-','.',substr($goods[fld_regdate],0,7))?></div>
+											</div>
+											<div class="sGoodsBtns">
+												<input type="button" value="상세보기" class="sgBtn btnWhite" onclick="JavaScript:fnc_goodscompanyVP2('goods',<?=$goods_uid?>)">
+												<? if( strlen($page) <= 0) { ?><input type="button" value="재선택" class="sgBtn btnMainC2" onclick="JavaScript:window.location.href='proposal_write_step1.html?qkeyword=<?=base64_encode($qkeyword)?>';"> <? } ?>
+											</div>
+										</li>
+									</ul>
+								</div>
+							</div>
+							<!--상품정보 e-->
+
+							<!-- 제안서정보 s-->
+							<div class="articleBox" style="margin-top:0;">
+								<div class="plusText" style="font-size:12px;margin-bottom:10px;"><span><i class="fa fa-asterisk"></i></span> 필수정보</div>
+								<div class="strongTitle2"><input type="text" name="fld_title" id="fld_title" value="<?=$proposal[fld_title]?>" placeholder="제안서 제목을 입력해주십시오."/></div>
+								<div class="strongTitle2"><textarea name="fld_contents" id="fld_contents" cols="30" rows="4" class="form-control dataText" style="width:100%;padding:1% 2%;" onBlur="fnc_autosave()" placeholder="내용을 입력해주십시오." onBlur="fnc_autosave()"><?=$proposal[fld_contents]?></textarea></div>
+								<table class="writeTable">
+									<tbody>
+										<tr>
+											<td style="border:0;padding:0;">
+												<div>
+													<div class="goodsInfoTop">
+														<div class="goodsInfoBasic">
+															<div class="priceInputResultBox">
+																<table>
+																	<colgroup><col width="5%" /><col width="15%" /><col width="20%" /><col width="5%" /><col width="20%" /><col width="15%" /><col width="15%" /><col width="5%" /></colgroup>
+																	<tbody>
+																		<?
+																			$Qry2 = "SELECT * FROM proposal_price WHERE proposal_uid=$proposal[uid] ORDER BY uid";
+																			$Rlt2 = @mysql_query($Qry2,$Con);
+																			$total_rows2 = @mysql_num_rows($Rlt2);
+																			for($x2 = 0 ; $x2 < $total_rows2 ; $x2++)
+																			{
+																				$row2 = @mysql_fetch_array($Rlt2);
+																		?>
+																		<tr>
+																			<td><span class="numBox"><?=$x2+1?></span></td>
+																			<td class="aCenter textC999 textBold">공개등급</td>
+																			<td class="aCenter"><span class="priceData" value="<?=$row2[fld_view_permit]?>"><?=$ArrSellProposalPriceViewPermit[$row2[fld_view_permit]]?></span></td>
+																			<td class="aRight textC999 textBold">수량</td>
+																			<td class="aRight"><span class="priceData"><?=number_format($row2[fld_ea])?></span> 개</td>
+																			<td class="aRight textC999 textBold">제안가</td>
+																			<td class="aRight"><span class="priceData"><?=number_format($row2[fld_price])?></span> 원</td>
+																			<td><div class="boxCloseBtn" onclick="fnc_DelPrice(jQuery(this),'Sell')"><i class="fa fa-times fa-lg"></i></div></td>
+																		</tr>
+																		<? } ?>
+																	</tbody>
+																</table>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="goodsInfoBox">
+													<div class="goodsInfoTop">
+														<div class="goodsInfoBasic priceInputBox">
+															<span class="fLeft mrgL20">공개등급<sup>*</sup></span>
+															<select name="" id="" class="goodsInput form-control" style="padding:0;">
+																<? foreach($ArrSellProposalPriceViewPermit AS $fld => $val) { ?>
+																<option value="<?=$fld?>"><?=$val?></option>
+																<? } ?>
+															</select>
+															<span class="fLeft" style="margin-left:40px;">수량<sup>*</sup></span>
+															<input type="text" class="goodsInput form-control" onKeyUp="fnc_numCheck(this)"/>
+															<span class="fLeft mrgL10">개</span>
+															<span class="mrgL20" style="margin-left:40px;">제안가<sup>*</sup></span>
+															<input type="text" class="goodsInput form-control" onKeyUp="fnc_numCheck(this)"/>
+															<span class="fLeft mrgL10">원</span>
+															<input type="button" value="제안가추가" name="btn_priceAdd" class="btn btnWMC1 fRight" onclick="JavaScript:fnc_AddCodePrice2();">
+														</div>
+													</div>
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+
+							<div id="proposalInfoBox" class="articleBox" style="padding-top:0;">
+								<!--div class="artTitle">상세정보</div-->
+								<table class="writeTable" style="border-top:1px solid #ddd;border-left:1px solid #ddd;border-right:1px solid #ddd;">
+									<colgroup><col width="20%" /><col width="80%" /></colgroup>
+									<tbody>
+										<tr>
+											<th>제안서공개설정</th>
+											<td>
+												<div class="selectListBox">
+													<? foreach($ArrSellProposalOpenLevel AS $fld => $val) { ?>
+													<label class="chechkbox-inline"><input type="radio" name="fld_open_level" value="<?=$fld?>" class="dataText"  onClick="fnc_autosave()"<?=("$proposal[fld_open_level]"=="$fld")?" checked":null?>/><?=$val?></label>
+													<? } ?>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<th>납기가능일</th>
+											<td>
+												<div class="selectListBox">
+													<select name="fld_delivery" id="" class="goodsInput form-control fLeft" style="width:120px;padding:0;" onChange="fnc_autosave()">
+														<? foreach($ArrSellProposalDelivery AS $fld => $val) { ?>
+														<option value="<?=$val?>"<?=("$val"=="$proposal[fld_delivery]")?" selected":null?>><?=$val?></option>
+														<? } ?>
+													</select>
+													<div class="fLeft mrgT10 mrgL10" style="color:#CCCCCC;">※ 납기가능일과 선택상품, 제목, 코멘트를 제외한 모든 값은 매칭 데이터(조건)로 사용됩니다.</div>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<th>용도</th>
+											<td>
+												<div class="selectListBox" selectListBoxId="useInfo">
+													<? for($x2 = 0 ; $x2 < count($ArrUse) ; $x2++) { ?>
+													<label class="chechkbox-inline">
+														<input type="checkbox" name="sel_use[<?=$x2?>]" value="<?=$ArrUse[$x2]?>"<?=(in_array($ArrUse[$x2],$arr_use))?" checked":null?> class="CLASS_sel_use dataText" onClick="fnc_autosave()"/><?=$ArrUse[$x2]?>
+													</label>
+													<? } ?>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<th>연령</th>
+											<td>
+												<div class="selectListBox" selectListBoxId="ageInfo">
+													<? for($x2 = 0 ; $x2 < count($ArrAge) ; $x2++) { ?>
+													<label class="chechkbox-inline"><input type="checkbox" name="sel_age" value="<?=$ArrAge[$x2]?>" <?=(in_array($ArrAge[$x2],$arr_age))?" checked":null?> class="dataText" onClick="fnc_autosave()"/><?=$ArrAge[$x2]?></label>
+													<? } ?>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<th>성별</th>
+											<td>
+												<div class="selectListBox" selectListBoxId="sexInfo">
+													<? for($x2 = 0 ; $x2 < count($ArrSex) ; $x2++) { ?>
+													<label class="chechkbox-inline"><input type="checkbox" name="sel_sex" value="<?=$ArrSex[$x2]?>" <?=(in_array($ArrSex[$x2],$arr_sex))?" checked":null?> class="dataText" onClick="fnc_autosave()"/><?=$ArrSex[$x2]?></label>
+													<? } ?>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<th>계절</th>
+											<td>
+												<div class="selectListBox" selectListBoxId="seasonInfo">
+													<? for($x2 = 0 ; $x2 < count($ArrSeason) ; $x2++) { ?>
+													<label class="chechkbox-inline"><input type="checkbox" name="sel_season" value="<?=$ArrSeason[$x2]?>" <?=(in_array($ArrSeason[$x2],$arr_season))?" checked":null?> class="dataText" onClick="fnc_autosave()"/><?=$ArrSeason[$x2]?></label>
+													<? } ?>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<th>업종</th>
+											<td>
+												<div class="selectListBox" selectListBoxId="buyer_upjongInfo">
+													<? for($x2 = 0 ; $x2 < count($ArrBuyerUpjong) ; $x2++) { ?>
+													<label class="chechkbox-inline"><input type="checkbox" name="sel_upjong" value="<?=$ArrBuyerUpjong[$x2]?>" <?=(in_array($ArrBuyerUpjong[$x2],$arr_buyer_upjong))?" checked":null?> class="dataText" onClick="fnc_autosave()"/><?=$ArrBuyerUpjong[$x2]?></label>
+													<? } ?>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<th>컬러</th>
+											<td>
+												<div class="selectListBox" selectListBoxId="theme_colorInfo">
+													<? for($x2 = 0 ; $x2 < count($ArrThemeColor) ; $x2++) { ?>
+													<label class="chechkbox-inline"><input type="checkbox" name="sel_themecolor" value="<?=$ArrThemeColor[$x2]?>" <?=(in_array($ArrThemeColor[$x2],$arr_theme_color))?" checked":null?> class="dataText" onClick="fnc_autosave()"/><?=$ArrThemeColor[$x2]?></label>
+													<? } ?>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<th>특징/특색</th>
+											<td>
+												<div class="selectListBox" selectListBoxId="characterInfo">
+													<? for($x2 = 0 ; $x2 < count($ArrCharacter) ; $x2++) { ?>
+													<label class="chechkbox-inline"><input type="checkbox" value="<?=$ArrCharacter[$x2]?>" <?=(in_array($ArrCharacter[$x2],$arr_character))?" checked":null?> class="dataText" onClick="fnc_autosave()"/><?=$ArrCharacter[$x2]?></label>
+													<? } ?>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<th>인쇄</th>
+											<td>
+												<div class="selectListBox" selectListBoxId="printInfo">
+													<label class="chechkbox-inline"><input type="radio" name="fld_print" value="2" class="dataText" <?=("$proposal[fld_print]"=="2")?" checked":null?> onClick="fnc_autosave()"/>인쇄가능</label>
+													<label class="chechkbox-inline"><input type="radio" name="fld_print" value="0" class="dataText" <?=("$proposal[fld_print]"=="0")?" checked":null?> onClick="fnc_autosave()"/>인쇄불가</label>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<th>샘플제출</th>
+											<td>
+												<div class="selectListBox" selectListBoxId="sampleInfo">
+													<label class="chechkbox-inline"><input type="radio" name="fld_sample" value="2" class="dataText" <?=("$proposal[fld_sample]"=="2")?" checked":null?> onClick="fnc_autosave()"/>샘플제출가능</label>
+													<label class="chechkbox-inline"><input type="radio" name="fld_sample" value="0" class="dataText" <?=("$proposal[fld_sample]"=="0")?" checked":null?> onClick="fnc_autosave()"/>샘플제출불가</label>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<th>결제조건</th>
+											<td>
+												<div class="selectListBox" selectListBoxId="payment_typeInfo">
+													<label class="chechkbox-inline"><input type="radio" name="fld_payment_type" value="1" class="dataText" <?=("$proposal[fld_payment_type]"=="1")?" checked":null?> onClick="fnc_autosave()"/>현금만 가능</label>
+													<label class="chechkbox-inline"><input type="radio" name="fld_payment_type" value="2" class="dataText" <?=("$proposal[fld_payment_type]"=="2")?" checked":null?> onClick="fnc_autosave()"/><?=$ArrPaymentType[2]?>결제 가능</label>
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+								<script type="text/javascript" src="/skin/js/proposalWriteAction.js"></script>
+							</div>
+
+							<!-- 제안서정보 e-->
+
+						</div>
+						<!-- 제안서등록 e-->
+
+						<!-- 페이지버튼 s-->
+						<div class="cbBottomBox">
+							<div align="center" style="padding:10px;color:#FFC000;" id="ID_view_autosave_msg2">자동저장됨 (<?=$proposal[fld_update]?>)</div>
+							<div class="pageBtnBox">
+								<div class="btn btnMainC2" onClick="JavaScript:checkData();"><?=($proposal_uid>=1)?"수정":"등록"?></div>
+								<div class="btn btnWhite" onClick="JavaScript:history.go(-1);">취소</div>
+							</div>
+						</div>
+						<!-- 페이지버튼 e-->
+					</form>
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+	<? @include_once HOME_DIR . "/include/bottom.php"; ?>

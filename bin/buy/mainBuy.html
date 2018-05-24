@@ -1,0 +1,65 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../../include/config.php";
+	@include_once HOME_DIR . "/include/top.php";
+?>
+</head>
+<body>
+<div id="wrap">
+	<script type="text/javascript">currentPageKind="buy";</script><!-- 현재페이지 -->
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					
+					<!-- contents s -->
+					<div class="cbTopBox">
+					</div>
+					<div class="cbMiddleBox">
+						<div class="mGridBox3">
+							<div class="mGridBoxOutline">
+								공고등록
+							</div>
+						</div>
+						<div class="mGridBoxWrap">
+							
+							<div class="mGridBox3">
+								<div class="mGridBoxOutline">
+									<div class="mgTitle">최근제안서</div>
+									<div class="mgSubTitle">가장 최근에 받은 제안서를 확인하세요</div>
+									div.mg
+								</div>
+							</div>
+							<div class="mGridBox3">
+								<div class="mGridBoxOutline">스크랩
+								</div>
+							</div>
+							<div class="mGridBox3">
+								<div class="mGridBoxOutline">베스트20
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="cbBottomBox">
+					</div>
+
+					<p>구매메인</p>
+					<div class="squareBtnWrap">
+						<input type="button" value="공고등록" class="squareBtnStyle btnMainC" onclick="javascript:pageMove(main_buyNavT[0][1],main_buyNavT[0][2]);">
+					</div>
+					<!-- contents e -->
+
+				</div>
+			</div>
+		</div>
+	</div>
+	<? @include_once HOME_DIR . "/include/bottom.php"; ?>

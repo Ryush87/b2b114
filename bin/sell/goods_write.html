@@ -1,0 +1,370 @@
+<?
+	@require_once "../../include/config.php";
+
+	if($work == "execute" AND strlen($fld_name) >= 1 AND strlen($fld_model) >= 1 AND $fld_price >= 1)
+	{
+		@require_once LIBRARY . "/Modules/function_fileup.php";
+		
+		// 파라미터를 변수로 정의
+			$cat1_uid = (strlen($cat1_uid) >= 1)?$cat1_uid:0;
+			$cat2_uid = (strlen($cat2_uid) >= 1)?$cat2_uid:0;
+			$cat3_uid = (strlen($cat3_uid) >= 1)?$cat3_uid:0;
+			$fld_name = addslashes(trim($_POST[fld_name]));
+			$fld_model = addslashes(trim($_POST[fld_model]));
+			$fld_price = (strlen($fld_price) >= 1)?str_replace(',','',$_POST[fld_price]):0;
+			$fld_manufactuer = addslashes(trim($_POST[fld_manufactuer]));
+			$fld_made_country = addslashes(trim($_POST[fld_made_country]));
+			$fld_introduction = addslashes(trim($_POST[fld_introduction]));
+			$fld_contents = addslashes(trim($_POST[fld_contents]));
+			$fld_keyword = addslashes(trim($_POST[fld_keyword]));
+			$fld_spec = addslashes(trim($_POST[fld_spec]));
+
+		// UID 가져오기
+			$Qry = "SELECT max(uid) FROM goods_default";
+			$Rlt = @mysql_query($Qry,$Con);
+			$max_uid = @mysql_result($Rlt,0,0);
+			$max_uid = $max_uid + 1 ;
+
+		// 파일 업로드 처리
+			$updir = WEBDATA . "/B2B114/goods_image_s";
+			$fld_image_s = ($_FILES[attach1][size]>=1)?fnc_fileup('attach1',$updir,$max_uid,0,0,'jpg,gif,png'):null;
+			$updir = WEBDATA . "/B2B114/goods_image_m";
+			$fld_image_m = ($_FILES[attach2][size]>=1)?fnc_fileup('attach2',$updir,$max_uid,0,0,'jpg,gif,png'):null;
+
+		// 쿼리문 작성(INSERT) 및 실행
+			$Qry = "
+							INSERT INTO
+								goods_default
+							SET
+								uid=".$max_uid.", 
+								regmem_uid='$_SESSION[ssUID]', 
+								cat1_uid=$cat1_uid, 
+								cat2_uid=$cat2_uid, 
+								cat3_uid=$cat3_uid, 
+								brand_uid=$brand_uid, 
+								fld_name='$fld_name', 
+								fld_model='$fld_model', 
+								fld_price=$fld_price, 
+								fld_contents='$fld_contents', 
+								fld_made_country='$fld_made_country', 
+								fld_keyword='$fld_keyword', 
+								fld_introduction='$fld_introduction', 
+								fld_manufactuer='$fld_manufactuer', 
+								fld_spec='$fld_spec', 
+								fld_image_s='$fld_image_s', 
+								fld_image_m='$fld_image_m', 
+								fld_regdate=NOW(), fld_update=NOW()
+						";
+					$Rlt = @mysql_query($Qry,$Con);
+			
+			if($Rlt)
+			{
+				echo "<form name='form1' method='post' action='proposal_write_step1.html'>";
+				echo "<input type='hidden' name='qkeyword' value='".urlencode(base64_encode($fld_name))."'/>";
+				echo "</form><script>document.form1.submit();</script>";
+				exit;
+			}
+			else
+			{
+				// 에러발생
+					echo "<script language='JavaScript'>alert('오류발생 : 관리자에게 문의 바랍니다.');history.go(-1);</script>";
+					exit;
+			}
+
+
+	}
+
+	@include_once HOME_DIR . "/include/top.php";
+?>
+<script language="JavaScript" src="/_LIB/css_js/number_format.js"></script>
+<script language="JavaScript">
+<!--
+
+	function form_check()
+	{
+		var form = document.sell_form ;
+
+		submitContents();	// 에디터의 내용을 textarea 로 입력.
+
+		array_name1 = new Array('fld_name','fld_model', 'fld_price', 'fld_made_country', 'fld_contents') ;
+		array_name2 = new Array('상품명','모델명', '소비자가', '원산지', '상세 설명') ;
+
+		for(x = 0 ; x < array_name1.length ; x++)
+		{
+
+			if(form[array_name1[x]].value == "")
+			{
+				message = "[ " + array_name2[x] + " ] 을(를) 입력(선택)해주십시요." ;
+				alert(message);
+				form[array_name1[x]].focus();
+				return false;
+			}
+		}
+		
+		form.work.value = "execute" ;
+		form.submit();
+		
+	}
+
+	function cat1_cat2(uid)
+	{
+		new Ajax.Request
+		(
+			'/bin/_common/_selectAddOption.html', {
+				method: 'post',
+				parameters: {
+					'work':'cat1_cat2', 
+					'label0':'2차 분류', 
+					'uid':uid
+				}, 
+				onComplete: function(httpObj) { 
+					select_innerHTML($('ID_cat2_uid'),httpObj.responseText); 
+					cat2_cat3(0);
+					}
+			}
+		);
+	}
+
+	function cat2_cat3(uid)
+	{
+		new Ajax.Request
+		(
+			'/bin/_common/_selectAddOption.html', {
+				method: 'post',
+				parameters: {
+					'work':'cat2_cat3', 
+					'label0':'3차 분류', 
+					'uid':uid
+				}, 
+				onComplete: function(httpObj) { 
+					select_innerHTML($('ID_cat3_uid'),httpObj.responseText); 
+					}
+			}
+		);
+	}
+
+	function fnc_select_brand(uid)
+	{
+		var form = document.sell_form;
+		var xmlDOC;
+		
+		new Ajax.Request
+		(
+			'./_select_brand.html', {
+				method: 'get',
+				parameters: {
+					'uid':uid
+				}, 
+				onComplete: function(httpObj) 
+				{ 
+					xmlDOC = httpObj.responseXML; 
+					
+					// 제조사
+						if(xmlDOC.getElementsByTagName("fld_manufactuer")[0].childNodes[0] != undefined) 
+							form.fld_manufactuer.value = xmlDOC.getElementsByTagName("fld_manufactuer")[0].childNodes[0].nodeValue;
+					// 원산지
+						form.fld_made_country.value = xmlDOC.getElementsByTagName("fld_made_country")[0].childNodes[0].nodeValue;
+					// 키워드
+						if(xmlDOC.getElementsByTagName("fld_keyword")[0].childNodes[0] != undefined) 
+							form.fld_keyword.value = xmlDOC.getElementsByTagName("fld_keyword")[0].childNodes[0].nodeValue;
+							
+						form.fld_name.focus();
+				}
+			}
+		);
+	}
+
+
+-->
+</script>
+</head>
+<body>
+<div id="wrap">
+	<script type="text/javascript">currentPageKind="sell";currentMainN=1;currentSubN=1;</script><!-- 현재페이지 -->
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<!-- contents s -->
+<form class="sell_form" name="sell_form" action="" method="post" enctype="multipart/form-data">
+<input type="hidden" name="work"/>
+						<!-- 신규상품등록 s-->
+						
+						<div class="cbTitle">
+							<h2>신규상품등록</h2>
+							<span style="padding-left:5px;">제안하실 상품을 검색하세요</span>
+						</div>
+						<div class="cbTopBox">
+						</div>
+						<div class="cbMiddleBox">
+							
+							<!-- 상품정보입력 s-->
+							<div class="articleBox">
+								<table class="writeTable">
+									<colgroup>
+										<col width="16%" /><col width="28%" /><col width="28%" /><col width="28%" />
+									</colgroup>
+									<tr>
+										<td colspan="4"><div class="artTitle">기본정보<div class="essentialText"><span><i class="fa fa-asterisk"></i></span> 필수정보</div></div></td>
+									</tr>
+									<tr>
+										<th>브랜드<sup>*</sup></th>
+										<td>
+											<select name="brand_uid" title="선택" class="form-control" onChange="JavaScript:fnc_select_brand(this.value)">
+												<option value="1">기타 브랜드(추가요청)</option>
+												<?
+													$Qry2 = "SELECT * FROM goods_brand WHERE fld_status = 'Y' ORDER BY fld_name";
+													$Rlt2 = @mysql_query($Qry2,$Con);
+													while($row2 = @mysql_fetch_array($Rlt2))
+													{
+												?>
+												<option value="<?=$row2[uid]?>"><?=$row2[fld_name]?></option>
+												<? } ?>
+											</select>
+										</td>
+										<td colspan="2" style="color:#AAAAAA;">※ 해당 브랜드가 목록에 없는 경우 "기타"로 선택(등록내용 확인 후 추가 및 수정 진행)</td>
+									</tr>
+									<tr>
+										<th>상품명<sup>*</sup></th>
+										<td colspan="3"><input name="fld_name" type="text" class="form-control" /></td>
+									</tr>
+									<tr>
+										<th>모델명<sup>*</sup></th>
+										<td><input name="fld_model" type="text" class="form-control" /></td>
+										<th>소비자가<sup>*</sup></th>
+										<td><input name="fld_price" type="text" class="form-control" onKeyUp="JavaScript:this.value=number_format(this.value)"/></td>
+									</tr>
+									<tr>
+										<th>제조사</th>
+										<td><input name="fld_manufactuer" type="text" class="form-control" /></td>
+										<th>원산지<sup>*</sup></th>
+										<td><input name="fld_made_country" type="text" class="form-control" placeholder="직접입력" style="width:180px;"/></td>
+									</tr>
+									<tr>
+										<th>한줄설명</th>
+										<td colspan="3"><input name="fld_introduction" type="text" class="form-control" /></td>
+									</tr>
+									<tr>
+										<th>상세 설명<sup>*</sup></th>
+										<td colspan="3">
+<script type="text/javascript" src="/_GCM/smart_editor/js/HuskyEZCreator.js" charset="utf-8"></script>
+<textarea name="fld_contents" id="ID_fld_contents" rows="10" cols="100" style="width:100%;height:300px; display:none;"></textarea>
+<script type="text/javascript">
+var oEditors = [];
+
+// 추가 글꼴 목록
+//var aAdditionalFontSet = [["MS UI Gothic", "MS UI Gothic"], ["Comic Sans MS", "Comic Sans MS"],["TEST","TEST"]];
+
+nhn.husky.EZCreator.createInIFrame({
+	oAppRef: oEditors,
+	elPlaceHolder: "ID_fld_contents",
+	sSkinURI: "/_GCM/smart_editor/SmartEditor2Skin.html",	
+	htParams : {
+		bUseToolbar : true,
+		bUseVerticalResizer : true,
+		bUseModeChanger : true,
+		fOnBeforeUnload : function(){
+		}
+	}, //boolean
+	fOnAppLoad : function(){
+	},
+	fCreator: "createSEditor2"
+});
+
+function submitContents() {
+	oEditors.getById["ID_fld_contents"].exec("UPDATE_CONTENTS_FIELD", []);
+}
+</script>
+										</td>
+									</tr>
+									<tr>
+										<th>상품군</th>
+										<td>
+											<select name="cat1_uid" onChange="JavaScript:cat1_cat2(this.value)" id="ID_cat1_uid" title="선택" class="form-control">
+												<option value="0">1차 분류</option>
+												<?
+													$Qry2 = "SELECT * FROM goods_cat1 WHERE fld_status='Y' ORDER BY fld_name";
+													$Rlt2 = @mysql_query($Qry2,$Con);
+													while($row2 = @mysql_fetch_array($Rlt2))
+													{
+												?>
+												<option value="<?=$row2[uid]?>"><?=$row2[fld_name]?></option>
+												<? } ?>
+											</select>
+										</td>
+										<td>
+											<select name="cat2_uid" onChange="JavaScript:cat2_cat3(this.value)" id="ID_cat2_uid" title="선택" class="form-control">
+												<option value="0">2차 분류</option>
+											</select>
+										</td>
+										<td>
+											<select name="cat3_uid" id="ID_cat3_uid" title="선택" class="form-control">
+												<option value="0">3차 분류</option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<th>태그(키워드)</th>
+										<td colspan="3"><input name="fld_keyword" type="text" class="form-control" /></td>
+									</tr>
+									<tr>
+										<th>썸네일 이미지</th>
+										<td colspan="3">
+											<input type="text" id="goods_image_s" class="fileInputType form-control" readonly="readonly" title="첨부된 파일경로" value="선택된 파일 없음">
+											<div class="uploadFile btn btnWhite mrgL10">
+												파일선택
+												<input type="file" name="attach1" onchange="javascript:document.getElementById('goods_image_s').value=this.value"/>
+											</div>
+											<div class="statusText2" style="float:left; margin-top:10px;"> 120px * 120px (JPG,PNG,GIF 만 등록 가능)</div>
+										</td>
+									</tr>
+									<tr>
+										<th>대표 이미지</th>
+										<td colspan="3">
+											<input type="text" id="goods_image_m" class="fileInputType form-control" readonly="readonly" title="첨부된 파일경로" value="선택된 파일 없음">
+											<div class="uploadFile btn btnWhite mrgL10">
+												파일선택
+												<input type="file" name="attach2" onchange="javascript:document.getElementById('goods_image_m').value=this.value"/>
+											</div>
+											<div class="statusText2" style="float:left; margin-top:10px;"> 300px * 300px (JPG,PNG,GIF 만 등록 가능)</div>
+										</td>
+									</tr>
+									<tr>
+										<th>스펙</th>
+										<td colspan="3">
+											<textarea name="fld_spec" style="width:100%;height:100px;"></textarea>
+											<div align="left" style="padding-top:4px;color:#FFC000;">※ 상세 설명에 입력한 내용은 검색어에 포함되지 않습니다. 스펙에 입력된 내용은 검색어 검색시 포함되어 검색 됩니다.</div>
+										</td>
+									</tr>
+								</table>
+							</div>
+							<!-- 상품정보입력 e-->
+
+						</div>
+						<!-- 신규상품등록 e-->
+
+						<!-- 페이지버튼 s-->
+						<div class="cbBottomBox">
+							<div class="pageBtnBox">
+								<div class="btn btnMainC" onclick="JavaScript:form_check();">등록</div>
+								<div class="btn btnWhite" onClick="JavaScript:history.go(-1);">취소</div>
+							</div>
+						</div>
+						<!-- 페이지버튼 e-->
+</form>
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+	<? @include_once HOME_DIR . "/include/bottom.php"; ?>

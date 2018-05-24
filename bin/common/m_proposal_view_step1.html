@@ -1,0 +1,44 @@
+<?
+	@require_once "../../include/config.php";
+	@include_once HOME_DIR . "/include/popup_top.php";
+?>
+</head>
+<body>
+	<div class="popHead bgColorMC1">
+		<div class="popWidthWrap">
+			<img src="/skin/images/common/logo_w.png" alt="B2B114 LOGO" style="float:left;width:80px;"/>
+			<div style="float:left;margin-left:10px;">제안서보기</div>
+		</div>
+	</div>
+	<div class="popContents">
+		<div class="popWidthWrap">
+			<div class="articleBox" style="margin:30px 0 0 0;">
+				<div class="artCont">
+					<form class="pageFormBox" id="" name="form_login" action="login.html" method="post" onSubmit="return fchk_login()">
+						<input type="hidden" name="work_type" value="login"/>
+						<div class="cbTitle">
+							<h2>비밀번호</h2>
+							<span style="margin:10px 0 0 0;">안내 받으신 비밀번호를 입력해주세요.</span>
+						</div>
+						<div class="cbMiddleBox">
+							<ul class="loginFormWrap">
+								<li class="memberInputBox">
+									<input type="password" name="" placeholder="비밀번호" id=""/>
+									<span id="" class="memberMsgBox"></span>
+								</li>
+								<li style="margin:50px 0;border-top:0;">
+									<input type="submit" value="제안서보기" class="btnStyle btnMainC" />
+								</li>
+							</ul>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="popFooter bdTop">
+		<div class="pageBtnBox"><a href="tel:010-1234-5678"><div class="btn btnWhite"><i class="fa fa-phone"></i> 전화문의</div></a></div>
+	</div>
+<? @include_once HOME_DIR . "/include/pop_infobox.php"; ?>
+</body>
+</html>

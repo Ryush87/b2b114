@@ -1,0 +1,91 @@
+<?
+	@require_once "../../include/config.php";
+	@include_once HOME_DIR . "/include/top.php";
+?>
+</head>
+<body>
+<div id="wrap">
+	<script type="text/javascript">currentPageKind="customer";currentMainN=0;currentSubN=0;</script><!-- 현재페이지 -->
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/oneNav.php"; ?>
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<!-- contents s -->
+
+					<!-- 문의등록 s-->
+					<form name="contact_form" class="pageFormBox" action="/_GCM/WebCS.html" enctype="multipart/form-data" method="post">
+						<input type="hidden" name="r_msg" value="Thank you! Move to the main page."/>
+						<input type="hidden" name="r_url" value=""/>
+						<input type="hidden" name="r_telno" value=""/>
+						<div class="cbTitle">
+							<h2><script>writeVar(sub_customerNavT_0[currentSubN][0]);</script></h2>
+							<span>무엇이든 물어보세요</span>
+						</div>
+						<div class="cbTopBox">
+						</div>
+						<div class="cbMiddleBox">
+							
+							<!-- 내용 s-->
+								<div class="articleBox" style="margin-bottom:0;">
+									<div class="artTop">
+										<div class="strongTitle2"><input type="text" name="f_subject" id="f_subject" placeholder="제목을 입력해주십시오."/></div>
+									</div>
+									<div class="artCont">
+										<table class="writeTable" style="border-top:1px solid #ddd;border-left:1px solid #ddd;border-right:1px solid #ddd;">
+											<colgroup>
+												<col width="10%" />
+												<col width="17%" />
+												<col width="10%" />
+												<col width="17%" />
+												<col width="10%" />
+												<col width="36%" />
+											</colgroup>
+											<tbody>
+												<tr>
+													<th>이름</th>
+													<td><input type="text" name="f_name" class="form-control"/></td>
+													<th>이메일</th>
+													<td><input type="text" name="f_email" class="form-control"/></td>
+													<th>첨부파일</th>
+													<td colspan="3">
+														<input type="text" id="FileRoute" class="fileInputType form-control" readonly="readonly" title="첨부된 파일경로" value="선택된 파일 없음">
+														<div class="uploadFile btn btnWhite mrgL10">
+															파일선택
+															<input type="file" name="attach" id="ID_attach1" class="" onchange="javascript:document.getElementById('FileRoute').value=this.value"/>
+														</div>
+													</td>
+												</tr>
+											</tbody>
+										</table>
+										<div class="strongTitle2" style="margin-top:20px;"><textarea name="f_contents" id="f_contents" cols="30" rows="4" class="form-control dataText" placeholder="내용을 입력해주십시오."></textarea></div>
+									</div>
+								</div>
+							<!-- 내용 e-->
+						</div>
+						<!-- 페이지버튼 s-->
+						<div class="cbBottomBox">
+							<div class="pageBtnBox">
+								<input type="submit" class="btn btnMainC2" value="문의등록" onClick="();" />
+								<div class="btn btnWhite" onClick="javascript:history.go(-1);">취소</div>
+							</div>
+						</div>
+						<!-- 페이지버튼 e-->
+					</form>
+					<!-- 문의등록 e-->
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+	<? @include_once HOME_DIR . "/include/bottom.php"; ?>

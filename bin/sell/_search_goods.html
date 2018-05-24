@@ -1,0 +1,133 @@
+<?
+	@require_once "../../include/config.php";
+	fnc_login_check();
+	
+	// 검색조건 만드는 부분( 콤마(,) 문자열을 이용해서 AND 검색 구현)
+		$arr_keyword = explode(',',$qkeyword);
+		$arr_field = Array('A.fld_name','B.fld_name','A.fld_model','A.fld_keyword','A.fld_spec');
+		
+		for($x = 0 ; $x < count($arr_field) ; $x++)
+		{
+			$WhereQ .= ( strlen($WhereQ) >= 1)?" OR (":" (";
+	
+			for($x2 = 0 ; $x2 < count($arr_keyword) ; $x2++)
+			{
+				$WhereQ .= ( $x2 >= 1 )?" AND ".$arr_field[$x]." LIKE '%".$arr_keyword[$x2]."%' ":" ".$arr_field[$x]." LIKE '%".$arr_keyword[$x2]."%' ";
+			}
+	
+			$WhereQ .= ") ";
+		}
+		
+	// 정렬조건 지정하는 부분
+		$qsort = ( strlen($qsort) >= 1 )?$qsort:"A.uid DESC";
+						
+	$Qry = "
+					SELECT 
+						A.*, B.fld_name AS brand_name 
+					FROM 
+						goods_default A, 
+						goods_brand B
+					WHERE
+						A.brand_uid = B.uid AND 
+						(
+							$WhereQ
+						)
+					ORDER BY $qsort
+					";
+	$Rlt = @mysql_query($Qry,$Con);
+	$total_rows = @mysql_num_rows($Rlt);
+	
+	if( $total_rows >= 1 )
+	{
+?>
+								<div class="artTitle">
+									<div class="sGoodsSearch">
+										<span class="sGoodsSearchTitle">검색결과</span>
+										<div class="sGoodsSearchSubtitle">총 <span><?=number_format($total_rows)?>개</span>의 상품이 검색되었습니다</div>
+										<div class="sortOpBox">
+											<ul>
+												<a href="JavaScript:document.sell_form.qsort.value='A.uid DESC';fnc_keyword();"><li<?=($qsort=="A.uid DESC")?" class='actOn'":null?>>최근등록일</li></a>
+												<a href="JavaScript:document.sell_form.qsort.value='A.fld_price';fnc_keyword();"><li<?=($qsort=="A.fld_price")?" class='actOn'":null?>>낮은가격순</li></a>
+												<a href="JavaScript:document.sell_form.qsort.value='A.fld_price DESC';fnc_keyword();"><li<?=($qsort=="A.fld_price DESC")?" class='actOn'":null?>>높은가격순</li></a>
+											</ul>
+										</div>
+									</div>
+								</div>
+								<div class="artCont">
+									<ul class="suggestGoods">
+										<?
+											while($row = @mysql_fetch_array($Rlt)) 
+											{
+												if($row[cat1_uid] >= 1) $view_cat1 = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat1 WHERE uid=".$row[cat1_uid],$Con),0,0);
+												if($row[cat2_uid] >= 1) $view_cat2 = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat2 WHERE uid=".$row[cat2_uid],$Con),0,0);
+												if($row[cat3_uid] >= 1) $view_cat3 = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat3 WHERE uid=".$row[cat3_uid],$Con),0,0);
+										?>
+										<li class="sGoodsList pddT20">
+											<div class="sGoodsImgArea fLeft">
+												<a href="#" target="_blank" class="img">
+													<img src="/_GWD/B2B114/goods_image_m/<?=( strlen($row[fld_image_m]) >= 1 )?$row[fld_image_m]:"noimage.gif"?>"/>
+												</a>
+											</div>
+											<div class="sGoodsinfo fLeft">
+												<div class="sgTitle"><?=$row[fld_name]?></div>
+												<div class="sgSubTitle"><?=$row[fld_introduction]?></div>
+												<div class="sgPrice"><span class=""><?=number_format($row[fld_price])?>원</span></div>
+												<? if( $row[cat1_uid] >= 1 ) { ?>
+												<div class="sgDepth">
+													<?=$view_cat1?> 
+													<?=(strlen($view_cat2)>=1)?" &gt; ".$view_cat2:null?>
+													<?=(strlen($view_cat3)>=1)?" &gt; ".$view_cat3:null?>
+												</div>
+												<? } ?>
+												<div class="sgDesc"><?=$row[fld_spec]?></div>
+												<div class="sgDate"><?=str_replace('-','년 ',substr($row[fld_regdate],0,7))?>월 등록</div>
+											</div>
+											<div class="sGoodsBtns">
+												<input type="button" value="상세보기" class="sgBtn btnWhite" onClick="JavaScript:fnc_goodscompanyVP2('goods',<?=$row[uid]?>)"/>
+												<input type="button" value="상품선택" class="sgBtn btnMainC2" onClick="JavaScript:select_goods(<?=$row[uid]?>,'<?=$row[fld_name]?>')"/>
+											</div>
+										</li>
+										<? } ?>
+									</ul>
+								</div>
+								<!-- 페이지버튼 s-->
+								<div class="cbBottomBox">
+									<div class="pageBtnBox pddT20">
+										<div class="btn btnWhite" onClick="JavaScript:window.location.href='/bin/sell/goods_write.html';">검색된 상품외의 다른 상품을 새롭게 등록하고 제안서를 등록</div>
+										<!-- <div class="btn btnMainC2" onClick="JavaScript:fnc_nextstep()">다음단계</div> -->
+									</div>
+								</div>
+								<!-- 페이지버튼 e-->
+<?
+	}
+	else
+	{
+?>
+								<div class="artTitle">
+									<div class="sGoodsSearch">
+										<div class="sGoodsSearchTitle">검색결과</div>
+										<div class="sGoodsSearchSubtitle">총 <span><?=number_format($total_rows)?>개</span>의 상품이 검색되었습니다</div>
+										<div class="sortOpBox">
+											<ul>
+												<a href="JavaScript:document.sell_form.qsort.value='A.uid DESC';fnc_keyword();"><li class="actOn">최근등록일</li></a>
+												<a href="JavaScript:document.sell_form.qsort.value='A.fld_price';fnc_keyword();"><li>낮은가격순</li></a>
+												<a href="JavaScript:document.sell_form.qsort.value='A.fld_price DESC';fnc_keyword();"><li>높은가격순</li></a>
+											</ul>
+										</div>
+									</div>
+								</div>
+								<div class="artCont">
+									<ul class="suggestGoods" style="float:left;width:100%;">
+										<li style="float:left;width:100%;text-align:center;padding:20px 0 30px 0;font-size:1.4em;font-weight:bold;border-bottom:1px solid #ddd;">
+											검색결과가 없습니다.
+										</li>
+									</ul>
+								</div>
+								<div class="cbBottomBox">
+									<div class="pageBtnBox pddT20">
+										<div class="btn btnMainC2" onClick="JavaScript:window.location.href='/bin/sell/goods_write.html';">B2B114 에 없는 새로운 상품이므로 상품등록 후 제안서를 등록</div>
+									</div>
+								</div>
+<?
+	}
+?>

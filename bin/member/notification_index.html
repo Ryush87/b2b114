@@ -1,0 +1,238 @@
+<?
+	@require_once "../../include/config.php";
+	@include_once HOME_DIR . "/include/popup_top.php";
+
+	if($page == "") { $page = 1 ; }
+	if($pageViewEa == "") { $pageViewEa = 10 ; }
+	
+	$WhereQ = " 
+							WHERE 
+								A.sender_uid = B.uid 
+								AND 
+								( 
+									A.receiver_uid=".$_SESSION[ssUID]." 
+									OR 
+									( 
+										A.sender_uid=".$_SESSION[ssUID]." 
+										AND fld_section=10
+									)
+								)";
+	$WhereQ .= (strlen($qsection) >= 1)?" AND A.fld_section=".$qsection:null;
+	$WhereQ .= (strlen($qkeyword) >= 1)?" AND ( B.fld_name LIKE '%$qkeyword%' OR B.fld_co_name LIKE '%$qkeyword%' )":null;
+	
+	$Qry = "SELECT count(A.uid) FROM member_message A, member_default B $WhereQ LIMIT 1" ;
+	$Rlt = @mysql_query($Qry,$Con) ;
+	$total_rows = @mysql_result($Rlt,0,0) ;
+
+	require LIBRARY . "/Modules/function_paging.php" ;
+	$pgn = fnc_paging($page,$total_rows,$pageViewEa,10,0) ;
+
+	$Qry = "SELECT 
+						A.*, 
+						DATE_FORMAT(A.fld_send_time,'%Y년 %m월 %d일 %H:%i') AS view_sendtime, 
+						DATE_FORMAT(A.fld_read_time,'%Y년 %m월 %d일 %H:%i') AS view_readtime, 
+						B.fld_id AS member_id, B.fld_name AS member_name, B.fld_co_name AS member_co_name 
+					FROM 
+						member_message A, member_default B 
+					$WhereQ 
+					ORDER BY A.uid DESC 
+					LIMIT $pgn[DataStartNo], $pgn[ViewDataEa]" ;
+	$Rlt = @mysql_query($Qry,$Con) ;
+?>
+<script language="JavaScript">
+<!--
+
+	function fnc_submit()
+	{
+		var form = document.member_form;
+		form.page.value = "1";
+		form.submit();
+	}
+	
+	function fnc_requestVP(request_uid,request_price_uid)
+	{
+		var urlurl = "/bin/sell/announce_view.html?request_uid="+request_uid+"&view_price_uid="+request_price_uid;
+		opener.location.href=urlurl;
+	}
+	
+-->
+</script>
+</head>
+<body>
+<form name="member_form" method="get" action="">
+<input type="hidden" name="page" value="<=$page?>"/>
+	<div class="popHead bgColorMC1">
+		<div class="popWidthWrap3">
+			<span class="fLeft"><i class="fa fa-bell fs14"></i> 최근 알림</span>
+			<div class="popWinCloseBtn"><i class="fa fa-times fa-lg"></i></div>
+			<div class="searchBoxWrap" style="font-size:12px;color:#666;margin-right:20px;">
+				<input type="text" name="qkeyword" value="<?=$qkeyword?>" class="searchInputBox" style="float:left;border:0;" placeholder="검색어" />
+				<input type="button" id="searchBtn" name="searchBtn" value="&#xf002;" class="listBtnStyle btnWhite" style="float:left;border:0;" onClick="JavaScript:fnc_submit();"/>
+			</div>
+		</div>
+	</div>
+	<div class="popContents">
+		<div class="popWidthWrap3">
+			<div class="artTop">
+				<div class="selectOptionBox" style="margin-left:2%;">
+					<select name="qsection" onChange="JavaScript:fnc_submit();" class="form-control;">
+						<option value="">전체</option>
+						<option value="30"<?=($qsection=="30")?" selected":null?>>스크랩알림</option>
+						<option value="10"<?=($qsection=="10")?" selected":null?>>제안(제안가 확인)요청</option>
+						<option value="20"<?=($qsection=="20")?" selected":null?>>제안서 평가</option>
+						<option value="40"<?=($qsection=="40")?" selected":null?>>공고 등록 알림</option>
+					</select>
+				</div>
+			</div>
+			<div class="articleBox" style="margin-top:0;padding-top:0;">
+				<div class="artCont">
+					<!-- 알림 s-->
+					<div class="noticeBoxWrap">
+						<ul class="noticeBox">
+<?
+	for($x = 0 ; $x < $pgn[ViewDataEa] ; $x++)
+	{
+		$IDXNO = ($pgn[DataStartNo] +1) + $x ;
+		$row = @mysql_fetch_array($Rlt) ;
+		$vInfo = null;
+		
+		$vInfo[type] = ($_SESSION[ssUID] == $row[receiver_uid])?"receive":"send";
+		$vInfo[read] = 1;
+
+		// 받은 메시지, 확인전 메시지인지 체크
+			if( $vInfo[type]=="receive" AND ( strlen($row[fld_read_time]) <= 0 OR $row[fld_read_time] == "0000-00-00 00:00:00") )
+			{
+				$vInfo[read] = 0;
+				$Qry2 = "UPDATE member_message SET fld_read_time=NOW() WHERE uid=".$row[uid];
+				$Rlt2 = @mysql_query($Qry2,$Con);
+			}
+		
+		switch($row[fld_section])
+		{
+			case 10 : // 제안 요청
+				$vInfo[title] = "제안 요청";
+				$vInfo[icon] = "money";
+				
+				if($vInfo[type] == "send")
+				{
+					$receiver = @mysql_fetch_array(@mysql_query("SELECT * FROM member_default WHERE uid=".$row[receiver_uid],$Con));
+					$vInfo[name] = (strlen($receiver[fld_co_name])>=1)?$receiver[fld_co_name]:$receiver[fld_id];
+					$vInfo[msg] = "님에게 제안 요청을 했습니다.";
+					$vInfo[view_uid] = $row[receiver_uid];
+				}
+				else
+				{
+					$vInfo[name] = (strlen($row[member_co_name])>=1)?$row[member_co_name]:$row[member_id];
+					$vInfo[msg] = "님이 제안 요청(제안가 확인 요청) 했습니다.";
+					$vInfo[view_uid] = $row[sender_uid];
+				}
+				$vInfo[proposal_uid] = $row[proposal_uid];
+				$vInfo[proposal_price_uid] = $row[proposal_price_uid];
+				$vInfo[request_uid] = $row[request_uid];
+				$vInfo[request_price_uid] = $row[request_price_uid];
+				$vInfo[receiver_readtime] = $row[view_readtime];
+			break;
+			
+			case 20 : // 제안서 평가
+				$vInfo[title] = "제안서평가";
+				$vInfo[icon] = "pencil-square-o";
+				$vInfo[name] = substr($row[member_id],0,2)."***";
+				$vInfo[msg] = "님이 귀하의 제안서를 평가( <b>".$ArrEval[$row[fld_eval]]."</b> )했습니다.";
+				$vInfo[proposal_uid] = $row[proposal_uid];
+				$vInfo[proposal_price_uid] = $row[proposal_price_uid];
+				$vInfo[request_uid] = $row[request_uid];
+				$vInfo[request_price_uid] = $row[request_price_uid];
+			break;
+			
+			case 30 : // 제안서 스크랩
+				$vInfo[title] = "스크랩알림";
+				$vInfo[icon] = "briefcase";
+				$vInfo[name] = substr($row[member_id],0,2)."***";
+				$vInfo[msg] = "님이 귀하의 제안서를 스크랩 했습니다.";
+				$vInfo[proposal_uid] = $row[proposal_uid];
+			break;
+			
+			case 40 : // 공고 등록 알림(관심 바이어의 공고 등록을 알려줌)
+				$vInfo[title] = "새공고";
+				$vInfo[icon] = "file-text-o";
+				$vInfo[name] = substr($row[member_id],0,2)."***";
+				$vInfo[msg] = "님이 새로운 공고를 등록 했습니다.";
+				$vInfo[request_uid] = $row[request_uid];
+			break;
+			
+		}
+		
+?>
+							<li class="<?=(!$vInfo[read])?"ntcActon":null?> ntcWay<?=strtoupper(substr($vInfo[type],0,1))?><?=substr($vInfo[type],1,20)?>">
+								<div class="ntcLeft">
+									<div class="ntcIcon"><i class="fa fa-<?=$vInfo[icon]?>"></i></div>
+								</div>
+								<div class="ntcRight">
+									<div class="ntcKind">
+										<?=$vInfo[title]?>
+										<? if(strlen($vInfo[receiver_readtime])>=1 AND $vInfo[type] == "send"){ ?><div class="ntcReceive balloonAct_R" title="<?=$vInfo[receiver_readtime]?>">상대방읽음<div><i class="fa fa-clock-o"></i></div></div><? } ?>
+									</div>
+									<div class="ntcText">
+										<span class="popupInfoBox" popDivId="companyNameInfo"<? if($vInfo[view_uid] >= 1) { ?> onClick="JavaScript:fnc_infoBox_<?=($vInfo[type] == "receive")?"buyer":"seller"?>Info(<?=$vInfo[view_uid]?>)"<? } ?>><?=$vInfo[name]?></span>
+										<?=$vInfo[msg]?>
+									</div>
+									<div class="ntcBtns">
+										<? if($vInfo[proposal_uid] >= 1) { ?><div class="btn btnWhite ntcBtn" onclick="fnc_proposalVP(<?=$vInfo[proposal_uid]?>)">제안서확인</div><? } ?>
+										<? if($vInfo[request_uid] >= 1) { ?><div class="btn btnWhite ntcBtn" onclick="fnc_requestVP(<?=$vInfo[request_uid]?>,<?=$vInfo[request_price_uid]?>)">공고정보확인</div><? } ?>
+									</div>
+									<div class="ntcDate"><?=$row[view_sendtime]?></div>
+									<div class="ntcWay"><i class="fa fa-chevron-<?=($vInfo[type]=="receive")?"left":"right"?>"></i></div>
+								</div>
+							</li>
+<?
+	}
+?>
+						</ul>
+					</div>
+					<!-- 알림 e-->
+					<div class="pagingBoxWrap">
+						<ul class="pagingBox2">
+<?
+
+	// 이전블록 버튼출력.
+	if($pgn[BeforeBlockNo] != "")
+	{
+		echo "<a href=\"JavaScript:document.member_form.page.value='$pgn[BeforeBlockNo]';document.member_form.submit();\"><li class=\"angleBtn\"><i class=\"fa fa-angle-left\"></i></li></a>";
+	}
+	
+	// 페이지번호 출력부분.
+	for($x = 0 ; $x < $pgn[ViewPageEa] ; $x++)
+	{
+		$PageNo = $pgn[PageStartNo]  + $x ;
+		if($page == $PageNo) 
+		{ 
+			echo "<li class=\"actOn\">$PageNo</li>";
+		}
+		else
+		{
+			echo " <a href=\"JavaScript:document.member_form.page.value='$PageNo';document.member_form.submit();\" onMouseOver=\"window.status='$PageNo 페이지로 이동';return true;\" onMouseOut=\"window.status='';\" onFocus='this.blur()' style='color:#797979'><li>$PageNo</li></a> " ;
+		}		
+	}
+	
+	// 다음블록 버튼출력.
+	if($pgn[NextBlockNo] != "")
+	{
+		echo "<a href=\"JavaScript:document.member_form.page.value='$pgn[NextBlockNo]';document.member_form.submit();\"><li class=\"angleBtn\"><i class=\"fa fa-angle-right\"></i></li></a>";
+	}
+?>	
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="popFooter bdTop">
+		<div class="pageBtnBox">
+			<div class="btn btnWhite" onclick="winClose();">닫기</div>
+		</div>
+	</div>
+</form>
+<script language="JavaScript">window.resizeTo(800,850);opener.window.location.reload();</script>
+<? @include_once HOME_DIR . "/include/pop_infobox.php"; ?>
+</body>
+</html>

@@ -1,0 +1,420 @@
+<?
+	@require_once "../../include/config.php";
+	@include_once HOME_DIR . "/include/top.php";
+	@include_once LIBRARY . "/Modules/function_price2won.php";
+
+	$page = ( strlen($page) >= 1)?$page:1;
+	$pageViewEa = ( strlen($pageViewEa) >= 1)?$pageViewEa:8;
+	$view_tab = (strlen($view_tab) >= 1)?$view_tab:"proposal";
+	switch($view_tab)
+	{
+		case "proposal" : $currentSubN = 0; break;
+		case "goods" : $currentSubN = 1; break;
+		case "seller" : $currentSubN = 2; break;
+	}
+?>
+<script language="JavaScript">
+<!--
+
+	function fnc_changeTab(tabname)
+	{
+		var form = document.buy_form;
+		form.view_tab.value=tabname;
+		form.page.value=1;
+		form.submit();
+	}
+
+	function fnc_keyword()
+	{
+		var form = document.buy_form;
+		form.page.value=1;
+		form.submit();
+	}
+
+-->
+</script>
+</head>
+<body>
+<div id="wrap">
+	<script type="text/javascript">currentPageKind="buy";currentMainN=2;currentSubN=<?=$currentSubN?>;</script><!-- 현재페이지 -->
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<!-- contents s -->
+
+					<!-- 스크랩리스트 s-->
+					<div class="cbTitle">
+						<h2><script>writeVar(main_buyNavT[currentMainN][0]);</script></h2>
+						<span>구매활동 중에 스크랩 해놓은 제안서/상품/셀러 목록입니다</span>
+					</div>
+					<div class="cbTopBox">
+					</div>
+					<div class="cbMiddleBox">
+						
+						<!-- 리스트 s-->
+<form class="pageFormBox" name="buy_form" action="" method="get" onSubmit="return false">
+<input type="hidden" name="page" value="<?=$page?>"/>
+<input type="hidden" name="view_tab" value="<?=$view_tab?>"/>
+							<div class="articleBox" style="margin-bottom:0;">
+								<div class="artTop">
+									<? $view_cnt = @mysql_result(@mysql_query("SELECT count(uid) FROM member_scrap WHERE member_uid=".$_SESSION[ssUID]." AND fld_section='proposal'",$Con),0,0); ?>
+									<a href="JavaScript:fnc_changeTab('proposal')" class="listTab<?=($view_tab=="proposal")?" listActTab":null?>"><div class="inTab"><div>제안서(<?=number_format($view_cnt)?>)</div></div></a>
+									<? $view_cnt = @mysql_result(@mysql_query("SELECT count(uid) FROM member_scrap WHERE member_uid=".$_SESSION[ssUID]." AND fld_section='goods'",$Con),0,0); ?>
+									<a href="JavaScript:fnc_changeTab('goods')" class="listTab<?=($view_tab=="goods")?" listActTab":null?>"><div class="inTab"><div>상품(<?=number_format($view_cnt)?>)</div></div></a>
+									<? $view_cnt = @mysql_result(@mysql_query("SELECT count(uid) FROM member_scrap WHERE member_uid=".$_SESSION[ssUID]." AND fld_section='seller'",$Con),0,0); ?>
+									<a href="JavaScript:fnc_changeTab('seller')" class="listTab<?=($view_tab=="seller")?" listActTab":null?>"><div class="inTab"><div>셀러(<?=number_format($view_cnt)?>)</div></div></a>
+									<div class="listTabEtc" style="padding:0;">
+										<div class="searchBoxWrap">
+											<input type="text" name="qkeyword" value="<?=$qkeyword?>" class="searchInputBox" placeholder="검색어" />
+											<input type="button" id="searchBtn" name="searchBtn" value="&#xf002;" class="listBtnStyle btnMainC" onClick="fnc_keyword()"/>
+										</div>
+									</div>
+								</div>
+								<div class="artCont">
+<?
+	switch($view_tab)
+	{
+		case "proposal" :	// 제안서 스크랩 보기START
+?>
+									<table class="listTable">
+										<caption>공고전체리스트</caption>
+										<colgroup>
+											<col width="10%" />
+											<col width="50%" />
+											<col width="20%" />
+											<col width="10%" />
+											<col width="10%" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th>이미지</th>
+												<th>제목</th>
+												<th>최저 제안가</th>
+												<th>업체명</th>
+												<th>스크랩시간</th>
+											</tr>
+										</thead>
+										<tbody>
+<?
+			// 조건문 설정
+				$WhereQ = " A.scrap_uid=B.uid AND B.goods_uid=C.uid AND C.brand_uid=D.uid AND A.member_uid=".$_SESSION[ssUID]." AND A.fld_section='".$view_tab."' ";
+				$WhereQ .= ( strlen($qkeyword) >= 1 )?" AND (B.fld_title LIKE '%$qkeyword%' OR B.fld_contents LIKE '%$qkeyword%' OR C.fld_name LIKE '%$qkeyword%' OR C.fld_introduction LIKE '%$qkeyword%' OR C.fld_spec LIKE '%$qkeyword%' OR D.fld_name LIKE '%$qkeyword%' )":null;
+				$FromQ = " member_scrap A, proposal_default B, goods_default C, goods_brand D ";
+				$FieldQ = "
+									A.scrap_uid AS proposal_uid, A.fld_regdate AS scrap_regdate, 
+									D.fld_name AS brand_name, 
+									C.fld_image_s AS goods_image_s, C.brand_uid AS goods_brand_uid, C.cat1_uid AS goods_cat1_uid, C.cat2_uid AS goods_cat2_uid, C.cat3_uid AS goods_cat3_uid, 
+									C.fld_name AS goods_name, C.fld_price AS goods_price, C.fld_introduction AS goods_introduction, 
+									B.fld_title AS proposal_title, B.fld_contents AS proposal_contents, B.regmem_uid AS proposal_regmem_uid
+								";
+				
+			// 총갯수 확인
+				$Qry = "SELECT count(A.uid) FROM $FromQ WHERE ".$WhereQ;
+				$Rlt = @mysql_query($Qry,$Con);
+				$total_rows = @mysql_result($Rlt,0,0);
+				
+			// 페이징
+				require LIBRARY . "/Modules/function_paging.php" ;
+				$pgn = fnc_paging($page,$total_rows,$pageViewEa,5,0) ;
+			
+			// 실제 쿼리
+				$Qry = "SELECT $FieldQ FROM $FromQ WHERE $WhereQ ORDER BY A.uid DESC LIMIT $pgn[DataStartNo], $pgn[ViewDataEa]";
+				$Rlt = @mysql_query($Qry,$Con);
+				
+			// 반복문(for) START
+				for($x2 = 0 ; $x2 < $pgn[ViewDataEa] ; $x2++)
+				{
+					$row = @mysql_fetch_array($Rlt);
+					
+					$view_introduction = null;
+					$view_introduction = (strlen($row[proposal_contents])>=1)?$row[proposal_contents]:null;
+					$view_introduction = (strlen($view_introduction)>=1)?$view_introduction:$row[goods_introduction];
+					$view_introduction = (strlen($view_introduction)>=1)?$view_introduction:$row[goods_spec];
+			
+					$cat1_name = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat1 WHERE uid=$row[goods_cat1_uid]",$Con),0,0);
+					$cat2_name = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat2 WHERE uid=$row[goods_cat2_uid]",$Con),0,0);
+					$cat3_name = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat3 WHERE uid=$row[goods_cat3_uid]",$Con),0,0);
+					$company_name = @mysql_result(@mysql_query("SELECT fld_co_name FROM member_default WHERE uid=$row[proposal_regmem_uid]",$Con),0,0);
+					$proposal_price = @mysql_fetch_array(@mysql_query("SELECT * FROM proposal_price WHERE proposal_uid=$row[proposal_uid] ORDER BY fld_price LIMIT 1",$Con));
+					$view_price = fnc_viewProposalPrice($proposal_price[fld_price],$proposal_price[fld_view_permit],$row[proposal_uid]);
+?>
+											<tr>
+												<td>
+													<div class="listTrImg"><img src="/_GWD/B2B114/goods_image_s/<?=(strlen($row[goods_image_s])>=1)?$row[goods_image_s]:"noimage.gif"?>" alt=""></div>
+												</td>
+												<td style="padding-left:10px;">
+													<a href="JavaScript:fnc_proposalVP(<?=$row[proposal_uid]?>);">
+														<div class="listTrTitle">
+															<span class="listTrSubtitle"><?=$row[proposal_title]?></span>
+															<? if( trim($row[proposal_title]) != trim($row[goods_name]) ){?><span class="listTrGoodname"><?=(strlen($row[brand_name])>=1)?"[".$row[brand_name]."] ":null?><?=$row[goods_name]?></span><? } ?>
+															<span><?=$view_introduction?></span>
+															<span><?=(strlen($cat1_name)>=1)?$cat1_name:null?><?=(strlen($cat2_name)>=1)?" > ".$cat2_name:null?><?=(strlen($cat3_name)>=1)?" > ".$cat3_name:null?></span>
+														</div>
+													</a>
+												</td>
+												<td class="listTrPrice">
+													<?=$view_price[price]?><br/>
+													<? if(!$view_price[open]) { ?>
+													<span style="font-weight:normal;font-size:11px;"><br/><?=$view_price[text]?></span>
+													<? } else { ?>
+													<span style="font-weight:normal;font-size:11px;">(최소 <?=number_format($proposal_price[fld_ea])?>개 이상)</span>
+													<? } ?>
+												</td>
+												<td><span class="popupInfoBox" popDivId="companyNameInfo"><?=$company_name?></span></td>
+												<td style="line-height:150%;"><span style="font-size:16px;">
+													<?=str_replace('-','/',substr($row[scrap_regdate],5,5))?></span>
+													<br/><?=substr($row[scrap_regdate],10,10)?>
+													<br/><div class="btn btnWhite listTrBtn scrapBtn" onclick="JavaScript:fnc_scrap(<?=$row[proposal_uid]?>,'proposal','ID_btn_scrap_<?=$x2?>')" id="ID_btn_scrap_<?=$x2?>" style="margin-left:0;"><?=fnc_checkScrap($row[proposal_uid],'proposal')?></div>
+												</td>
+											</tr>
+<?
+				} // 반복문(for) END
+?>
+										</tbody>
+									</table>
+<?
+		break; // 제안서 스크랩 보기END
+		
+		case "goods" :	// 상품별 스크랩 보기 START
+?>
+									<ul class="imgListUl">
+<?
+			// 조건문 설정
+				$FromQ = " member_scrap A, goods_default B, goods_brand C ";
+				$WhereQ = " A.scrap_uid=B.uid AND B.brand_uid=C.uid AND A.member_uid=".$_SESSION[ssUID]." AND A.fld_section='".$view_tab."' ";
+				$WhereQ .= ( strlen($qkeyword) >= 1 )?" AND (B.fld_name LIKE '%$qkeyword%' OR C.fld_name LIKE '%$qkeyword%' )":null;
+				$FieldQ = "
+									A.scrap_uid AS goods_uid, A.fld_regdate AS scrap_regdate, 
+									B.fld_price AS goods_price, B.fld_name AS goods_name, 
+									B.fld_image_s AS goods_image_s, B.fld_made_country AS goods_made_country,
+									B.cat1_uid AS goods_cat1_uid, B.cat2_uid AS goods_cat2_uid, B.cat3_uid AS goods_cat3_uid, 
+									C.fld_name AS brand_name
+								";
+				
+			// 총갯수 확인
+				$Qry = "SELECT count(A.uid) FROM $FromQ WHERE ".$WhereQ;
+				$Rlt = @mysql_query($Qry,$Con);
+				$total_rows = @mysql_result($Rlt,0,0);
+				
+			// 페이징
+				require LIBRARY . "/Modules/function_paging.php" ;
+				$pgn = fnc_paging($page,$total_rows,$pageViewEa,5,0) ;
+			
+			// 실제 쿼리
+				$Qry = "SELECT $FieldQ FROM $FromQ WHERE $WhereQ ORDER BY A.uid DESC LIMIT $pgn[DataStartNo], $pgn[ViewDataEa]";
+				$Rlt = @mysql_query($Qry,$Con);
+				
+			// 반복문(for) START
+				for($x2 = 0 ; $x2 < $pgn[ViewDataEa] ; $x2++)
+				{
+					$row = @mysql_fetch_array($Rlt);
+					
+					$cat1_name = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat1 WHERE uid=$row[goods_cat1_uid]",$Con),0,0);
+					$cat2_name = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat2 WHERE uid=$row[goods_cat2_uid]",$Con),0,0);
+					$cat3_name = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat3 WHERE uid=$row[goods_cat3_uid]",$Con),0,0);
+?>
+										<li class="liStyle">
+											<div class="liWrap">
+												<div class="liImgBox">
+													<a href="javascript:fnc_goodscompanyVP('goods',<?=$row[goods_uid]?>);"><img src="/_GWD/B2B114/goods_image_s/<?=(strlen($row[goods_image_s])>=1)?$row[goods_image_s]:"noimage.gif"?>" alt=""></a>
+												</div>
+												<div class="liTxtBox">
+													<a href="javascript:fnc_goodscompanyVP('goods',<?=$row[goods_uid]?>);">
+														<span class="liTxtGoodname"><?=(strlen($row[brand_name])>=1)?"[".$row[brand_name]."] ":null?><?=$row[goods_name]?></span>
+														<span class="liTxtCate"><?=(strlen($cat1_name)>=1)?$cat1_name:null?><?=(strlen($cat2_name)>=1)?" > ".$cat2_name:null?><?=(strlen($cat3_name)>=1)?" > ".$cat3_name:null?>&nbsp;</span>
+														<span class="liTxtPrice">
+															<div class="fLeft" style="font-weight:normal;"><?=$row[goods_made_country]?> 생산</div>
+															<div class="fRight fs12">소비자가</div>
+														</span>
+													</a>
+													<span class="liTxtChck"><?=number_format($row[goods_price])?> 원</span>
+													<div class="btn btnWhite listTrBtn scrapBtn" onclick="JavaScript:fnc_scrap(<?=$row[goods_uid]?>,'goods','ID_btn_scrap_<?=$x2?>')" id="ID_btn_scrap_<?=$x2?>"><?=fnc_checkScrap($row[goods_uid],'goods')?></div>
+												</div>
+											</div>
+										</li>
+<?
+				} // 반복문(for) END
+?>
+									</ul>
+
+<?
+		break;	// 상품별 스크랩 보기 END
+		
+		case "seller" :	// 셀러별 스크랩 보기 START 
+?>
+									<ul class="imgListUl">
+<?
+			// 조건문 설정
+				$FromQ = " member_scrap A, member_default B ";
+				$WhereQ = " A.scrap_uid=B.uid AND A.member_uid=".$_SESSION[ssUID]." AND A.fld_section='".$view_tab."' ";
+				$WhereQ .= ( strlen($qkeyword) >= 1 )?" AND (B.fld_name LIKE '%$qkeyword%' OR B.fld_co_name LIKE '%$qkeyword%' OR B.fld_co_ownname LIKE '%$qkeyword%' )":null;
+				$FieldQ = "
+									A.scrap_uid AS member_uid, A.fld_regdate AS scrap_regdate, 
+									B.fld_co_logo AS member_co_logo, B.fld_co_name AS member_co_name, 
+									B.fld_co_history AS member_co_history, B.fld_co_sales_account AS member_co_sales_account, 
+									B.fld_co_odate AS member_co_odate, B.fld_co_staff AS member_co_staff, 
+									B.fld_co_address1 AS member_co_address1, B.fld_co_ownname AS member_co_ownname, 
+									B.fld_name AS member_name, B.fld_position AS member_position, B.fld_co_mproduct AS member_co_mproduct, 
+									B.fld_co_telno AS member_co_telno, B.fld_co_url AS member_co_url, 
+									B.fld_email_address AS member_email_address,
+									B.fld_seller_reject AS member_seller_reject, B.fld_seller_review AS member_seller_review, B.fld_seller_important AS member_seller_important
+								";
+				
+			// 총갯수 확인
+				$Qry = "SELECT count(A.uid) FROM $FromQ WHERE ".$WhereQ;
+				$Rlt = @mysql_query($Qry,$Con);
+				$total_rows = @mysql_result($Rlt,0,0);
+				
+			// 페이징
+				require LIBRARY . "/Modules/function_paging.php" ;
+				$pgn = fnc_paging($page,$total_rows,$pageViewEa,5,0) ;
+			
+			// 실제 쿼리
+				$Qry = "SELECT $FieldQ FROM $FromQ WHERE $WhereQ ORDER BY A.uid DESC LIMIT $pgn[DataStartNo], $pgn[ViewDataEa]";
+				$Rlt = @mysql_query($Qry,$Con);
+				
+			// 반복문(for) START
+				for($x2 = 0 ; $x2 < $pgn[ViewDataEa] ; $x2++)
+				{
+					$row = @mysql_fetch_array($Rlt);
+					
+					// 해당 셀러에게 등록된 총 제안서의 숫자를 가져오기
+						$Qry3 = "SELECT count(uid) FROM proposal_default WHERE regmem_uid=".$row[member_uid];
+						$Rlt3 = mysql_query($Qry3,$Con);
+						$proposal_totalrows = @mysql_result($Rlt3,0,0);
+?>
+										<li class="liStyle2">
+											<div class="liWrap">
+												<table>
+													<tr>
+														<td class="liImgFixBox">
+															<a href="javascript:fnc_goodscompanyVP('company',<?=$row[member_uid]?>);">
+																<img src="/_GWD/B2B114/co_logo/<?=(strlen($row[member_co_logo])>=1)?$row[member_co_logo]:"noimage.gif"?>" alt="">
+															</a>
+														</td>
+														<td class="liTxtFixBox">
+															<table>
+																<colgroup><col width="11%"/><col width="20%"/><col width="8%"/><col width="20%"/><col width="11%"/><col width="30%"/></colgroup>
+																<tr>
+																	<td colspan="4" class="fs18 textBold">
+																		<a href="javascript:fnc_goodscompanyVP('company',<?=$row[member_uid]?>);">
+																			<?=(strlen($row[member_co_name])>=1)?$row[member_co_name]:"개인회원"?>
+																		</a>
+																	</td>
+																	<td colspan="2">
+																		<div class="fRight btn btnWhite listTrBtn scrapBtn" onclick="JavaScript:fnc_scrap(<?=$row[member_uid]?>,'seller','ID_btn_scrap_<?=$x2?>')" id="ID_btn_scrap_<?=$x2?>"><?=fnc_checkScrap($row[member_uid],'seller')?></div>
+																	</td>
+																</tr>
+																<tr>
+																	<td colspan="6" class="fs10 lh14" style="color:#999999;font-size:12px;padding-bottom:8px;"><?=nl2br(strip_tags($row[member_co_history]))?></td>
+																</tr>
+																<tr>
+																	<th>매출액</th>
+																	<td><?=fnc_price2won($row[member_co_sales_account])?></td>
+																	<th>개업일</th>
+																	<td><?=($row[member_co_odate] != "0000-00-00")?substr($row[member_co_odate],0,4)."년 ".substr($row[member_co_odate],5,2)."월 ".substr($row[member_co_odate],8,2)."일":"&nbsp;"?></td>
+																	<th>사원수</th>
+																	<td><?=number_format($row[member_co_staff])?> 명</td>
+																</tr>
+																<tr>
+																	<th>소재지</th>
+																	<? $arr_tmp = explode(' ',$row[member_co_address1]); ?>
+																	<td><?=$arr_tmp[0]?> <?=$arr_tmp[1]?></td>
+																	<th>대표자명</th>
+																	<td><?=$row[member_co_ownname]?></td>
+																	<th>담당자</th>
+																	<td><?=$row[member_name]?> <?=$row[member_position]?></td>
+																</tr>
+																<tr>
+																	<th>주력상품군</th>
+																	<td colspan="3"><?=$row[member_co_mproduct]?></td>
+																	<th>전화번호</th>
+																	<td><?=$row[member_co_telno]?></td>
+																</tr>
+																<tr>
+																	<th>대표사이트</th>
+																	<td colspan="3"><? if( strlen($row[member_co_url]) >= 1) { ?><a href="<?=$row[member_co_url]?>" target="_blank"><?=$row[member_co_url]?></a><? } else { echo "&nbsp;"; } ?></td>
+																	<th>이메일주소</th>
+																	<td><?=$row[member_email_address]?></td>
+																</tr>
+																<tr>
+																	<td colspan="4" style="text-align:right;padding-top:12px;">
+																		<div class="fLeft"><div class="btn evalBtn evalDiv_important" onclick="" id="">업체평가총점</div><span class="evalTxt_important"><?=number_format(fnc_coScore($row[member_uid]))?>점</span></div>
+																		<div class="fLeft"><div class="btn evalBtn evalDiv_white mrgL10" onclick="" id="">제안서 등록수</div><span class="evalTxt_basic"><?=number_format($proposal_totalrows)?>개</span></div>
+																	</td>
+																	<td colspan="2">&nbsp;</td>
+																</tr>
+															</table>
+														</td>
+													</tr>
+												</table>
+											</div>
+										</li>
+<?
+				} // 반복문(for) END
+?>
+									</ul>
+<?
+		break;
+	} 
+	
+	if($pgn[TotalDataRows] <= 0) { 
+?>
+<div class="listTableNoDiv">스크랩된 리스트가 없습니다.</div>
+<? } ?>
+								</div>
+								<div class="pagingBoxWrap">
+									<ul class="pagingBox2">
+										<?
+											// 이전블록 버튼출력.
+											if($pgn[BeforeBlockNo] != "")
+											{
+												echo "<a href=\"JavaScript:document.buy_form.page.value='$pgn[BeforeBlockNo]';document.buy_form.submit();\"><li class=\"angleBtn\"><i class=\"fa fa-angle-left\"></i></li></a>";
+											}
+											
+											// 페이지번호 출력부분.
+											for($x2 = 0 ; $x2 < $pgn[ViewPageEa] ; $x2++)
+											{
+												$PageNo = $pgn[PageStartNo]  + $x2 ;
+												if($page == $PageNo) 
+												{ 
+													echo "<li class=\"actOn\">$PageNo</li>";
+												}
+												else
+												{
+													echo " <a href=\"JavaScript:document.buy_form.page.value='$PageNo';document.buy_form.submit();\" onMouseOver=\"window.status='$PageNo 페이지로 이동';return true;\" onMouseOut=\"window.status='';\" onFocus='this.blur()' style='color:#797979'><li>$PageNo</li></a> " ;
+												}		
+											}
+											
+											// 다음블록 버튼출력.
+											if($pgn[NextBlockNo] != "")
+											{
+												echo "<a href=\"JavaScript:document.buy_form.page.value='$pgn[NextBlockNo]';document.buy_form.submit();\"><li class=\"angleBtn\"><i class=\"fa fa-angle-right\"></i></li></a>";
+											}
+										?>	
+									</ul>
+								</div>
+							</div>
+</form>
+						<!-- 리스트 e-->
+
+					</div>
+					<!-- 스크랩리스트 e-->
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+	<? @include_once HOME_DIR . "/include/pop_infobox.php"; ?>
+	<? @include_once HOME_DIR . "/include/bottom.php"; ?>

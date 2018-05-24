@@ -1,0 +1,185 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../../include/config.php";
+
+	// 기본값 설정
+		$view_tab = (strlen($view_tab) >= 1)?$view_tab:"category";
+		$pageViewEa = 20;
+		
+	// 조건별 설정(쿼리문)
+		switch($view_tab)
+		{
+			case "category" :
+				$Qry = "SELECT uid, fld_name FROM goods_cat1 WHERE fld_status='Y' ORDER BY fld_name ASC";
+				$Rlt = @mysql_query($Qry,$Con);
+				$total_rows = @mysql_num_rows($Rlt);
+				for($x = 0 ; $x < $total_rows ; $x++)
+				{
+					$row = @mysql_fetch_array($Rlt);
+					$arr_sub_button[$row[uid]] = $row[fld_name];
+					if($x <= 0) $view_sub = ( strlen($view_sub) <= 0 )?$row[uid]:$view_sub; 
+				}
+				$WhereQ = " B.brand_uid=C.uid AND B.cat1_uid=$view_sub ";
+			break;
+			
+			case "use" :
+				$arr_sub_button = $ArrUse;
+			break;
+
+			case "age" :
+				$arr_sub_button = $ArrAge;
+			break;
+
+			case "buyer_upjong" :
+				$arr_sub_button = $ArrBuyerUpjong;
+			break;
+
+			case "character" :
+				$arr_sub_button = $ArrCharacter;
+			break;
+		}
+		$view_sub = ( strlen($view_sub) <= 0 )?$arr_sub_button[0]:$view_sub; 
+		if($view_tab != "category") $WhereQ = " B.brand_uid=C.uid AND B.fld_".$view_tab." LIKE '%".$view_sub."%' ";
+		
+	@include_once HOME_DIR . "/include/top.php";
+?>
+<script language="JavaScript">
+<!--
+
+	function fnc_changeTab(tabname)
+	{
+		var form = document.buy_form;
+		form.view_tab.value=tabname;
+		form.submit();
+	}
+
+	function fnc_changeSub(subvalue)
+	{
+		var form = document.buy_form;
+		form.view_sub.value=subvalue;
+		form.submit();
+	}
+
+-->
+</script>
+</head>
+<body>
+<div id="wrap">
+	<script type="text/javascript">currentPageKind="buy";currentMainN=3;currentSubN=0;</script><!-- 현재페이지 -->
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<!-- contents s -->
+
+<form class="" name="buy_form" action="" method="get" onSubmit="return false">
+<input type="hidden" name="view_tab" value="<?=$view_tab?>"/>
+<input type="hidden" name="view_sub"/>
+					<!-- 상품검색 s-->
+					<div class="cbTitle">
+						<h2><script>writeVar(sub_buyNavT_3[currentSubN][0]);</script></h2>
+						<span style="padding-left:5px;">B2B114내의 베스트 상품입니다</span>
+					</div>
+					<div class="cbTopBox">
+					</div>
+					<div class="cbMiddleBox">
+						<!-- 상품검색결과 s-->
+						<div class="articleBox">
+							<div class="artTop">
+								<a href="JavaScript:fnc_changeTab('category');" class="bestListTab<?=($view_tab=="category")?" listActTab":null?>"><div class="inTab">상품분류별</div></a>
+								<a href="JavaScript:fnc_changeTab('use');" class="bestListTab<?=($view_tab=="use")?" listActTab":null?>"><div class="inTab">용도별</div></a>
+								<a href="JavaScript:fnc_changeTab('age');" class="bestListTab<?=($view_tab=="age")?" listActTab":null?>"><div class="inTab">연령별</div></a>
+								<a href="JavaScript:fnc_changeTab('buyer_upjong');"  class="bestListTab<?=($view_tab=="upjong")?" listActTab":null?>"><div class="inTab">업종별</div></a>
+								<a href="JavaScript:fnc_changeTab('character');"  class="bestListTab<?=($view_tab=="character")?" listActTab":null?>"><div class="inTab">특징별</div></a>
+							</div>
+							
+							<div class="artTop">
+								<div class="bestGoodsItemWrap">
+								<? 
+									foreach($arr_sub_button AS $fld => $val) 
+									{ 
+										$fldfld = ($view_tab == "category")?$fld:$val;
+								?>
+									<div class='bestGoodsItem<?=("$view_sub"=="$fldfld")?" itemAct":null?>' onClick="JavaScript:fnc_changeSub('<?=$fldfld?>');"><?=$val?></div>
+								<? } ?>
+								</div>
+							</div>
+							<div class="artCont bdTop pddT10">
+								<ul class="imgListUl">
+<?
+
+	// 조건문 설정
+		$FromQ = " goods_default B, goods_brand C ";
+		$FieldQ = "
+							B.uid AS goods_uid,B.fld_price AS goods_price, B.fld_name AS goods_name, 
+							B.fld_image_m AS goods_image_m, B.fld_made_country AS goods_made_country,
+							B.cat1_uid AS goods_cat1_uid, B.cat2_uid AS goods_cat2_uid, B.cat3_uid AS goods_cat3_uid, 
+							C.fld_name AS brand_name
+							, B.fld_count_important, B.fld_count_review 
+						";
+		
+	// 실제 쿼리
+		$Qry = "SELECT $FieldQ FROM $FromQ WHERE $WhereQ AND B.fld_status ='Active' ORDER BY B.fld_count_important DESC, B.fld_count_review DESC, B.uid DESC LIMIT $pageViewEa";
+		$Rlt = @mysql_query($Qry,$Con);
+		$total_rows = @mysql_num_rows($Rlt);
+		
+	// 반복문(for) START
+		for($x2 = 0 ; $x2 < $total_rows ; $x2++)
+		{
+			$xno = $x2 + 1 ;
+			$row = @mysql_fetch_array($Rlt);
+			
+			$cat1_name = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat1 WHERE uid=$row[goods_cat1_uid]",$Con),0,0);
+			$cat2_name = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat2 WHERE uid=$row[goods_cat2_uid]",$Con),0,0);
+			$cat3_name = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat3 WHERE uid=$row[goods_cat3_uid]",$Con),0,0);
+?>
+									<li class="liStyle">
+										<div class="liWrap">
+											<div class="bestNum"><?=$xno?></div><div class="bestNumBg"></div>
+											<div class="liImgBox">
+												<a href="JavaScript:fnc_goodscompanyVP('goods',<?=$row[goods_uid]?>);">
+													<img src="/_GWD/B2B114/goods_image_m/<?=(strlen($row[goods_image_m])>=1)?$row[goods_image_m]:"noimage.gif"?>" alt="">
+												</a>
+											</div>
+											<div class="liTxtBox">
+												<a href="JavaScript:fnc_goodscompanyVP('goods',<?=$row[goods_uid]?>);">
+													<span class="liTxtGoodname"><?=(strlen($row[brand_name])>=1)?"[".$row[brand_name]."] ":null?><?=$row[goods_name]?> / I<?=$row[fld_count_important]?>,R<?=$row[fld_count_review]?></span>
+													<span class="liTxtCate"><?=(strlen($cat1_name)>=1)?$cat1_name:null?><?=(strlen($cat2_name)>=1)?" > ".$cat2_name:null?><?=(strlen($cat3_name)>=1)?" > ".$cat3_name:null?>&nbsp;</span>
+													<span class="liTxtPrice">
+														<div class="fLeft" style="font-weight:normal;"><?=$row[goods_made_country]?> 생산</div>
+														<div class="fRight fs12">소비자가</div>
+													</span>
+												</a>
+												<span class="liTxtChck"><?=number_format($row[goods_price])?> 원</span>
+												<? if($_SESSION[ssUID]>=1) { ?>
+												<div class="btn btnWhite listTrBtn scrapBtn" onclick="JavaScript:fnc_scrap(<?=$row[goods_uid]?>,'goods','ID_btn_scrap_<?=$x2?>')" id="ID_btn_scrap_<?=$x2?>"><?=fnc_checkScrap($row[goods_uid],'goods')?></div>
+												<? } ?>
+											</div>
+										</div>
+									</li>
+<?
+		} // for end
+?>
+								</ul>
+							</div>
+						</div>
+						<!-- 상품검색결과 e-->
+					</div>
+					<!-- 상품검색 e-->
+</form>
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+	<? @include_once HOME_DIR . "/include/bottom.php"; ?>

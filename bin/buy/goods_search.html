@@ -1,0 +1,405 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../../include/config.php";
+	
+	// 기본값 설정
+		$view_sort = (strlen($view_sort) >= 1)?$view_sort:"regdate_d";
+		$page = (strlen($page) >= 1)?$page:1;
+		$pageViewEa = ( strlen($pageViewEa) >= 1)?$pageViewEa:12;
+		$qprint = ( strlen($qprint) >= 1)?$qprint:"ALL";
+
+	// 정렬조건 설정
+		switch($view_sort)
+		{
+			case "regdate_d" : $orderbyQ = "A.fld_regdate DESC"; break;
+			case "price_d" : $orderbyQ = "A.fld_price DESC"; break;
+			case "price_a" : $orderbyQ = "A.fld_price ASC"; break;
+		}
+		
+	$TableQ = " goods_default A, goods_brand B ";
+	$SelectQ = "
+							A.uid AS goods_uid, A.fld_image_m AS goods_image_m, A.fld_name AS goods_name, 
+							A.fld_price AS goods_price, A.fld_made_country AS goods_made_country, 
+							A.cat1_uid AS goods_cat1_uid, A.cat2_uid AS goods_cat2_uid, A.cat3_uid AS goods_cat3_uid, 
+							B.fld_name AS brand_name, A.cat1_uid AS goods_cat1_uid
+						";
+	
+	$WhereQ = " WHERE A.brand_uid = B.uid ";
+	$WhereQ .= ($qbrand_uid >= 1)?" AND A.brand_uid=".$qbrand_uid:null;
+	$WhereQ .= (strlen($qkeyword) >= 1)?" AND ( A.fld_name LIKE '%$qkeyword%' OR A.fld_introduction LIKE '%$qkeyword$' OR A.fld_spec LIKE '%$qkeyword%' OR B.fld_name LIKE '%$qkeyword%' )":null;
+	$WhereQ .= ($qcat1_uid >= 1)?" AND A.cat1_uid=".$qcat1_uid:null;
+	$WhereQ .= ($qcat2_uid >= 1)?" AND A.cat2_uid=".$qcat2_uid:null;
+	$WhereQ .= ($qcat3_uid >= 1)?" AND A.cat3_uid=".$qcat3_uid:null;
+	$WhereQ .= ($qprint != "ALL")?" AND A.fld_print='$qprint'":null;
+	if(count($quse)>=1){ foreach($quse AS $fld => $val) { $WhereQ .= " AND fld_use LIKE '%$val%'"; }}
+	if(count($qage)>=1){ foreach($qage AS $fld => $val) { $WhereQ .= " AND fld_age LIKE '%$val%'"; }}
+	if(count($qsex)>=1){ foreach($qsex AS $fld => $val) { $WhereQ .= " AND fld_sex LIKE '%$val%'"; }}
+	if(count($qseason)>=1){ foreach($qseason AS $fld => $val) { $WhereQ .= " AND fld_season LIKE '%$val%'"; }}
+	if(count($qbuyer_upjong)>=1){ foreach($qbuyer_upjong AS $fld => $val) { $WhereQ .= " AND fld_buyer_upjong LIKE '%$val%'"; }}
+	if(count($qtheme_color)>=1){ foreach($qtheme_color AS $fld => $val) { $WhereQ .= " AND fld_theme_color LIKE '%$val%'"; }}
+	if(count($qcharacter)>=1){ foreach($qcharacter AS $fld => $val) { $WhereQ .= " AND fld_character LIKE '%$val%'"; }}
+	
+	if(strlen($WhereQ) >= 28)
+	{
+		$Qry = "SELECT count(A.uid) FROM $TableQ $WhereQ LIMIT 1" ;
+		$Rlt = @mysql_query($Qry,$Con) ;
+		$total_rows = @mysql_result($Rlt,0,0) ;
+	
+		require LIBRARY . "/Modules/function_paging.php" ;
+		$pgn = fnc_paging($page,$total_rows,$pageViewEa,10,0) ;
+	
+		$Qry = "SELECT $SelectQ FROM $TableQ $WhereQ ORDER BY $orderbyQ LIMIT $pgn[DataStartNo], $pgn[ViewDataEa]" ;
+		$Rlt = @mysql_query($Qry,$Con) ;
+	}
+		
+	@include_once HOME_DIR . "/include/top.php";
+?>
+<script language="JavaScript">
+<!--
+
+	function fnc_changeSort(condition)
+	{
+		var form = document.buy_form;
+		form.view_sort.value=condition;
+		form.page.value=1;
+		form.submit();
+	}
+
+	function fnc_cat1TOcat2()
+	{
+		new Ajax.Request
+		(
+			'_selectAddOption.html', {
+				method: 'post',
+				parameters: {
+					'work':'cat1TOcat2', 
+					'label0':'전체 중분류',
+					'q_uid':$('ID_qcat1_uid').value
+				}, 
+				onComplete: function(httpObj) { select_innerHTML($('ID_qcat2_uid'),httpObj.responseText);fnc_cat2TOcat3(); }
+			}
+		);
+	}
+
+	function fnc_cat2TOcat3()
+	{
+		new Ajax.Request
+		(
+			'_selectAddOption.html', {
+				method: 'post',
+				parameters: {
+					'work':'cat2TOcat3', 
+					'label0':'전체 소분류',
+					'q_uid':$('ID_qcat2_uid').value
+				}, 
+				onComplete: function(httpObj) { select_innerHTML($('ID_qcat3_uid'),httpObj.responseText); }
+			}
+		);
+	}
+	
+	function form_check()
+	{
+	}
+	
+-->
+</script>
+</head>
+<body>
+<div id="wrap">
+	<script type="text/javascript">currentPageKind="buy";currentMainN=3;currentSubN=1;</script><!-- 현재페이지 -->
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<!-- contents s -->
+
+<form class="" name="buy_form" action="" method="get" onSubmit="return form_check()">
+<input type="hidden" name="view_sort" value="<?=$view_sort?>"/>
+<input type="hidden" name="page" value="<?=$page?>"/>
+					<!-- 상품검색 s-->
+					<div class="cbTitle">
+						<h2><script>writeVar(sub_buyNavT_3[currentSubN][0]);</script></h2>
+						<span style="padding-left:5px;">궁금하신 상품 정보를 확인할 수 있습니다</span>
+					</div>
+
+					<div class="cbTopBox">
+						<!-- 상품검색 s-->
+						<div class="articleBox">
+							<div class="artTitle bdBottom2MC1">
+								<div class="sGoodsSearchTitle">검색조건</div>
+								<div class="sGoodsSearchSubtitle">검색하고자 하는 상품의 정보를 선택 및 검색어를 입력하세요</div>
+							</div>
+							<table class="viewTable" style="background:#effaff;">
+								<colgroup>
+									<col width="15%" /><col width="85%" />
+								</colgroup>
+								<tbody>
+									<tr>
+										<td class="searchHead bdTop">검색어</td>
+										<td class="searchContents bdTop" style="text-align:left;">
+											<input type="text" name="qkeyword" value="<?=$qkeyword?>" class="searchInputBox form-control" placeholder="검색어를 입력하세요" />
+											<input type="submit" id="searchBtn" name="searchBtn" value="&#xf002;&nbsp;검색" class="btn btnMainC mrgL10 fLeft"/>
+											<div class="sGoodsSearchBtn sGoodsSearchToggle">
+												<div class="btn btnWhite listTrBtn">상세검색펼치기</div>
+											</div>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+							<div id="sGoodsSearchToggleTarget">
+								<table class="viewTable" style="background:#effaff;">
+									<colgroup>
+										<col width="15%" /><col width="85%" />
+									</colgroup>
+									<tbody>
+										<tr>
+											<td class="searchHead bdTop">브랜드</td>
+											<td class="searchContents bdTop">
+												<select name="qbrand_uid" class="form-control fLeft" style="padding:0;width:25%;">
+													<option value="">전체 브랜드</option>
+													<?
+														$Qry2 = "SELECT * FROM goods_brand WHERE fld_status='Y' ORDER BY fld_name";
+														$Rlt2 = @mysql_query($Qry2,$Con);
+														while($row2 = @mysql_fetch_array($Rlt2))
+														{
+															$brand_name[$row2[uid]] = $row2[fld_name];
+													?>
+													<option value="<?=$row2[uid]?>"<?=($row2[uid]==$qbrand_uid)?" selected":null?>><?=$row2[fld_name]?></option>
+													<? } ?>
+													</select>
+											</td>
+										</tr>
+										<tr>
+											<td class="searchHead bdTop">상품군</td>
+											<td class="searchContents bdTop">
+												<select name="qcat1_uid" id="ID_qcat1_uid" class="fLeft mrgR10 form-control" style="padding:0;width:25%;" onChange="fnc_cat1TOcat2()">>
+													<option value="">전체 대분류</option>
+													<?
+														$Qry2 = "SELECT * FROM goods_cat1 WHERE fld_status='Y' ORDER BY fld_name";
+														$Rlt2 = @mysql_query($Qry2,$Con);
+														while($row2 = @mysql_fetch_array($Rlt2))
+														{
+															$cat1_name[$row2[uid]] = $row2[fld_name];
+													?>
+													<option value="<?=$row2[uid]?>"<?=($row2[uid]==$qcat1_uid)?" selected":null?>><?=$row2[fld_name]?></option>
+													<? } ?>
+												</select>
+												<select name="qcat2_uid" id="ID_qcat2_uid" class="fLeft mrgR10 form-control" style="padding:0;width:25%;" onChange="fnc_cat2TOcat3()">>
+													<option value="">전체 중분류</option>
+													<?
+														$Qry2 = "SELECT * FROM goods_cat2 WHERE cat1_uid=$qcat1_uid AND fld_status='Y' ORDER BY fld_name";
+														$Rlt2 = @mysql_query($Qry2,$Con);
+														while($row2 = @mysql_fetch_array($Rlt2))
+														{
+													?>
+													<option value="<?=$row2[uid]?>"<?=($row2[uid]==$qcat2_uid)?" selected":null?>><?=$row2[fld_name]?></option>
+													<? } ?>
+												</select>
+												<select name="qcat3_uid" id="ID_qcat3_uid" class="fLeft form-control" style="padding:0;width:25%;">
+													<option value="">전체 소분류</option>
+													<?
+														$Qry2 = "SELECT * FROM goods_cat3 WHERE cat2_uid=$qcat2_uid AND fld_status='Y' ORDER BY fld_name";
+														$Rlt2 = @mysql_query($Qry2,$Con);
+														while($row2 = @mysql_fetch_array($Rlt2))
+														{
+													?>
+													<option value="<?=$row2[uid]?>"<?=($row2[uid]==$qcat3_uid)?" selected":null?>><?=$row2[fld_name]?></option>
+													<? } ?>
+												</select>
+										</tr>
+										<tr>
+											<td class="searchHead bdTop">용도</td>
+											<td class="searchContents bdTop" style="text-align:left;">
+												<div class="selectListBox" selectListBoxId="useInfo">
+													<? for($x2 = 0 ; $x2 < count($ArrUse) ; $x2++) { ?>
+													<label class="chechkbox-inline"><input type="checkbox" name="quse[]" value="<?=$ArrUse[$x2]?>" class="dataText"<?=(@in_array($ArrUse[$x2],$quse))?" checked":null?>/><?=$ArrUse[$x2]?></label>
+													<? } ?>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<td class="searchHead bdTop">연령 / 성별</td>
+											<td class="searchContents bdTop" style="text-align:left;">
+												<div class="selectListBox" selectListBoxId="ageInfo">
+													<? for($x2 = 0 ; $x2 < count($ArrAge) ; $x2++) { ?>
+													<label class="chechkbox-inline"><input type="checkbox" name="qage[]" value="<?=$ArrAge[$x2]?>" class="dataText"<?=(@in_array($ArrAge[$x2],$qage))?" checked":null?>/><?=$ArrAge[$x2]?></label>
+													<? } ?>
+													&nbsp; / &nbsp; 
+													<? for($x2 = 0 ; $x2 < count($ArrSex) ; $x2++) { ?>
+													<label class="chechkbox-inline"><input type="checkbox" name="qsex[]" value="<?=$ArrSex[$x2]?>" class="dataText"<?=(@in_array($ArrSex[$x2],$qsex))?" checked":null?>/><?=$ArrSex[$x2]?></label>
+													<? } ?>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<td class="searchHead bdTop">계절</td>
+											<td class="searchContents bdTop" style="text-align:left;">
+												<div class="selectListBox" selectListBoxId="seasonInfo">
+													<? for($x2 = 0 ; $x2 < count($ArrSeason) ; $x2++) { ?>
+													<label class="chechkbox-inline"><input type="checkbox" name="qseason[]" value="<?=$ArrSeason[$x2]?>" class="dataText"<?=(@in_array($ArrSeason[$x2],$qseason))?" checked":null?>/><?=$ArrSeason[$x2]?></label>
+													<? } ?>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<td class="searchHead bdTop">업종</td>
+											<td class="searchContents bdTop" style="text-align:left;">
+												<div class="selectListBox" selectListBoxId="buyer_upjongInfo">
+													<? for($x2 = 0 ; $x2 < count($ArrBuyerUpjong) ; $x2++) { ?>
+													<label class="chechkbox-inline"><input type="checkbox" name="qbuyer_upjong[]" value="<?=$ArrBuyerUpjong[$x2]?>" class="dataText"<?=(@in_array($ArrBuyerUpjong[$x2],$qbuyer_upjong))?" checked":null?>/><?=$ArrBuyerUpjong[$x2]?></label>
+													<? } ?>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<td class="searchHead bdTop">컬러</td>
+											<td class="searchContents bdTop" style="text-align:left;">
+												<div class="selectListBox" selectListBoxId="theme_colorInfo">
+													<? for($x2 = 0 ; $x2 < count($ArrThemeColor) ; $x2++) { ?>
+													<label class="chechkbox-inline"><input type="checkbox" name="qtheme_color[]" value="<?=$ArrThemeColor[$x2]?>" class="dataText"<?=(@in_array($ArrThemeColor[$x2],$qtheme_color))?" checked":null?>/><?=$ArrThemeColor[$x2]?></label>
+													<? } ?>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<td class="searchHead bdTop">특징/특색</td>
+											<td class="searchContents bdTop" style="text-align:left;">
+												<div class="selectListBox" selectListBoxId="characterInfo">
+													<? for($x2 = 0 ; $x2 < count($ArrCharacter) ; $x2++) { ?>
+													<label class="chechkbox-inline"><input type="checkbox" name="qcharacter[]" value="<?=$ArrCharacter[$x2]?>" class="dataText"<?=(@in_array($ArrCharacter[$x2],$qcharacter))?" checked":null?>/><?=$ArrCharacter[$x2]?></label>
+													<? } ?>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<td class="searchHead bdTop bdBottom2MC1">인쇄</td>
+											<td class="searchContents bdTop bdBottom2MC1" style="text-align:left;">
+												<div class="selectListBox" selectListBoxId="printInfo">
+													<label class="chechkbox-inline"><input type="radio" name="qprint" value="ALL" class="dataText"<?=($qprint=="ALL")?" checked":null?>/>전체</label>
+													<label class="chechkbox-inline"><input type="radio" name="qprint" value="Y" class="dataText"<?=($qprint=="Y")?" checked":null?>/>인쇄가능 상품만</label>
+													<label class="chechkbox-inline"><input type="radio" name="qprint" value="N" class="dataText"<?=($qprint=="N")?" checked":null?>/>인쇄불가 상품만</label>
+												</div>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<!-- 상품검색 e-->
+					</div>
+					<div class="cbMiddleBox">
+						<!-- 상품검색결과 s-->
+						<div class="articleBox">
+							<div class="artTitle">
+								<div class="sGoodsSearch">
+									<div class="sGoodsSearchTitle">검색결과</div>
+									<div class="sGoodsSearchSubtitle">총 <span><?=number_format($total_rows)?>개</span>의 상품이 검색되었습니다</div>
+									<div class="sortOpBox">
+										<ul>
+											<a href="JavaScript:fnc_changeSort('regdate_d')"><li<?=($view_sort=="regdate_d")?" class=\"actOn\"":null?>>최근등록순</li></a>
+											<a href="JavaScript:fnc_changeSort('price_a')"><li<?=($view_sort=="price_a")?" class=\"actOn\"":null?>>낮은가격순</li></a>
+											<a href="JavaScript:fnc_changeSort('price_d')"><li<?=($view_sort=="price_d")?" class=\"actOn\"":null?>>높은가격순</li></a>
+										</ul>
+									</div>
+								</div>
+							</div>
+							<div class="artCont">
+<?
+	if($total_rows >= 1)
+	{
+?>
+								<ul class="imgListUl">
+<?
+		for($x = 0 ; $x < $pgn[ViewDataEa] ; $x++)
+		{
+			$IDXNO = ($pgn[DataStartNo] +1) + $x ;
+			$row = @mysql_fetch_array($Rlt) ;
+	
+			$cat1_name = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat1 WHERE uid=$row[goods_cat1_uid]",$Con),0,0);
+			$cat2_name = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat2 WHERE uid=$row[goods_cat2_uid]",$Con),0,0);
+			$cat3_name = @mysql_result(@mysql_query("SELECT fld_name FROM goods_cat3 WHERE uid=$row[goods_cat3_uid]",$Con),0,0);
+?>
+									<li class="liStyle">
+										<div class="liWrap">
+											<div class="liImgBox">
+												<a href="JavaScript:fnc_goodscompanyVP('goods',<?=$row[goods_uid]?>);">
+													<img src="/_GWD/B2B114/goods_image_m/<?=(strlen($row[goods_image_m])>=1)?$row[goods_image_m]:"noimage.gif"?>" alt="">
+												</a>
+											</div>
+											<div class="liTxtBox">
+												<a href="JavaScript:fnc_goodscompanyVP('goods',<?=$row[goods_uid]?>);">
+													<span class="liTxtGoodname"><?=(strlen($row[brand_name])>=1)?"[".$row[brand_name]."] ":null?><?=$row[goods_name]?></span>
+													<span class="liTxtCate"><?=(strlen($cat1_name)>=1)?$cat1_name:null?><?=(strlen($cat2_name)>=1)?" > ".$cat2_name:null?><?=(strlen($cat3_name)>=1)?" > ".$cat3_name:null?>&nbsp;</span>
+													<span class="liTxtPrice">
+														<div class="fLeft" style="font-weight:normal;"><?=$row[goods_made_country]?> 생산</div>
+														<div class="fRight fs12">소비자가</div>
+													</span>
+												</a>
+												<span class="liTxtChck"><span><?=number_format($row[goods_price])?></span> 원</span>
+												<div class="btn btnWhite listTrBtn scrapBtn" onclick="JavaScript:fnc_scrap(<?=$row[goods_uid]?>,'goods','ID_btn_scrap_<?=$x?>')" id="ID_btn_scrap_<?=$x?>"><?=fnc_checkScrap($row[goods_uid],'goods')?></div>
+											</div>
+										</div>
+									</li>
+<? 	} ?>
+								</ul>
+<? } else { ?>
+								<script type="text/javascript">
+									jQuery('#sGoodsSearchToggleTarget').css('display','block');
+									jQuery('.sGoodsSearchToggle .btn').html('접기');
+								</script>
+								<div class="noSearchResult">검색된 상품이 없습니다.<br/><br/> <? if(strlen($WhereQ) <= 27) { ?>최소 1개 이상의 조건을 설정하셔야 합니다.<? } ?></div>
+<? } ?>
+							</div>
+							<div class="pagingBoxWrap">
+								<ul class="pagingBox2">
+<?
+
+	// 이전블록 버튼출력.
+	if($pgn[BeforeBlockNo] != "")
+	{
+		echo "<a href=\"JavaScript:document.buy_form.page.value='$pgn[BeforeBlockNo]';document.buy_form.submit();\"><li class=\"angleBtn\"><i class=\"fa fa-angle-left\"></i></li></a>";
+	}
+	
+	// 페이지번호 출력부분.
+	for($x = 0 ; $x < $pgn[ViewPageEa] ; $x++)
+	{
+		$PageNo = $pgn[PageStartNo]  + $x ;
+		if($page == $PageNo) 
+		{ 
+			echo "<li class=\"actOn\">$PageNo</li>";
+		}
+		else
+		{
+			echo " <a href=\"JavaScript:document.buy_form.page.value='$PageNo';document.buy_form.submit();\" onMouseOver=\"window.status='$PageNo 페이지로 이동';return true;\" onMouseOut=\"window.status='';\" onFocus='this.blur()' style='color:#797979'><li>$PageNo</li></a> " ;
+		}		
+	}
+	
+	// 다음블록 버튼출력.
+	if($pgn[NextBlockNo] != "")
+	{
+		echo "<a href=\"JavaScript:document.buy_form.page.value='$pgn[NextBlockNo]';document.buy_form.submit();\"><li class=\"angleBtn\"><i class=\"fa fa-angle-right\"></i></li></a>";
+	}
+?>	
+								</ul>
+							</div>
+						</div>
+						<!-- 상품검색결과 e-->
+					</div>
+					<!-- 상품검색 e-->
+</form>
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+	<? @include_once HOME_DIR . "/include/bottom.php"; ?>

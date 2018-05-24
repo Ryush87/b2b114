@@ -1,0 +1,35 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../../include/config.php";
+	
+	switch($work)
+	{
+		case "cat1_cat2" :	// 대분류 선택
+			$Qry = "SELECT * FROM goods_cat2 WHERE cat1_uid = '$uid' ORDER BY fld_name";
+			$Rlt = @mysql_query($Qry,$Con);
+		break;
+
+		case "cat2_cat3" :	// 중분류 선택
+			$Qry = "SELECT * FROM goods_cat3 WHERE cat2_uid = '$uid' ORDER BY fld_name";
+			$Rlt = @mysql_query($Qry,$Con);
+		break;
+
+
+	} // end switch
+	
+	if( strlen($label0) >= 1)
+	{
+?>
+		<option value=""><?=$label0?></option>
+<?
+	}	// end id
+	
+	while($row = @mysql_fetch_array($Rlt))
+	{
+?>
+		<option value="<?=$row[uid]?>"><?=$row[fld_name]?></option>
+<?
+	} // end while
+	
+	exit;
+?>

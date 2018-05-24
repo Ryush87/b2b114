@@ -1,0 +1,58 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../../include/config.php";
+	$Qry = "SELECT * FROM goods_brand WHERE uid=$uid";
+	$Rlt = @mysql_query($Qry,$Con);
+	if( $brand = @mysql_fetch_array($Rlt) )
+	{
+		// 총 몇개의 상품과 몇개의 제안서가 등록되었는지 체크
+			$cnt_goods = @mysql_result(@mysql_query("SELECT count(uid) FROM goods_default WHERE brand_uid=$uid",$Con),0,0);
+			$cnt_proposal = @mysql_result(@mysql_query("SELECT count(B.uid) FROM goods_default A, proposal_default B WHERE A.uid=B.goods_uid AND A.brand_uid=$uid",$Con),0,0);
+?>
+		<div class="popDivBtnWrap">
+			<div class="popDivSubtitle">브랜드 정보를 확인할 수 있습니다</div>
+		</div>
+		<table class="popDivTable">
+			<colgroup><col width="20%" /><col width="30%" /><col width="20%" /><col width="30%" /></colgroup>
+			<tbody>
+				<tr>
+					<td colspan="2" style="text-align:center;">
+						<div class="popImgLogo">
+							<img src="/_GWD/B2B114/goods_brand/<?=(strlen($brand[fld_logo])>=1)?$brand[fld_logo]:"noimage.gif"?>" alt="">
+						</div>
+					</td>
+					<td colspan="2"class="textBold" style="font-size:20px;"><?=$brand[fld_name]?></td>
+				</tr>
+				<? if(strlen($brand[fld_contents]) >= 1) { ?>
+				<tr>
+					<td colspan="4" class="lh12">
+						<div class="popScrollbox">
+						<?=nl2br($brand[fld_contents])?>
+						</div>
+					</td>
+				</tr>
+				<? } ?>
+				<? if(strlen($brand[fld_like_brand]) >=1) { ?>
+				<tr>
+					<th>유사브랜드</td>
+					<td colspan="3"><?=$brand[fld_like_brand]?></td>
+				</tr>
+				<? } ?>
+				<tr>
+					<th>생산국가</td>
+					<td><?=$brand[fld_made_country]?> 생산</td>
+					<th>제조회사</td>
+					<td><?=$brand[fld_manufactuer]?>&nbsp;</td>
+				</tr>
+				<tr>
+					<th>상품/제안서</th>
+					<td colspan="3">
+						<div class="btn evalBtn evalDiv_white" onclick="" id="">등록된 상품 개수</div><span class="evalTxt_basic"><?=number_format($cnt_goods)?>개</span>
+						<div class="btn evalBtn evalDiv_white mrgL10" onclick="" id="">등록된 제안서 개수</div><span class="evalTxt_basic"><?=number_format($cnt_proposal)?>건</span>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+<?
+	} else { echo "<div align='center' style='padding:100px;'>오류발생 : 관리자에게 문의 바랍니다.</div>"; } 
+?>

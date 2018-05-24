@@ -1,0 +1,52 @@
+<?
+	@require_once "../../include/config.php";
+	@include_once HOME_DIR . "/include/top.php";
+?>
+</head>
+<body>
+<div id="wrap">
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/oneNav.php"; ?>
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav_member.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<!-- contents s -->
+
+					<!-- PR정보관리 s -->
+					<div class="cbTitle">
+						<h2>회원탈퇴</h2>
+						<span>B2B114 사이트에 오신 것을 환영합니다</span>
+					</div>
+					<div class="cbTopBox">
+						
+					</div>
+					<div class="cbMiddleBox">
+						
+					</div>
+					<!-- PR정보관리 e -->
+
+					<!-- 페이지버튼 s-->
+					<div class="cbBottomBox">
+						<div class="pageBtnBox">
+							<input type="submit" value="다음단계" class="btnStyle btnMainC"/>
+							<input type="button" value="취소" class="btnStyle btnWhite" onclick="JavaScript:history.go(-1);"/>
+						</div>
+					</div>
+					<!-- 페이지버튼 e-->
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">setCurrentPage('회원탈퇴');</script><!-- 현재페이지 -->
+	<? @include_once HOME_DIR . "/include/bottom.php"; ?>

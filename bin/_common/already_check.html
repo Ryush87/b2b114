@@ -1,0 +1,19 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../../include/config.php";
+	
+	$Qry = "SELECT * FROM ".trim($_POST[tabletable])." WHERE ".trim($_POST[fldfld])." = '".trim($_POST[valval])."'";
+	$Rlt = @mysql_query($Qry,$Con);
+	$total_rows = @mysql_num_rows($Rlt);
+	
+	if( $total_rows >= 1 )
+	{
+		echo "FALSE"; // 사용중
+	}
+	else
+	{
+		echo "TRUE"; // 사용가능
+	}
+
+	exit;
+?>

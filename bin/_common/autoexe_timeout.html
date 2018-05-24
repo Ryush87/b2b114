@@ -1,0 +1,8 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "/home/_GNTGLOBAL/www.b2b114.co.kr/include/config.php";
+	
+	// 게재중인 공고중 마감일이 경과된 공고는 마감처리
+		$Qry = "UPDATE request_default SET fld_status=2 WHERE fld_status=1 AND fld_end_date < DATE_SUB(NOW(),INTERVAL 1 DAY)";
+		$Rlt = @mysql_query($Qry,$Con);
+?>

@@ -1,0 +1,267 @@
+<?
+	@require_once "../../include/config.php";
+
+	if($work == "request_execute")
+	{
+		$Qry = "UPDATE request_default SET fld_status=1, fld_regdate=NOW() WHERE uid=$request_uid";
+		$Rlt = @mysql_query($Qry,$Con);
+		echo "<script language='JavaScript'>window.location.href='my_announce_list.html?qstatus=1';</script>";
+		exit;
+	}
+
+	@include_once HOME_DIR . "/include/top.php";
+
+	// 데이터 가져오기(자동저장)
+		if($request_uid >= 1)
+		{
+			$Qry = "SELECT * FROM request_default WHERE uid=".$request_uid;
+		}
+		else
+		{
+			$Qry = "SELECT * FROM request_default WHERE regmem_uid=".$_SESSION[ssUID]." AND fld_status=0";
+		}
+		$Qry .= " ORDER BY uid DESC LIMIT 1";
+		$Rlt = @mysql_query($Qry,$Con);
+		$total_rows = @mysql_num_rows($Rlt);
+
+		if($total_rows >= 1)
+		{
+			// 있는 경우
+				$request = @mysql_fetch_array($Rlt);
+			// 수정권한체크(본인등록건인지)
+				if($_SESSION[ssADMIN] == "N" AND $request[regmem_uid] != $_SESSION[ssUID])
+				{
+					echo "<script>alert('본인의 공고만 수정 가능합니다.');history.go(-1);</script>";
+					exit;
+				}
+		}
+		else
+		{
+			// 없는 경우
+				$Qry = "INSERT INTO request_default SET regmem_uid=".$_SESSION[ssUID].", fld_update=NOW()";
+				$Rlt = @mysql_query($Qry,$Con);
+				
+			// 데이터 가져오기
+				$Qry = "SELECT * FROM request_default WHERE regmem_uid=$_SESSION[ssUID] AND fld_status=0 ORDER BY uid DESC LIMIT 1";
+				$Rlt = @mysql_query($Qry,$Con);
+				$request = @mysql_fetch_array($Rlt);
+		}
+
+	// 가져온 데이터를 사용할 수 있는 상태로 가공하기
+		$arr_use = explode(',',trim($request[fld_use]));
+		$arr_age = explode(',',trim($request[fld_age]));
+		$arr_sex = explode(',',trim($request[fld_sex]));
+		$arr_season = explode(',',trim($request[fld_season]));
+		$arr_buyer_upjong = explode(',',trim($request[fld_buyer_upjong]));
+		$arr_theme_color = explode(',',trim($request[fld_theme_color]));
+		$arr_request_category = explode(',',trim($request[fld_request_category]));
+		$arr_reject_category = explode(',',trim($request[fld_reject_category]));
+		$arr_character = explode(',',trim($request[fld_character]));
+
+	// 기본값 설정
+		$request[fld_print] = (strlen($request[fld_print]) >= 1)?$request[fld_print]:1;
+		$request[fld_sample] = (strlen($request[fld_sample]) >= 1)?$request[fld_sample]:1;
+		$request[fld_payment_type] = (strlen($request[fld_payment_type]) >= 1)?$request[fld_payment_type]:1;
+		$request[fld_delivery_type] = (strlen($request[fld_delivery_type]) >= 1)?$request[fld_delivery_type]:1;
+?>
+</head>
+<body>
+<div id="wrap">
+	<script type="text/javascript">currentPageKind="buy";currentMainN=0;currentSubN=0;</script><!-- 현재페이지 -->
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<!-- contents s -->
+					<form class="buy_form" name="buy_form" action="" method="post">
+					<!--input type="hidden" name="execute_uid"/-->
+					<input type="hidden" name="work"/>
+					<input type="hidden" name="request_uid" value="<?=$request[uid]?>"/>
+					<input type="hidden" name="page" value="<?=$page?>"/>
+					<input type="hidden" name="fld_price_s"/>
+					<input type="hidden" name="fld_price_e"/>
+					<input type="hidden" name="fld_ea"/>
+					<input type="hidden" name="del_price_s"/>
+					<input type="hidden" name="del_price_e"/>
+					<input type="hidden" name="del_ea"/>
+					<input type="hidden" name="fld_use"/>
+					<input type="hidden" name="fld_age"/>
+					<input type="hidden" name="fld_sex"/>
+					<input type="hidden" name="fld_season"/>
+					<input type="hidden" name="fld_buyer_upjong"/>
+					<input type="hidden" name="fld_theme_color"/>
+					<input type="hidden" name="fld_request_category"/>
+					<input type="hidden" name="fld_reject_category"/>
+					<input type="hidden" name="fld_character"/>
+						<!-- 공고등록 s-->
+						<div class="cbTitle">
+							<h2><script>writeVar(main_buyNavT[currentMainN][0]);</script></h2>
+							<span>많은 정보를 입력하실수록 정확한 제안을 받으실 수 있습니다.</span>
+							<span style="float:right;color:#FFC000;" id="ID_view_autosave_msg1">자동저장됨 (<?=$request[fld_update]?>)</span>
+						</div>
+						<div class="cbTopBox">
+						</div>
+						<div class="cbMiddleBox">
+							
+							<!-- 공고정보 s-->
+							<div class="articleBox">
+								<div class="plusText" style="font-size:12px;margin-bottom:10px;"><span><i class="fa fa-asterisk"></i></span> 필수정보</div>
+								<div class="strongTitle"><input type="text" name="fld_title" id="fld_title" value="<?=$request[fld_title]?>" placeholder="제목을 입력 해주십시오." onBlur="fnc_autosave()"/></div>
+								<style type="text/css">.writeTable td {border:0;padding:0;}</style>
+								<table class="writeTable">
+									<caption>공고기본정보</caption>
+									<tbody>
+										<!-- <tr>
+											<td style="border:0;">
+												<textarea name="fld_contents" id="fld_contents" cols="30" rows="4" class="form-control" onBlur="fnc_autosave()" placeholder="내용을 입력해주십시오."><?=$request[fld_contents]?></textarea>
+											</td>
+										</tr> -->
+										<tr>
+											<td>
+												<div>
+													<div class="goodsInfoTop">
+														<div class="goodsInfoBasic">
+															<div class="priceInputResultBox">
+																<table>
+																	<colgroup><col width="10%" /><col width="10%" /><col width="15%" /><col width="10%" /><col width="15%" /><col width="15%" /><col width="20%" /><col width="5%" /></colgroup>
+																	<tbody>
+																	<?
+																		$Qry2 = "SELECT * FROM request_price WHERE request_uid=$request[uid] ORDER BY uid";
+																		$Rlt2 = @mysql_query($Qry2,$Con);
+																		$total_rows2 = @mysql_num_rows($Rlt2);
+																		for($x2 = 0 ; $x2 < $total_rows2 ; $x2++)
+																		{
+																			$row2 = @mysql_fetch_array($Rlt2);
+																	?>
+																	<tr>
+																		<td><span class="numBox"><?=$x2+1?></span></td>
+																		<td><div class="textC999 textBold">단가</div></td>
+																		<td class="aRight"><span class="priceData"><?=number_format($row2[fld_price_s])?></span> 원</td>
+																		<td class="aRight">~</td>
+																		<td class="aRight"><span class="priceData"><?=number_format($row2[fld_price_e])?></span> 원</td>
+																		<td class="aRight"><div class="textC999 textBold">수량</div></td>
+																		<td class="aRight"><span class="priceData"><?=number_format($row2[fld_ea])?></span>개</td>
+																		<td><div class="boxCloseBtn" onclick="fnc_DelPrice(jQuery(this),'Buy')"><i class="fa fa-times fa-lg"></i></div></td>
+																	</tr>
+																	<? } ?>
+																	</tbody>
+																</table>
+															</div>
+														</div>
+													</div>
+												</div>
+
+												<div class="goodsInfoBox">
+													<div class="goodsInfoTop">
+														<div class="goodsInfoBasic priceInputBox">
+															<span>단가<sup>*</sup></span>
+															<input type="text" class="goodsInput form-control" onKeyUp="fnc_numCheck(this)" onBlur="fnc_autosave()"/>
+															<span class="mrgL10">원 이상 ~ </span>
+															<input type="text" class="goodsInput form-control" onKeyUp="fnc_numCheck(this)" onBlur="fnc_autosave()"/>
+															<span class="mrgL10"> 원 이하</span>
+															<span style="margin-left:80px;">수량<sup>*</sup></span>
+															<input type="text" class="goodsInput form-control" onKeyUp="fnc_numCheck(this)" onBlur="fnc_autosave()"/>
+															<span class="mrgL10"> 개 </span>
+															<input type="button" value="단가추가" name="btn_priceAdd" class="btn btnWMC1 fRight textBold" onclick="JavaScript:fnc_AddCodePrice();">
+														</div>
+													</div>
+												</div>
+
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<table class="insideTable">
+													<colgroup><col width="35%"/><col width="65%"/></colgroup>
+													<tr>
+														<td style="padding-left:20px;">
+															<div class="dateInputBox">
+																<span>납품처 정보</span> <input type="text" name="fld_buyer_name" value="<?=$request[fld_buyer_name]?>" class="form-control" onBlur="fnc_autosave()" style="display:inline-block;width:200px;margin-left:10px;"/>
+															</div>
+														</td>
+														<td style="padding-left:10px;">
+															<div class="intblText">
+																<p class="fs10" style="color:#999999;line-height:125%;font-size:12px;">
+																	납품처 정보는 필수 입력 항목이 아니므로 공란으로 두셔도 공고 등록 진행에 지장이 없습니다.<br/>
+  																	하지만 판매자가 공고 내용 중 가장 궁금해 하는 항목 이므로 실제 납품되는 납품처(기업명)를 기재(최선!) 하거나<br/>
+  																	힌트(예 : OO은행 OO지점) 형태로만 기재하셔도 더욱 다양하고 경쟁력 있는 제안서가 도착 됩니다.
+  																</p>
+															</div>
+														</td>
+													</tr>
+												</table>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<table>
+													<colgroup><col width="33%"/><col width="33%"/><col width="34%"/></colgroup>
+													<tr>
+														<td>
+															<div class="dateInputBox">
+																<span>마감일<sup>*</sup></span> <input type="text" name="fld_end_date" value="<?=(strlen($request[fld_end_date])>=1 AND $request[fld_end_date] != "0000-00-00")?$request[fld_end_date]:date('Y-m-d',time()+(86400*10))?>" onBlur="fnc_autosave()" id="datePickClosing" class="datePickInput form-control" /><i class="fa fa-calendar"></i>
+															</div>
+														</td>
+														<td>
+															<div class="dateInputBox ttaCenter">
+																<span>발주일(예상)</span> <input type="text" name="fld_order_date" value="<?=(strlen($request[fld_order_date])>=1 AND $request[fld_order_date] != "0000-00-00")?$request[fld_order_date]:null?>" onBlur="fnc_autosave()" id="datePickOrder" class="datePickInput form-control" /><i class="fa fa-calendar"></i>
+															</div>
+														</td>
+														<td>
+															<div class="dateInputBox ttaRight">
+																<span>납기일(예상)</span> <input type="text" name="fld_delivery_date" value="<?=(strlen($request[fld_delivery_date])>=1 AND $request[fld_delivery_date] != "0000-00-00")?$request[fld_delivery_date]:null?>" onBlur="fnc_autosave()" id="datePickDeli" class="datePickInput form-control" /><i class="fa fa-calendar"></i>
+															</div>
+														</td>
+													</tr>
+												</table>
+												<script type="text/javascript">
+													setDatePick("datePickClosing");
+													setDatePick("datePickOrder");
+													setDatePick("datePickDeli");
+												</script>
+											</td>
+										</tr>
+										<tr>
+											<td>
+												<? @include_once HOME_DIR . "/include/infoBox.php"; ?>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+								<? @include_once HOME_DIR . "/include/pop_divbox.php"; ?>
+							</div>
+							<!-- 공고정보 e-->
+
+						</div>
+						<!-- 공고등록 e-->
+
+						<!-- 페이지버튼 s-->
+						<div class="cbBottomBox">
+							<div class="autoSaveText" id="ID_view_autosave_msg2">자동저장됨 (<?=$request[fld_update]?>)</div>
+							<div class="pageBtnBox">
+								<? if($request_uid >= 1) { ?>
+								<div class="btn btnMainC" onClick="JavaScript:fnc_autosave();window.location.href='my_announce_<?=(strlen($return_url)>=1)?$return_url:"list"?>.html?qstatus=<?=$qstatus?>&page=<?=$page?>&request_uid=<?=$request_uid?>';">수정</div>
+								<? } else { ?>
+								<div class="btn btnMainC" onClick="JavaScript:checkData();">등록</div>
+								<? } ?>
+								<a href="javascript:history.go(-1);"><div class="btn btnWhite">취소</div></a>
+							</div>
+						</div>
+						<!-- 페이지버튼 e-->
+					</form>
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+	<? @include_once HOME_DIR . "/include/bottom.php"; ?>

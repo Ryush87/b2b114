@@ -1,0 +1,135 @@
+<?
+	@require_once "../../include/config.php";
+	@include_once HOME_DIR . "/include/top.php";
+?>
+</head>
+<body>
+<div id="wrap">
+	<script type="text/javascript">currentPageKind="customer";currentMainN=0;currentSubN=0;</script><!-- 현재페이지 -->
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/oneNav.php"; ?>
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<!-- contents s -->
+
+					<!-- 리스트 s-->
+					<form class="pageFormBox" name="buy_form" action="" method="get">
+					<input type="hidden" name="work"/>
+					<input type="hidden" name="uid"/>
+					<input type="hidden" name="page" value="<?=$page?>"/>
+					<input type="hidden" name="qstatus" value="<?=$qstatus?>"/>
+					<div class="cbTitle">
+						<h2><script>writeVar(sub_customerNavT_0[currentSubN][0]);</script></h2>
+						<span>B2B114 공지사항을 확인하세요</span>
+					</div>
+					<div class="cbTopBox">
+					</div>
+					<div class="cbMiddleBox">
+						
+						<!-- 내용 s-->
+							<div class="articleBox">
+								<div class="artTop">
+									<div class="searchBoxWrap">
+										<input type="text" name="qkeyword" value="<?=$qkeyword?>" class="searchInputBox" placeholder="검색어" />
+										<input type="submit" id="searchBtn" name="searchBtn" value="&#xf002;" class="listBtnStyle btnMainC" onClick="fnc_keyword()"/>
+									</div>
+								</div>
+								<div class="artCont">
+									<table class="listTable">
+										<caption>공고전체리스트</caption>
+										<colgroup>
+											<col width="10%" />
+											<col width="70%" />
+											<col width="20%" />
+										</colgroup>
+										<thead>
+											<tr>
+												<th class="bd2Top666">번호</th>
+												<th class="bd2Top666">제목</th>
+												<th class="bd2Top666">일자</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>5</td>
+												<th class="lh16">
+													<a href="#">
+														B2B114 사이트가 오픈했습니다.
+													</a>
+												</th>
+												<td>2015/12/31</td>
+											</tr>
+											<tr>
+												<td>4</td>
+												<th class="lh16">
+													<a href="#">
+														B2B114 사이트가 오픈했습니다.
+													</a>
+												</th>
+												<td>2015/12/31</td>
+											</tr>
+											<tr>
+												<td>3</td>
+												<th class="lh16">
+													<a href="#">
+														B2B114 사이트가 오픈했습니다.
+													</a>
+												</th>
+												<td>2015/12/31</td>
+											</tr>
+											<tr>
+												<td>2</td>
+												<th class="lh16">
+													<a href="#">
+														B2B114 사이트가 오픈했습니다.
+													</a>
+												</th>
+												<td>2015/12/31</td>
+											</tr>
+											<tr>
+												<td>1</td>
+												<th class="lh16">
+													<a href="#">
+														B2B114 사이트가 오픈했습니다.
+													</a>
+												</th>
+												<td>2015/12/31</td>
+											</tr>
+										</tbody>
+									</table>
+									<div class="pagingBoxWrap">
+										<ul class="pagingBox2">
+											<a href="#"><li class="angleBtn"><i class="fa fa-angle-double-left"></i></li></a>
+											<a href="#"><li class="angleBtn"><i class="fa fa-angle-left"></i></li></a>
+											<a href="#"><li class="actOn">1</li></a>
+											<a href="#"><li>2</li></a>
+											<a href="#"><li>3</li></a>
+											<a href="#"><li>4</li></a>
+											<a href="#"><li>5</li></a>
+											<a href="#"><li class="angleBtn"><i class="fa fa-angle-right"></i></li></a>
+											<a href="#"><li class="angleBtn"><i class="fa fa-angle-double-right"></i></li></a>
+										</ul>
+									</div>
+								</div>
+							</div>
+						<!-- 내용 e-->
+
+					</div>
+					<!-- 리스트 e-->
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+	<? @include_once HOME_DIR . "/include/bottom.php"; ?>

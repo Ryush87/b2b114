@@ -1,0 +1,97 @@
+<?php
+
+	@require_once "../../include/config.php";
+	fnc_login_check();
+	
+	$qkeyword = trim($qkeyword);
+	
+if(strlen($qkeyword) >= 1)
+{
+	// 카테고리3 데이터 가져오기
+		$Qry = "
+						SELECT 
+							A.fld_name AS cat1_name, 
+							A.uid AS cat1_uid, 
+							B.fld_name AS cat2_name, 
+							B.uid AS cat2_uid, 
+							C.fld_name AS cat3_name, 
+							C.uid AS cat3_uid
+						FROM 
+							goods_cat1 A, 
+							goods_cat2 B, 
+							goods_cat3 C 
+						WHERE 
+							A.uid = B.cat1_uid 
+							AND B.uid = C.cat2_uid 
+							AND 
+							( 
+								C.fld_name LIKE '%$qkeyword%' 
+								OR C.fld_keyword LIKE '%$qkeyword%'
+							) 
+						ORDER BY 
+							cat1_uid, cat2_uid, cat3_name
+					";
+		$Rlt = @mysql_query($Qry,$Con);
+		$cat3_cnt = @mysql_num_rows($Rlt);
+		while($row = @mysql_fetch_array($Rlt))
+		{
+			echo "<div class=\"listItem\" onclick=\"searchItemChoice(this);\" catuid=\"".$row[cat1_uid]."|".$row[cat2_uid]."|".$row[cat3_uid]."\">".$row[cat1_name]." > ".$row[cat2_name]." > ".$row[cat3_name]."</div>";
+		}
+
+	// 카테고리2 데이터 가져오기
+		$Qry = "
+						SELECT 
+							A.fld_name AS cat1_name, 
+							A.uid AS cat1_uid, 
+							B.fld_name AS cat2_name, 
+							B.uid AS cat2_uid
+						FROM 
+							goods_cat1 A, 
+							goods_cat2 B 
+						WHERE 
+							A.uid = B.cat1_uid 
+							AND 
+							( 
+								B.fld_name LIKE '%$qkeyword%' 
+								OR B.fld_keyword LIKE '%$qkeyword%'
+							) 
+						ORDER BY 
+							cat1_uid, cat2_name
+					";
+		$Rlt = @mysql_query($Qry,$Con);
+		$cat2_cnt = @mysql_num_rows($Rlt);
+		while($row = @mysql_fetch_array($Rlt))
+		{
+			echo "<div class=\"listItem\" onclick=\"searchItemChoice(this);\" catuid=\"".$row[cat1_uid]."|".$row[cat2_uid]."\">".$row[cat1_name]." > ".$row[cat2_name]."</div>";
+		}
+
+	// 카테고리1 데이터 가져오기
+		$Qry = "
+						SELECT 
+							A.fld_name AS cat1_name, 
+							A.uid AS cat1_uid
+						FROM 
+							goods_cat1 A
+						WHERE 
+							( 
+								A.fld_name LIKE '%$qkeyword%' 
+								OR A.fld_keyword LIKE '%$qkeyword%'
+							) 
+						ORDER BY 
+							cat1_name
+					";
+		$Rlt = @mysql_query($Qry,$Con);
+		$cat1_cnt = @mysql_num_rows($Rlt);
+		while($row = @mysql_fetch_array($Rlt))
+		{
+			echo "<div class=\"listItem\" onclick=\"searchItemChoice(this);\" catuid=\"".$row[cat1_uid]."\">".$row[cat1_name]."</div>";
+		}
+
+	// 데이터 없는 경우 없다고 뿌려줌
+		if( $cat1_cnt <= 0 AND $cat2_cnt <= 0 AND $cat3_cnt <= 0)
+		{
+			//echo "<br/><span style='text-align:center;'>입력하신 키워드에 맞는 상품군이 없습니다.</span><br/>";
+			echo "<div class=\"listItem\">입력하신 키워드에 맞는 상품군이 없습니다.</div>";
+		}	
+}
+?>

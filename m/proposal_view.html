@@ -1,0 +1,288 @@
+<?
+	$LoginNotCheck=1;
+	@require_once "../include/config.php";
+	
+	$Qry = "SELECT * FROM proposal_msend WHERE uid=".base64_decode($c);
+	$Rlt = @mysql_query($Qry,$Con);
+	$proposal_msend = @mysql_fetch_array($Rlt);
+	if( substr($proposal_msend[fld_to_celno],-4) != $fld_confirm_celno )
+	{
+		echo "<script>alert('번호 입력이 잘못된것 같습니다.\\n\\n다시 한번 확인하시고 입력 해주십시오.');history.go(-1);</script>";
+		exit;
+	}
+	else
+	{
+		// 제안서 기본 정보 가져오기
+			$Qry = "SELECT * FROM proposal_default WHERE uid=".$proposal_msend[proposal_uid];
+			$Rlt = @mysql_query($Qry,$Con);
+			$proposal_default = @mysql_fetch_array($Rlt);
+			$eval_reject = ( @in_array($proposal_uid,$arr_eval_rejct) )?true:false;
+			$eval_review = ( @in_array($proposal_uid,$arr_eval_review) )?true:false;
+			$eval_important = ( @in_array($proposal_uid,$arr_eval_important) )?true:false;
+			$arr_use = explode(",",$proposal_default[fld_use]);
+			$arr_season = explode(',',$proposal_default[fld_season]);
+			$arr_theme_color = explode(',',$proposal_default[fld_theme_color]);
+			$arr_age = explode(',',$proposal_default[fld_age]);
+			$arr_buyer_upjong = explode(',',$proposal_default[fld_buyer_upjong]);
+			$arr_character = explode(',',$proposal_default[fld_character]);
+			$arr_sex = explode(',',$proposal_default[fld_sex]);
+
+		// 상품/브랜드/카테고리 정보 가져오기
+			$goods_default = @mysql_fetch_array(@mysql_query("SELECT * FROM goods_default WHERE uid=".$proposal_default[goods_uid],$Con));
+			$goods_brand = @mysql_fetch_array(@mysql_query("SELECT * FROM goods_brand WHERE uid=".$goods_default[brand_uid],$Con));
+			$goods_cat1 = ($goods_default[cat1_uid] >= 1)?@mysql_fetch_array(@mysql_query("SELECT * FROM goods_cat1 WHERE uid=".$goods_default[cat1_uid],$Con)):null;
+			$goods_cat2 = ($goods_default[cat2_uid] >= 1)?@mysql_fetch_array(@mysql_query("SELECT * FROM goods_cat2 WHERE uid=".$goods_default[cat2_uid],$Con)):null;
+			$goods_cat3 = ($goods_default[cat3_uid] >= 1)?@mysql_fetch_array(@mysql_query("SELECT * FROM goods_cat3 WHERE uid=".$goods_default[cat3_uid],$Con)):null;
+	
+		// 제안서 가격 정보 가져오기
+			if($proposal_msend[price_uid] >= 1)
+			{
+				$Qry = "SELECT * FROM proposal_price WHERE uid=".$proposal_msend[price_uid];
+				$Rlt = @mysql_query($Qry,$Con);
+				$proposal_price = @mysql_fetch_array($Rlt);
+			}
+
+		// 제안사 정보 가져오기
+			$Qry = "SELECT * FROM member_default WHERE uid=".$proposal_default[regmem_uid];
+			$Rlt = @mysql_query($Qry,$Con);
+			$regmem_default = @mysql_fetch_array($Rlt);
+	}
+	
+	@include_once HOME_DIR . "/include/popup_top.php";
+?>
+</head>
+<body>
+	<div class="popHead bgColorMC1">
+		<div class="popWidthWrap">
+			<img src="/skin/images/common/logo_w.png" alt="B2B114 LOGO" style="float:left;width:80px;"/>
+			<div style="float:left;margin-left:10px;">제안서보기</div>
+		</div>
+	</div>
+	<div class="popContents">
+		<div class="popWidthWrap">
+
+			<!-- header s -->
+			<div class="apTitle apTitleAct fLeft"><div><?=$proposal_default[fld_title]?></div></div>
+			<!-- header e -->
+			<!-- 상품정보 s -->
+			<div class="articleBox" style="margin:0 0 0 0;">
+				<div class="artTitle">제안정보</div>
+				<div class="artCont">
+					<div class="pGoodsImgArea">
+						<img alt="" id="" src="/_GWD/B2B114/goods_image_m/<?=(strlen($goods_default[fld_image_m])>=1)?$goods_default[fld_image_m]:"noimage.gif"?>">
+					</div>
+					<div class="pGoodsSummary">
+						<table class="viewTable" style="border:1px solid #eee;">
+							<colgroup>
+								<col width="30%"/><col width="70%"/>
+							</colgroup>
+							<tbody>
+								<tr>
+									<th class="<?=($proposal_msend[price_uid]>=1)?"bdTop7MC1 bdLeft7MC1":"bdTop"?>">상품명</th>
+									<td class="<?=($proposal_msend[price_uid]>=1)?"bdTop7MC1 bdRight7MC1":"bdTop"?> textBold"><?=$goods_default[fld_name]?></td>
+								</tr>
+								<tr>
+									<th class="<?=($proposal_msend[price_uid]>=1)?"bdLeft7MC1":"bdTop"?>">소비자가</th>
+									<td class="<?=($proposal_msend[price_uid]>=1)?"bdRight7MC1":"bdTop"?> textBold"><?=number_format($goods_default[fld_price])?> 원</td>
+								</tr>
+								<? if($proposal_msend[price_uid] >= 1) { ?>
+								<tr>
+									<th class="bdLeft7MC1">발주 수량</th>
+									<td class="bdRight7MC1 textBold">최소 <?=number_format($proposal_price[fld_ea])?>개 이상</td>
+								</tr>
+								<?
+									$view_percent = ceil(100-($proposal_price[fld_price]/$goods_default[fld_price]*100));
+								?>
+								<tr>
+									<th class="bdBottom7MC1 bdLeft7MC1">제안가</th>
+									<td class="bdBottom7MC1 bdRight7MC1 textBold">
+										<span class="fs16 textMC1"><?=number_format($proposal_price[fld_price])?>원</span>
+										<span class="btn smallTrBtn"><?=$view_percent?>% 할인</span>
+									</td>
+								</tr>
+								<? } ?>
+								<tr>
+									<th class="bdTop">납기가능일</th>
+									<td class="bdTop"><?=$proposal_default[fld_delivery]?></td>
+								</tr>
+								<tr>
+									<th class="bdTop">제안사</th>
+									<td class="bdTop">
+										<?=(strlen($regmem_default[fld_co_name])>=1)?$regmem_default[fld_co_name]:"개인회원"?>
+										<div class="btn btnWhite listTrSmallBtn popupInfoBox fRight" popDivId="companyNameInfo" onClick="JavaScript:fnc_infoBox_sellerInfo_m(<?=$regmem_default[uid]?>)"><i class="fa fa-building-o"></i> 상세정보</div>
+									</td>
+								</tr>
+								
+								<tr>
+									<th class="bdTop">브랜드</th>
+									<td class="bdTop">
+										<?=$goods_brand[fld_name]?>
+										<div class="btn btnWhite listTrSmallBtn popupInfoBox fRight" popDivId="brandNameInfo" onClick="JavaScript:fnc_infoBox_brandInfo_m(<?=$goods_brand[uid]?>)"><i class="fa fa-tag"></i> 상세정보</div>
+									</td>
+								</tr>
+								<tr>
+									<th class="bdTop">원산지</th>
+									<td class="bdTop"><?=($goods_default[fld_made_korea]=="Y")?"대한민국":$goods_default[fld_made_country]?></td>
+								</tr>
+								<tr>
+									<th class="bdTop">인쇄/샘플</th>
+									<td class="bdTop">
+										인쇄 <?=($proposal_default[fld_print]==2)?"가능":"불가"?> / 샘플제출 <?=($proposal_default[fld_sample]==2)?"가능":"불가"?>
+									</td>
+								</tr>
+								<tr>
+									<td colspan="2" class="bdTop" style="font-size:1em;">
+										<div class="btn evalBtn evalDiv_reject">거절</div><span class="evalTxt_reject"><?=number_format($goods_default[fld_count_reject])?>건</span>
+										<div class="btn evalBtn evalDiv_review mrgL10">검토</div><span class="evalTxt_review"><?=number_format($goods_default[fld_count_review])?>건</span>
+										<div class="btn evalBtn evalDiv_important mrgL10">유력</div><span class="evalTxt_important"><?=number_format($goods_default[fld_count_important])?>건</span>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="pGoodsinfo">
+						<table class="viewTable" style="border:1px solid #eee;">
+							<colgroup>
+								<col width="30%"/><col width="70%"/>
+							</colgroup>
+							<tbody>
+								<tr>
+									<th>상품분류</th>
+									<td>
+										<?=(strlen($goods_cat1[fld_name])>=1)?$goods_cat1[fld_name]:null?>
+										<?=(strlen($goods_cat2[fld_name])>=1)?" > ".$goods_cat2[fld_name]:null?>
+										<?=(strlen($goods_cat3[fld_name])>=1)?" > ".$goods_cat3[fld_name]:null?>
+									</td>
+								</tr>
+								<tr>
+									<th class="bdTop">모델명</th>
+									<td class="bdTop"><?=$goods_default[fld_model]?></td>
+								</tr>
+								<? if( strlen($goods_default[fld_introduction]) >= 1 ) { ?>
+								<tr>
+									<th class="bdTop">간략설명</th>
+									<td class="bdTop"><?=$goods_default[fld_introduction]?></td>
+								</tr>
+								<? } ?>
+								<? if( strlen($goods_default[fld_spec]) >= 1 ) { ?>
+								<tr>
+									<th class="bdTop">스펙</th>
+									<td class="bdTop lh16"><?=nl2br($goods_default[fld_spec])?></td>
+								</tr>
+								<? } ?>
+								<? if( strlen($proposal_default[fld_contents]) >= 1 ) { ?>
+								<tr>
+									<th class="bdTop">제안설명</th>
+									<td class="bdTop lh16"><?=nl2br($proposal_default[fld_contents])?></td>
+								</tr>
+								<? } ?>
+								<? if( strlen($arr_use[0]) >=1 ) { ?>
+								<tr>
+									<th class="bdTop">용도</th>
+									<td class="bdTop lh16">
+										<? foreach($arr_use AS $fld => $val) { ?>
+										<div class="pGoodsSelectedItem"><?=$val?></div>
+										<? } ?>
+									</td>
+								</tr>
+								<? } ?>
+								<? if( strlen($arr_season[0]) >=1 ) { ?>
+								<tr>
+									<th class="bdTop">계절</th>
+									<td class="bdTop lh16">
+										<? foreach($arr_season AS $fld => $val) { ?>
+										<div class="pGoodsSelectedItem"><?=$val?></div>
+										<? } ?>
+									</td>
+								</tr>
+								<? } ?>
+								<? if( strlen($arr_theme_color[0]) >=1 ) { ?>
+								<tr>
+									<th class="bdTop">테마컬러</th>
+									<td class="bdTop lh16">
+										<? foreach($arr_theme_color AS $fld => $val) { ?>
+										<div class="pGoodsSelectedItem"><?=$val?></div>
+										<? } ?>
+									</td>
+								</tr>
+								<? } ?>
+								<? if( strlen($arr_age[0]) >=1 ) { ?>
+								<tr>
+									<th class="bdTop">연령</th>
+									<td class="bdTop lh16">
+										<? foreach($arr_age AS $fld => $val) { ?>
+										<div class="pGoodsSelectedItem"><?=$val?></div>
+										<? } ?>
+									</td>
+								</tr>
+								<? } ?>
+								<? if( strlen($arr_character[0]) >=1 ) { ?>
+								<tr>
+									<th class="bdTop">특징</th>
+									<td class="bdTop lh16">
+										<? foreach($arr_character AS $fld => $val) { ?>
+										<div class="pGoodsSelectedItem"><?=$val?></div>
+										<? } ?>
+									</td>
+								</tr>
+								<? } ?>
+								<? if( strlen($arr_sex[0]) >=1 ) { ?>
+								<tr>
+									<th class="bdTop">성별</th>
+									<td class="bdTop lh16">
+										<? foreach($arr_sex AS $fld => $val) { ?>
+										<div class="pGoodsSelectedItem"><?=$val?></div>
+										<? } ?>
+									</td>
+								</tr>
+								<? } ?>
+								<tr>
+									<td class="bdTop" colspan="2">
+										<div class="previewDetailInfoBox">
+											<?=stripslashes($goods_default[fld_contents])?>
+										</div>
+										<div class="viewDetailInfoBtn" style="text-align:center;">
+											<div class="btn btnWhite listTrBtn">상품상세보기</div>
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<!-- 상품정보 e -->
+			
+		</div>
+	</div>
+	<div id="scrollTopBtn" class="bgColor999"><i class="fa fa-chevron-up"></i>TOP</div>
+	<div class="popFooter bdTop">
+		<div class="pageBtnBox"><a href="tel:<?=(strlen($proposal_msend[fld_to_celno])>=1)?$proposal_msend[fld_to_celno]:CS_TELNO?>"><div class="btn btnMainC textBold"><div class="fLeft fs14" style="height:20px;margin:-2px 5px 0 0;"><i class="fa fa-phone"></i></div>전화문의</div></a></div>
+	</div>
+
+	<!-- infoBox s -->
+	<style type="text/css">
+		.popInfoBox {width:90%;height:80%;overflow:auto;}
+		.popInfoBox {padding-bottom:20px;}
+		.popInfoBox .popDivTable tbody td {text-align:center;padding-left:5px;}
+		.popInfoBox .popDivTable th, .popInfoBox .popDivTable td {padding:5px;line-height:2em;}
+		.popDivTable tbody td.popImgLogo img {width:100%;}
+	</style>
+	<div class="popInfoBgBox"></div>
+
+	<div id="companyNameInfo" class="popInfoBox">
+		<div class="popInfoCloseBtn"><i class="fa fa-times fa-2x"></i></div>
+		<div class="popDivTitle"><span><i class="fa fa-building-o"></i> 업체정보</span></div>
+		<div class="popDivContents" id="ID_companyNameInfo" style="max-height:95%;"></div>
+	</div>
+
+	<div id="brandNameInfo" class="popInfoBox">
+		<div class="popInfoCloseBtn"><i class="fa fa-times fa-2x"></i></div>
+		<div class="popDivTitle"><span><i class="fa fa-tag"></i> 브랜드 정보</span></div>
+		<div class="popDivContents" id="ID_brandNameInfo" style="max-height:95%;"></div>
+	</div>
+
+	<!-- infoBox e -->
+
+</body>
+</html>

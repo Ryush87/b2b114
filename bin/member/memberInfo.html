@@ -1,0 +1,404 @@
+<?
+	@require_once "../../include/config.php";
+	@include_once HOME_DIR . "/include/top.php";
+?>
+<script language="JavaScript" src="/_LIB/css_js/number_format.js"></script>
+<script language="JavaScript" src="function.js"></script>
+<script language="JavaScript">
+<!--
+
+	function fchk_join()
+	{
+		// 아이디 체크
+			if( $('ID_join_id_chk').value == false )
+			{
+				fnc_join_idchk();
+				return false;
+			}
+		
+		// 패스워드 체크
+			if( $('ID_join_password').value.length < 6 )
+			{
+				$('ID_join_password_msg').innerHTML = "영문+숫자, 6~20자 이내로 비밀번호를 입력 해주십시오.";
+				$('ID_join_password').focus();
+				return false;
+			} else { $('ID_join_password_msg').innerHTML = ""; }
+		
+		// 패스워드(확인) 체크
+			if( $('ID_join_password').value != $('ID_join_password2').value )
+			{
+				$('ID_join_password2_msg').innerHTML = "비밀번호와 비밀번호 확인의 입력값이 다릅니다.";
+				$('ID_join_password2').focus();
+				return false;
+			} else { $('ID_join_password2_msg').innerHTML = ""; }
+		
+		// 이메일 체크
+			if( $('ID_join_email_chk').value == false )
+			{
+				fnc_join_emailchk();
+				return false;
+			}
+		
+		// 휴대폰 인증 체크
+			if( $('ID_join_celno').value.length >= 1)
+			{
+				if( $('ID_join_celno_confirm').value != "Y" )
+				{
+					$('ID_join_celno_msg').innerHTML = "휴대폰번호 등록시 휴대폰인증을 하셔야 합니다.";
+					$('ID_join_celno').focus();
+					return false;
+				}
+			}
+
+		// 진행여부 확인
+			if( confirm('입력하신 정보로 회원가입 하시겠습니까?') )
+			{
+				document.form_join.submit();
+			}
+			else
+			{
+				return false;
+			}
+		
+	}
+	
+-->
+</script>
+</head>
+<body>
+<form class="pageFormBox" name="form_join" action="join_complete_.html" enctype="multipart/form-data" method="post">
+<input type="hidden" name="work_type" value="simple_join"/>
+<div id="wrap">
+	<div id="header">
+		<? @include_once HOME_DIR . "/include/oneNav.php"; ?>
+		<? @include_once HOME_DIR . "/include/header.php"; ?>
+		<? @include_once HOME_DIR . "/include/nav_member.php"; ?>
+	</div>
+	<div id="contentsBox">
+		<div class="contentsTop bgColoreee">
+			<div class="widthWrap">
+				<ul class="localBox"></ul>
+			</div>
+		</div>
+		<div class="contentsMiddle">
+			<div class="widthWrap">
+				<div class="contentsBoxWrap">
+					<!-- contents s -->
+					
+					<form class="pageFormBox" id="" name="" action="" method="post">
+						<!-- 정보입력 s-->
+						<div class="cbTitle">
+							<h2>회원정보 수정</h2>
+							<span>회원님의 정보를 수정 및 확인할 수 있습니다</span>
+						</div>
+						<div class="cbTopBox">
+							
+						</div>
+						<div class="cbMiddleBox">
+							<!-- 회원정보 s-->
+							<div class="articleBox">
+								<div class="artTitle">회원정보<div class="plusText"><span><i class="fa fa-asterisk"></i></span> 필수정보</div></div>
+								<div class="artCont bdTop2MC1">
+									
+									<table class="writeTable">
+										<caption>회원정보입력</caption>
+										<colgroup>
+											<col width="20%" /><col width="80%" />
+										</colgroup>
+										<tbody>
+											<tr>
+												<th>아이디</th>
+												<td>hoyoyo8</td>
+											</tr>
+											<tr>
+												<th>비밀번호<sup>*</sup></th>
+												<td>
+													<input type="password" name="join_password" id="ID_join_password" class="textType form-control" />
+													<span id="ID_join_password_msg" class="statusText"></span>
+												</td>
+											</tr>
+											<tr>
+												<th>비밀번호 확인<sup>*</sup></th>
+												<td>
+													<input type="password" name="join_password2" id="ID_join_password2" class="textType form-control"/>
+													<span id="ID_join_password2_msg" class="statusText"></span>
+												</td>
+											</tr>
+											<tr>
+												<th>이메일주소<sup>*</sup></th>
+												<td>
+													<input type="text" name="join_email" id="ID_join_email" class="textType form-control" onKeyUp="JavaScript:fnc_join_emailchk();"/>
+													<input type="hidden" name="join_email_chk" value="0" id="ID_join_email_chk"/>
+													<span id="ID_join_email_msg" class="statusText"></span>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>이름</th>
+												<td>유승현</td>
+											</tr>
+											<tr class="hideBox">
+												<th>휴대폰번호</th>
+												<td>
+													<input type="hidden" name="join_celno_confirm" id="ID_join_celno_confirm"/>
+													<span><input type="text" name="join_celno" maxlength="12" id="ID_join_celno" class="textType form-control"/></span>
+													<span><input type="button" value="인증번호발송" class="btn btnWhite mrgL10" onclick="JavaScript:fnc_celno_confirm1()" id="IDBT_join_celno"></span>
+													<span style="display:none;padding-top:5px;" id="IDB_celno_confirm">
+														<input type="text" name="celno_confirm" maxlength="5" id="ID_celno_confirm" class="text80Type form-control" style="text-align:center;width:80px;"/>
+														<input type="button" value="인증확인" class="btn btnWhite mrgL10" onclick="JavaScript:fnc_celno_confirm2()"> 
+													</span>
+													<span id="ID_join_celno_msg" class="statusText"></span>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>소속부서</th>
+												<td>
+													<input type="text" name="join_division" id="ID_join_division" class="textType form-control"/>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>직위</th>
+												<td>
+													<input type="text" name="join_position" id="ID_join_position" class="textType form-control"/>
+												</td>
+											</tr>
+											<tr>
+												<td colspan="2">
+													<div class="hideBtnBox showArtCont">
+														<input type="button" value="+ 더보기" class="btn btnWhite" onclick="">
+													</div>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<!--회원정보 e-->
+							<!--기업정보 s-->
+							<div class="articleBox">
+								<div class="artTitle">기업정보</div>
+								<div class="artCont bdTop2MC1">
+									<table class="writeTable">
+										<caption>기업정보입력</caption>
+										<colgroup>
+											<col width="20%" /><col width="80%" />
+										</colgroup>
+										<tbody>
+											<tr class="hideBox">
+												<th>사업자 등록증</th>
+												<td>
+													<input type="text" id="bizpaperImgFileRoute" class="fileInputType form-control" readonly="readonly" title="첨부된 파일경로" value="선택된 파일 없음">
+													<div class="uploadFile btn btnWhite mrgL10">
+														파일선택
+														<input type="file" name="attach1" id="ID_attach1" class="" onchange="javascript:document.getElementById('bizpaperImgFileRoute').value=this.value"/>
+													</div>
+													<br/><br/>
+													<br/>사업자 등록증을 업로드하면 당사 운영팀에서 귀사의 사업자등록증 정보를 확인하고
+													<br/><b style="color:#FF8000">사업자인증 처리</b>를 하며 사업자 등록증 상의 정보로 입력하신 <b style="color:#FF8000">정보를 갱신(수정)</b> 합니다.
+													<br/>만약 사업자인증 처리가 급히 필요하신 경우 운영팀(<?=fnc_TelnoAddHyphen(CS_TELNO)?>)으로 연락 주시기 바랍니다.
+													<br/>※ 갱신 정보 : 회사명, 사업자번호, 소재지, 업태, 종목 등 사업자 등록증 상에 표시된 항목
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>회사명</th>
+												<td>
+													<input type="text" name="join_co_name" id="ID_join_co_name" class="textType form-control" />
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>사업자번호</th>
+												<td>
+													<input type="number" name="join_co_uno1_1" maxlength="3" id="ID_join_co_uno1_1" class="textNumType form-control" /><div class="hyphen">-</div>
+													<input type="number" name="join_co_uno1_2" maxlength="2" id="ID_join_co_uno1_2" class="textNumType form-control" /><div class="hyphen">-</div>
+													<input type="number" name="join_co_uno1_3" maxlength="5" id="ID_join_co_uno1_3" class="textNumType form-control" />
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>법인등록번호</th>
+												<td>
+													<input type="number" name="join_co_uno2_1" maxlength="6" id="ID_join_co_uno2_1" class="textNumType form-control" /><div class="hyphen">-</div>
+													<input type="number" name="join_co_uno2_2" maxlength="7" id="ID_join_co_uno2_2" class="textNumType form-control" />
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>우편번호</th>
+												<td>
+													<input type="text" name="join_co_zipcode1" id="dm_zipcode1" size="5" class="text80Type form-control" readonly onClick="fnc_execDaumPostcode()"/><div class="hyphen">-</div>
+													<input type="text" name="join_co_zipcode2" id="dm_zipcode2" size="5" class="text80Type form-control" readonly onClick="fnc_execDaumPostcode()"/>
+													<input type="button" value="우편번호찾기" class="btn btnWhite mrgL10" onClick="fnc_execDaumPostcode()">
+													<? @include_once LIBRARY . "/Common/address_search_daumAPI.html"; ?>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>주소</th>
+												<td>
+													<input type="text" name="join_co_address1" id="dm_address1" class="text100Type form-control" />
+													<p>&nbsp;</p>
+													<input type="text" name="join_co_address2" id="dm_address2" class="text100Type form-control" />
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>업태</th>
+												<td>
+													<input type="text" name="join_co_uptae" id="ID_join_co_uptae" class="textType form-control" />
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>종목</th>
+												<td>
+													<input type="text" name="join_co_jongmok" id="ID_join_co_jongmok" class="textType form-control" />
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>대표자명</th>
+												<td>
+													<input type="text" name="join_co_ownname" id="ID_join_co_ownname" class="textType form-control" />
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>개업일</th>
+												<td>
+													<div class="dateInputBox">
+														<input type="text" name="join_co_odate" id="ID_join_co_odate" class="datePickInput form-control" style="margin-left:0;" /><i class="fa fa-calendar"></i>
+													</div>
+													<script type="text/javascript">setDatePick("ID_join_co_odate");</script>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>전화번호</th>
+												<td>
+													<select name="join_co_telno1" id="ID_join_co_telno1" class="selectType form-control">
+														<option value="" selected>선택</option>
+														<option value="02" >02</option>
+														<option value="031">031</option>
+														<option value="032" >032</option>
+														<option value="033" >033</option>
+														<option value="041" >041</option>
+														<option value="042" >042</option>
+														<option value="043" >043</option>
+														<option value="044" >044</option>
+														<option value="051" >051</option>
+														<option value="052" >052</option>
+														<option value="053" >053</option>
+														<option value="054" >054</option>
+														<option value="055" >055</option>
+														<option value="061" >061</option>
+														<option value="062" >062</option>
+														<option value="063" >063</option>
+														<option value="064" >064</option>
+														<option value="070" >070</option>
+													</select>
+													<div class="hyphen">-</div>
+													<input type="number" name="join_co_telno2" id="ID_join_co_telno2" class="text80Type form-control" />
+													<div class="hyphen">-</div>
+													<input type="number" name="join_co_telno3" id="ID_join_co_telno3" class="text80Type form-control" />
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>팩스번호</th>
+												<td>
+													<select name="join_co_faxno1" id="ID_join_co_faxno1" class="selectType form-control">
+														<option value="" selected>선택</option>
+														<option value="02" >02</option>
+														<option value="031">031</option>
+														<option value="032" >032</option>
+														<option value="033" >033</option>
+														<option value="041" >041</option>
+														<option value="042" >042</option>
+														<option value="043" >043</option>
+														<option value="044" >044</option>
+														<option value="051" >051</option>
+														<option value="052" >052</option>
+														<option value="053" >053</option>
+														<option value="054" >054</option>
+														<option value="055" >055</option>
+														<option value="061" >061</option>
+														<option value="062" >062</option>
+														<option value="063" >063</option>
+														<option value="064" >064</option>
+														<option value="070" >070</option>
+													</select>
+													<div class="hyphen">-</div>
+													<input type="number" name="join_co_faxno2" id="ID_join_co_faxno2" class="text80Type form-control" />
+													<div class="hyphen">-</div>
+													<input type="number" name="join_co_faxno3" id="ID_join_co_faxno3" class="text80Type form-control" />
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>홈페이지</th>
+												<td>
+													<div class="hyphen">http://</div><input type="text" name="join_co_url" id="ID_join_co_url" class="textType form-control"/>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>회사로고</th>
+												<td>
+													<input type="text" id="bizLogoImgFileRoute" class="fileInputType form-control" readonly="readonly" title="첨부된 파일경로" value="선택된 파일 없음">
+													<div class="uploadFile btn btnWhite mrgL10">
+														파일선택
+														<input type="file" name="attach2" id="ID_attach1" class="" onchange="javascript:document.getElementById('bizLogoImgFileRoute').value=this.value"/>
+													</div>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>기업History</th>
+												<td>
+													<textarea name="join_co_history" id="ID_join_co_history" cols="30" rows="8" class="form-control"></textarea>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>주력상품군</th>
+												<td>
+													<input type="text" name="join_co_mproduct" id="ID_join_co_mproduct" class="titleType form-control" />
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>사원수</th>
+												<td>
+													<input type="text" name="join_co_staff" id="ID_join_co_staff" class="textType form-control" /><div class="hyphen"> 명</div>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>자본금</th>
+												<td>
+													<input type="text" name="join_co_cstock" id="ID_join_co_cstock" class="textType form-control" onKeyUp="JavaScript:this.value=number_format(this.value);"/><div class="hyphen"> 만원</div>
+												</td>
+											</tr>
+											<tr class="hideBox">
+												<th>매출액</th>
+												<td>
+													<input type="text" name="join_co_sales_account" id="ID_join_co_sales_account" class="textType form-control"  onKeyUp="JavaScript:this.value=number_format(this.value);"/><div class="hyphen"> 만원</div>
+												</td>
+											</tr>
+											<tr>
+												<td colspan="2">
+													<div class="hideBtnBox showArtCont">
+														<input type="button" value="+ 더보기" class="btn btnWhite" onclick="">
+													</div>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<!--기업정보 e-->
+						</div>
+						<!-- 정보입력 e-->
+
+						<!-- 페이지버튼 s-->
+						<div class="cbBottomBox">
+							<div class="pageBtnBox">
+								<input type="button" value="수정하기" class="btn btnMainC" onClick=""/>
+								<input type="button" value="취소" class="btn btnWhite" onclick="JavaScript:history.go(-1);"/>
+							</div>
+						</div>
+						<!-- 페이지버튼 e-->
+					</form>
+
+					<!-- contents e -->
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+	<script type="text/javascript">setCurrentPage('회원정보변경');</script><!-- 현재페이지 -->
+	<? @include_once HOME_DIR . "/include/bottom.php"; ?>
